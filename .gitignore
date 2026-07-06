@@ -1,0 +1,38 @@
+# Maven Wrapper
+.mvn/wrapper/maven-wrapper.jar
+
+# Maven 本地工具（无需全局安装）
+tools/apache-maven-3.9.6/
+tools/maven.zip
+
+# Compiled
+backend/target/
+frontend/dist/
+frontend/node_modules/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+.project
+.classpath
+.settings/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+logs/
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# Docker volumes (local data)
+docker/mysql/data/
+docker/redis/data/
