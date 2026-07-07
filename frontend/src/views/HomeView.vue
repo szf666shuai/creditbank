@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import request from '@/utils/request'
+import { identityRecommends } from '@/config/home-recommendations'
 
 const quickEntries = [
   { icon: '💰', label: '积分商城', path: '/credit', color: '#2094f3' },
@@ -39,7 +40,7 @@ onMounted(async () => {
 
 <template>
   <div class="home-page">
-    <!-- Banner 占位 -->
+    <!-- Banner -->
     <section class="banner">
       <div class="banner-content">
         <h1 class="banner-title">终身学习 · 学分银行</h1>
@@ -52,21 +53,63 @@ onMounted(async () => {
       </div>
     </section>
 
-    <!-- 快捷入口 -->
-    <section class="quick-section">
+    <!-- 快捷入口 + 身份推荐 -->
+    <section class="feature-section">
       <div class="section-inner">
-        <div class="quick-grid">
-          <router-link
-            v-for="item in quickEntries"
-            :key="item.label"
-            :to="item.path"
-            class="quick-item"
-          >
-            <span class="quick-icon" :style="{ background: item.color + '18', color: item.color }">
-              {{ item.icon }}
-            </span>
-            <span class="quick-label">{{ item.label }}</span>
-          </router-link>
+        <div class="feature-row">
+          <!-- 左侧：快捷入口 -->
+          <div class="feature-left">
+            <div class="quick-grid">
+              <router-link
+                v-for="item in quickEntries"
+                :key="item.label"
+                :to="item.path"
+                class="quick-item"
+              >
+                <span
+                  class="quick-icon"
+                  :style="{ background: item.color + '18', color: item.color }"
+                >
+                  {{ item.icon }}
+                </span>
+                <span class="quick-label">{{ item.label }}</span>
+              </router-link>
+            </div>
+          </div>
+
+          <!-- 右侧：身份分类推荐 -->
+          <div class="feature-right">
+            <div class="identity-grid">
+              <div
+                v-for="item in identityRecommends"
+                :key="item.title"
+                class="identity-card"
+              >
+                <div class="identity-header">
+                  <span
+                    class="identity-icon"
+                    :style="{ background: item.color + '18', color: item.color }"
+                  >
+                    {{ item.icon }}
+                  </span>
+                  <span class="identity-title">{{ item.title }}</span>
+                </div>
+                <div class="identity-tags">
+                  <router-link
+                    v-for="tag in item.tags"
+                    :key="tag.label"
+                    :to="tag.path"
+                    class="identity-tag"
+                  >
+                    {{ tag.label }}
+                  </router-link>
+                  <router-link :to="item.morePath" class="identity-more">
+                    查看更多 &gt;
+                  </router-link>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -162,36 +205,48 @@ onMounted(async () => {
   width: 32px;
 }
 
-/* 通用 section */
 .section-inner {
   max-width: var(--content-max-width);
   margin: 0 auto;
   padding: 0 16px;
 }
 
-/* 快捷入口 */
-.quick-section {
+/* 左右分栏 */
+.feature-section {
   margin-top: -40px;
   position: relative;
   z-index: 1;
 }
 
+.feature-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: stretch;
+}
+
+/* 左侧快捷入口 */
+.feature-left {
+  min-width: 0;
+}
+
 .quick-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 0;
+  gap: 4px;
   background: var(--color-white);
   border-radius: 8px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  padding: 24px 16px;
+  padding: 20px 12px;
+  height: 100%;
 }
 
 .quick-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
-  padding: 16px 8px;
+  gap: 8px;
+  padding: 12px 4px;
   text-decoration: none;
   border-radius: 8px;
   transition: background 0.2s;
@@ -202,18 +257,97 @@ onMounted(async () => {
 }
 
 .quick-icon {
-  width: 52px;
-  height: 52px;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 12px;
-  font-size: 24px;
+  border-radius: 10px;
+  font-size: 22px;
 }
 
 .quick-label {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--color-text);
+  text-align: center;
+  line-height: 1.3;
+}
+
+/* 右侧身份推荐 */
+.feature-right {
+  min-width: 0;
+}
+
+.identity-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  height: 100%;
+}
+
+.identity-card {
+  background: var(--color-white);
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.identity-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.identity-icon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.identity-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.identity-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+  line-height: 1.8;
+}
+
+.identity-tag {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  transition: color 0.2s;
+  white-space: nowrap;
+}
+
+.identity-tag:hover {
+  color: var(--color-primary);
+}
+
+.identity-more {
+  font-size: 13px;
+  color: var(--color-primary);
+  text-decoration: none;
+  white-space: nowrap;
+  margin-left: auto;
+}
+
+.identity-more:hover {
+  opacity: 0.8;
 }
 
 /* 状态区 */
@@ -254,20 +388,34 @@ onMounted(async () => {
   color: var(--color-text-secondary);
 }
 
+@media (max-width: 900px) {
+  .feature-row {
+    grid-template-columns: 1fr;
+  }
+
+  .identity-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
 @media (max-width: 768px) {
+  .banner-title {
+    font-size: 24px;
+  }
+
   .quick-grid {
     grid-template-columns: repeat(4, 1fr);
     padding: 16px 8px;
-  }
-
-  .banner-title {
-    font-size: 24px;
   }
 }
 
 @media (max-width: 480px) {
   .quick-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .identity-grid {
+    grid-template-columns: 1fr;
   }
 }
 </style>

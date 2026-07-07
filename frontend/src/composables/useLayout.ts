@@ -1,33 +1,21 @@
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-
-export interface NavItem {
-  label: string
-  path: string
-}
-
-export const navItems: NavItem[] = [
-  { label: '首页', path: '/' },
-  { label: '课程', path: '/courses' },
-  { label: '积分商城', path: '/credit' },
-  { label: '学习档案', path: '/archive' },
-  { label: '学习成果', path: '/achievement' },
-  { label: '论坛', path: '/forum' },
-  { label: '机构加盟', path: '/organization' },
-  { label: '关于我们', path: '/about' },
-]
+import { siteNav, profileNav } from '@/config/site-nav'
 
 export function useLayout() {
   const route = useRoute()
   const router = useRouter()
   const searchKeyword = ref('')
-  const locale = ref<'zh' | 'en'>('zh')
+  /** 登录状态，接入 JWT 后替换为 store 判断 */
+  const isLoggedIn = ref(false)
 
   const activePath = computed(() => route.path)
 
-  function isActive(path: string) {
-    if (path === '/') return route.path === '/'
-    return route.path.startsWith(path)
+  function isNavActive(item: { path?: string; key: string; children: { path: string }[] }) {
+    if (item.path) {
+      return item.path === '/' ? route.path === '/' : route.path.startsWith(item.path)
+    }
+    return item.children.some((c) => route.path.startsWith(c.path))
   }
 
   function handleSearch() {
@@ -35,9 +23,18 @@ export function useLayout() {
     router.push({ path: '/search', query: { q: searchKeyword.value.trim() } })
   }
 
-  function toggleLocale() {
-    locale.value = locale.value === 'zh' ? 'en' : 'zh'
+  function navigate(path: string) {
+    router.push(path)
   }
 
-  return { navItems, activePath, searchKeyword, locale, isActive, handleSearch, toggleLocale }
+  return {
+    siteNav,
+    profileNav,
+    searchKeyword,
+    isLoggedIn,
+    activePath,
+    isNavActive,
+    handleSearch,
+    navigate,
+  }
 }

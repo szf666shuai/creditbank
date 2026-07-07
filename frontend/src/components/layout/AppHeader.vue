@@ -1,8 +1,16 @@
 <script setup lang="ts">
-import { Search } from '@element-plus/icons-vue'
+import { ArrowDown, HomeFilled, Search } from '@element-plus/icons-vue'
 import { useLayout } from '@/composables/useLayout'
 
-const { navItems, searchKeyword, locale, isActive, handleSearch, toggleLocale } = useLayout()
+const {
+  siteNav,
+  profileNav,
+  searchKeyword,
+  isLoggedIn,
+  isNavActive,
+  handleSearch,
+  navigate,
+} = useLayout()
 </script>
 
 <template>
@@ -12,8 +20,11 @@ const { navItems, searchKeyword, locale, isActive, handleSearch, toggleLocale } 
       <router-link to="/" class="logo">
         <div class="logo-icon">
           <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect width="40" height="40" rx="4" fill="white" fill-opacity="0.15"/>
-            <path d="M10 28V12h4l6 10 6-10h4v16h-3.5V18l-5.5 9h-2l-5.5-9v10H10z" fill="white"/>
+            <rect width="40" height="40" rx="4" fill="white" fill-opacity="0.15" />
+            <path
+              d="M10 28V12h4l6 10 6-10h4v16h-3.5V18l-5.5 9h-2l-5.5-9v10H10z"
+              fill="white"
+            />
           </svg>
         </div>
         <div class="logo-text">
@@ -24,18 +35,54 @@ const { navItems, searchKeyword, locale, isActive, handleSearch, toggleLocale } 
 
       <!-- 主导航 -->
       <nav class="main-nav">
-        <router-link
-          v-for="item in navItems"
-          :key="item.path"
-          :to="item.path"
-          class="nav-item"
-          :class="{ active: isActive(item.path) }"
-        >
-          {{ item.label }}
-        </router-link>
+        <template v-for="item in siteNav" :key="item.key">
+          <!-- 首页：图标按钮 -->
+          <router-link
+            v-if="item.icon"
+            to="/"
+            class="nav-item nav-home"
+            :class="{ active: isNavActive(item) }"
+            title="首页"
+          >
+            <el-icon :size="18"><HomeFilled /></el-icon>
+          </router-link>
+
+          <!-- 带下拉的菜单 -->
+          <el-dropdown
+            v-else
+            trigger="hover"
+            placement="bottom-start"
+            :show-timeout="80"
+            :hide-timeout="150"
+          >
+            <span
+              class="nav-item nav-dropdown"
+              :class="{ active: isNavActive(item) }"
+            >
+              {{ item.label }}
+              <el-icon class="nav-arrow"><ArrowDown /></el-icon>
+            </span>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <template v-if="item.children.length">
+                  <el-dropdown-item
+                    v-for="child in item.children"
+                    :key="child.path"
+                    @click="navigate(child.path)"
+                  >
+                    {{ child.label }}
+                  </el-dropdown-item>
+                </template>
+                <el-dropdown-item v-else disabled>
+                  待组员补充页面
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+        </template>
       </nav>
 
-      <!-- 右侧操作区 -->
+      <!-- 右侧：搜索 + 登录/个人中心 -->
       <div class="header-actions">
         <div class="search-box">
           <input
@@ -49,14 +96,39 @@ const { navItems, searchKeyword, locale, isActive, handleSearch, toggleLocale } 
           </button>
         </div>
 
-        <button class="lang-btn" @click="toggleLocale">
-          {{ locale === 'zh' ? 'English' : '中文' }}
-        </button>
-
-        <div class="auth-btns">
+        <!-- 未登录 -->
+        <div v-if="!isLoggedIn" class="auth-btns">
           <router-link to="/login" class="btn-login">登录</router-link>
           <router-link to="/register" class="btn-register">注册</router-link>
         </div>
+
+        <!-- 已登录：个人中心下拉 -->
+        <el-dropdown
+          v-else
+          trigger="hover"
+          placement="bottom-end"
+        >
+          <span class="nav-item profile-trigger">
+            个人中心
+            <el-icon class="nav-arrow"><ArrowDown /></el-icon>
+          </span>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <template v-if="profileNav.length">
+                <el-dropdown-item
+                  v-for="child in profileNav"
+                  :key="child.path"
+                  @click="navigate(child.path)"
+                >
+                  {{ child.label }}
+                </el-dropdown-item>
+              </template>
+              <el-dropdown-item v-else @click="navigate('/profile')">
+                进入个人中心
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
       </div>
     </div>
   </header>
@@ -78,10 +150,9 @@ const { navItems, searchKeyword, locale, isActive, handleSearch, toggleLocale } 
   height: var(--header-height);
   margin: 0 auto;
   padding: 0 16px;
-  gap: 24px;
+  gap: 20px;
 }
 
-/* Logo */
 .logo {
   display: flex;
   align-items: center;
@@ -91,7 +162,6 @@ const { navItems, searchKeyword, locale, isActive, handleSearch, toggleLocale } 
   background: var(--color-primary);
   padding: 8px 14px;
   border-radius: 4px;
-  margin-right: 8px;
 }
 
 .logo-icon {
@@ -123,26 +193,31 @@ const { navItems, searchKeyword, locale, isActive, handleSearch, toggleLocale } 
   color: rgba(255, 255, 255, 0.75);
 }
 
-/* 导航 */
 .main-nav {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
   flex: 1;
-  overflow: hidden;
+  min-width: 0;
 }
 
 .nav-item {
-  padding: 6px 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 14px;
   font-size: 14px;
   color: var(--color-text);
   text-decoration: none;
   white-space: nowrap;
   border-radius: 4px;
-  transition: color 0.2s;
+  cursor: pointer;
+  transition: color 0.2s, background 0.2s;
+  outline: none;
 }
 
-.nav-item:hover {
+.nav-item:hover,
+.nav-dropdown:hover {
   color: var(--color-primary);
 }
 
@@ -151,7 +226,19 @@ const { navItems, searchKeyword, locale, isActive, handleSearch, toggleLocale } 
   font-weight: 600;
 }
 
-/* 右侧操作 */
+.nav-home {
+  padding: 6px 10px;
+}
+
+.nav-arrow {
+  font-size: 12px;
+  transition: transform 0.2s;
+}
+
+.nav-dropdown:hover .nav-arrow {
+  transform: rotate(180deg);
+}
+
 .header-actions {
   display: flex;
   align-items: center;
@@ -201,23 +288,6 @@ const { navItems, searchKeyword, locale, isActive, handleSearch, toggleLocale } 
   color: var(--color-primary);
 }
 
-.lang-btn {
-  padding: 5px 12px;
-  border: 1px solid var(--color-border);
-  border-radius: 16px;
-  background: var(--color-white);
-  font-size: 13px;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  white-space: nowrap;
-  transition: border-color 0.2s, color 0.2s;
-}
-
-.lang-btn:hover {
-  border-color: var(--color-primary);
-  color: var(--color-primary);
-}
-
 .auth-btns {
   display: flex;
   align-items: center;
@@ -252,6 +322,18 @@ const { navItems, searchKeyword, locale, isActive, handleSearch, toggleLocale } 
 }
 
 .btn-register:hover {
+  background: var(--color-primary-light);
+}
+
+.profile-trigger {
+  padding: 6px 16px;
+  border: 1px solid var(--color-primary);
+  border-radius: 20px;
+  color: var(--color-primary);
+  font-weight: 500;
+}
+
+.profile-trigger:hover {
   background: var(--color-primary-light);
 }
 
