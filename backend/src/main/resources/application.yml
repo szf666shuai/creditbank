@@ -35,3 +35,8 @@ mybatis-plus:
 logging:
   level:
     com.creditbank.platform: debug
+
+jwt:
+  secret: credit-bank-platform-jwt-secret-key-2026-very-long-string
+  expiration-ms: 86400000
+

@@ -1,15 +1,24 @@
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { siteNav, profileNav } from '@/config/site-nav'
+import { siteNav, profileNavByRole } from '@/config/site-nav'
+import { useAuthStore } from '@/stores/auth'
+import { roleLabel } from '@/types/auth'
 
 export function useLayout() {
   const route = useRoute()
   const router = useRouter()
+  const authStore = useAuthStore()
   const searchKeyword = ref('')
-  /** 登录状态，接入 JWT 后替换为 store 判断 */
-  const isLoggedIn = ref(false)
 
-  const activePath = computed(() => route.path)
+  const isLoggedIn = computed(() => authStore.isLoggedIn)
+  const displayName = computed(() => authStore.displayName)
+  const userRoleName = computed(() =>
+    authStore.userInfo ? roleLabel(authStore.userInfo.role) : '',
+  )
+  const profileNav = computed(() => {
+    const role = authStore.userInfo?.role
+    return role != null ? profileNavByRole[role] ?? [] : []
+  })
 
   function isNavActive(item: { path?: string; key: string; children: { path: string }[] }) {
     if (item.path) {
@@ -27,14 +36,21 @@ export function useLayout() {
     router.push(path)
   }
 
+  function logout() {
+    authStore.logout()
+    router.push('/login')
+  }
+
   return {
     siteNav,
     profileNav,
     searchKeyword,
     isLoggedIn,
-    activePath,
+    displayName,
+    userRoleName,
     isNavActive,
     handleSearch,
     navigate,
+    logout,
   }
 }

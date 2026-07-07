@@ -63,9 +63,24 @@ export const siteNav: NavItem[] = [
   },
 ]
 
-/** 登录后「个人中心」下拉 — 待补充 */
-export const profileNav: NavChild[] = [
-  // { label: '个人资料', path: '/profile' },
-  // { label: '学习档案', path: '/archive' },
-  // { label: '退出登录', path: '/logout' },
-]
+/** 登录后「个人中心」下拉 — 按角色扩展 */
+export const profileNavByRole: Record<number, NavChild[]> = {
+  /** 学员 */
+  0: [
+    { label: '学习档案', path: '/archive' },
+    { label: '积分商城', path: '/credit' },
+  ],
+  /** 企业用户 */
+  1: [
+    { label: '企业中心', path: '/enterprise' },
+    { label: '活动报名', path: '/activity' },
+    { label: '招聘求职', path: '/job' },
+  ],
+  /** 管理员 */
+  2: [
+    { label: '机构加盟', path: '/organization' },
+  ],
+}
+
+/** @deprecated 使用 profileNavByRole，保留空数组兼容旧引用 */
+export const profileNav: NavChild[] = []

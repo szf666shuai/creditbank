@@ -2,6 +2,9 @@ import { createRouter, createWebHistory } from 'vue-router'
 import MainLayout from '@/layouts/MainLayout.vue'
 import HomeView from '@/views/HomeView.vue'
 import PlaceholderView from '@/views/PlaceholderView.vue'
+import LoginView from '@/views/auth/LoginView.vue'
+import RegisterView from '@/views/auth/RegisterView.vue'
+import ProfileView from '@/views/ProfileView.vue'
 
 const placeholder = (title: string) => ({
   component: PlaceholderView,
@@ -32,9 +35,9 @@ const router = createRouter({
         { path: 'partners', ...placeholder('合作单位') },
         { path: 'contact', ...placeholder('联系我们') },
         { path: 'search', ...placeholder('搜索结果') },
-        { path: 'login', ...placeholder('登录') },
-        { path: 'register', ...placeholder('注册') },
-        { path: 'profile', ...placeholder('个人中心') },
+        { path: 'login', name: 'login', component: LoginView, meta: { guest: true } },
+        { path: 'register', name: 'register', component: RegisterView, meta: { guest: true } },
+        { path: 'profile', name: 'profile', component: ProfileView, meta: { requiresAuth: true } },
         { path: 'help/:type', ...placeholder('帮助中心') },
       ],
     },
@@ -42,6 +45,18 @@ const router = createRouter({
   scrollBehavior() {
     return { top: 0 }
   },
+})
+
+router.beforeEach(async (to) => {
+  const { useAuthStore } = await import('@/stores/auth')
+  const authStore = useAuthStore()
+
+  if (to.meta.requiresAuth && !authStore.isLoggedIn) {
+    return { path: '/login', query: { redirect: to.fullPath } }
+  }
+  if (to.meta.guest && authStore.isLoggedIn) {
+    return { path: '/profile' }
+  }
 })
 
 export default router

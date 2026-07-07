@@ -7,9 +7,12 @@ const {
   profileNav,
   searchKeyword,
   isLoggedIn,
+  displayName,
+  userRoleName,
   isNavActive,
   handleSearch,
   navigate,
+  logout,
 } = useLayout()
 </script>
 
@@ -109,22 +112,24 @@ const {
           placement="bottom-end"
         >
           <span class="nav-item profile-trigger">
-            个人中心
+            {{ displayName }}
+            <span class="role-badge">{{ userRoleName }}</span>
             <el-icon class="nav-arrow"><ArrowDown /></el-icon>
           </span>
           <template #dropdown>
             <el-dropdown-menu>
-              <template v-if="profileNav.length">
-                <el-dropdown-item
-                  v-for="child in profileNav"
-                  :key="child.path"
-                  @click="navigate(child.path)"
-                >
-                  {{ child.label }}
-                </el-dropdown-item>
-              </template>
-              <el-dropdown-item v-else @click="navigate('/profile')">
-                进入个人中心
+              <el-dropdown-item @click="navigate('/profile')">
+                个人中心
+              </el-dropdown-item>
+              <el-dropdown-item
+                v-for="child in profileNav"
+                :key="child.path"
+                @click="navigate(child.path)"
+              >
+                {{ child.label }}
+              </el-dropdown-item>
+              <el-dropdown-item divided @click="logout">
+                退出登录
               </el-dropdown-item>
             </el-dropdown-menu>
           </template>
@@ -331,6 +336,15 @@ const {
   border-radius: 20px;
   color: var(--color-primary);
   font-weight: 500;
+}
+
+.role-badge {
+  font-size: 11px;
+  padding: 1px 6px;
+  background: var(--color-primary-light);
+  border-radius: 10px;
+  color: var(--color-primary);
+  font-weight: 400;
 }
 
 .profile-trigger:hover {
