@@ -576,9 +576,9 @@ INSERT INTO sys_organization (name, code, type, intro, contact, phone, join_stat
 ('示例培训机构', 'ORG003', 2, '职业技能培训机构', '王老师', '13800000003', 1);
 
 INSERT INTO sys_user (username, password, real_name, role, org_id) VALUES
-('admin', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5EH', '系统管理员', 2, NULL),
-('student1', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5EH', '测试学员', 0, NULL),
-('enterprise1', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5EH', '企业管理员', 1, 2);
+('admin', '$2a$10$jEdydp234.XnKIUAjnYbyOmR/4O2gPJRfsy5eL3qkfcV18SWaLEyu', '系统管理员', 2, NULL),
+('student1', '$2a$10$jEdydp234.XnKIUAjnYbyOmR/4O2gPJRfsy5eL3qkfcV18SWaLEyu', '测试学员', 0, NULL),
+('enterprise1', '$2a$10$jEdydp234.XnKIUAjnYbyOmR/4O2gPJRfsy5eL3qkfcV18SWaLEyu', '企业管理员', 1, 2);
 
 INSERT INTO sys_tag (name, category) VALUES
 ('Java', 'skill'), ('C++', 'skill'), ('Python', 'skill'),
