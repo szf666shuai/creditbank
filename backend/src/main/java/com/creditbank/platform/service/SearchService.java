@@ -42,11 +42,7 @@ public class SearchService {
 
         List<SearchItemVO> items = switch (searchType) {
             case "course" -> searchMapper.searchCourses(q, pageLimit);
-            case "resource" -> merge(
-                    searchMapper.searchCourses(q, pageLimit),
-                    searchMapper.searchResources(q, pageLimit),
-                    pageLimit
-            );
+            case "resource" -> searchMapper.searchResources(q, pageLimit);
             case "forum" -> searchMapper.searchForum(q, pageLimit);
             case "news" -> searchMapper.searchNews(q, pageLimit);
             case "activity" -> searchMapper.searchActivities(q, pageLimit);

@@ -11,7 +11,8 @@ import java.util.List;
 public interface SearchMapper {
 
     @Select("""
-            SELECT 'course' AS type, id, title, description AS summary, NULL AS extra, create_time AS createTime
+            SELECT 'course' AS type, id, title, description AS summary, cover_url AS coverUrl,
+                   NULL AS extra, create_time AS createTime
             FROM course
             WHERE deleted = 0 AND status = 1
               AND (title LIKE CONCAT('%', #{keyword}, '%') OR description LIKE CONCAT('%', #{keyword}, '%'))
@@ -21,7 +22,8 @@ public interface SearchMapper {
     List<SearchItemVO> searchCourses(@Param("keyword") String keyword, @Param("limit") int limit);
 
     @Select("""
-            SELECT 'resource' AS type, id, title, description AS summary, NULL AS extra, create_time AS createTime
+            SELECT 'resource' AS type, id, title, description AS summary, file_url AS coverUrl,
+                   NULL AS extra, create_time AS createTime
             FROM org_material
             WHERE deleted = 0 AND status = 1
               AND (title LIKE CONCAT('%', #{keyword}, '%') OR description LIKE CONCAT('%', #{keyword}, '%'))
@@ -82,7 +84,8 @@ public interface SearchMapper {
     List<SearchItemVO> searchEnterprises(@Param("keyword") String keyword, @Param("limit") int limit);
 
     @Select("""
-            SELECT 'credit' AS type, id, name AS title, description AS summary, NULL AS extra, create_time AS createTime
+            SELECT 'credit' AS type, id, name AS title, description AS summary, cover_url AS coverUrl,
+                   NULL AS extra, create_time AS createTime
             FROM mall_product
             WHERE deleted = 0 AND status = 1
               AND (name LIKE CONCAT('%', #{keyword}, '%') OR description LIKE CONCAT('%', #{keyword}, '%'))

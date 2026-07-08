@@ -17,6 +17,7 @@ public class SearchItemVO {
     private Long id;
     private String title;
     private String summary;
+    private String coverUrl;
     private String extra;
     private LocalDateTime createTime;
 }

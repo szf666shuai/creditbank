@@ -11,10 +11,10 @@ DELETE FROM mall_product WHERE name LIKE '[测试]%';
 DELETE FROM org_material WHERE title LIKE '[测试]%';
 
 -- 课程（enterprise1=3, 示例科技集团=2, 培训机构=3）
-INSERT INTO course (org_id, publisher_id, title, description, price_credit, duration_hours, credit_reward, status) VALUES
-(2, 3, '[测试] Java 程序设计基础', '面向零基础学员，系统学习 Java 语法、面向对象与集合框架，适合学分银行入门课程。', 20.00, 24.0, 10.00, 1),
-(3, 3, '[测试] Spring Boot 与 Java 微服务实战', '基于 Spring Boot 构建 REST API 与微服务，涵盖 Java Web 开发与部署实践。', 35.00, 32.0, 15.00, 1),
-(3, 3, '[测试] Python 数据分析入门', '使用 Pandas 进行数据清洗与可视化，与 Java 后端形成对比学习路径。', 15.00, 18.0, 8.00, 1);
+INSERT INTO course (org_id, publisher_id, title, description, cover_url, price_credit, duration_hours, credit_reward, status) VALUES
+(2, 3, '[测试] Java 程序设计基础', '面向零基础学员，系统学习 Java 语法、面向对象与集合框架，适合学分银行入门课程。', 'https://picsum.photos/seed/java-course-1/400/250', 20.00, 24.0, 10.00, 1),
+(3, 3, '[测试] Spring Boot 与 Java 微服务实战', '基于 Spring Boot 构建 REST API 与微服务，涵盖 Java Web 开发与部署实践。', 'https://picsum.photos/seed/java-course-2/400/250', 35.00, 32.0, 15.00, 1),
+(3, 3, '[测试] Python 数据分析入门', '使用 Pandas 进行数据清洗与可视化，与 Java 后端形成对比学习路径。', 'https://picsum.photos/seed/python-course/400/250', 15.00, 18.0, 8.00, 1);
 
 INSERT INTO course_tag (course_id, tag_id)
 SELECT c.id, t.id FROM course c, sys_tag t
@@ -47,12 +47,12 @@ INSERT INTO policy_news (title, content, source, author, status, publish_time) V
 ('[测试] 2026 年暑期实践活动通知', '鼓励学员参与企业实践活动，含编程马拉松、技术沙龙等。', '平台公告', '运营中心', 1, '2026-06-20 09:00:00');
 
 -- 积分商城商品（category 课程资源=1）
-INSERT INTO mall_product (category_id, name, description, product_type, price_credit, status) VALUES
-(1, '[测试] Java 电子书兑换券', '可兑换一本 Java 核心技术电子书，适合备考与自学。', 2, 8.00, 1),
-(1, '[测试] Spring Boot 实战课程包', '包含视频课程与实验手册的 Java 微服务学习包。', 3, 25.00, 1),
-(2, '[测试] 程序员键盘垫', '印有 Java 咖啡杯图案的桌面配件。', 1, 5.00, 1);
+INSERT INTO mall_product (category_id, name, description, cover_url, product_type, price_credit, status) VALUES
+(1, '[测试] Java 电子书兑换券', '可兑换一本 Java 核心技术电子书，适合备考与自学。', 'https://picsum.photos/seed/java-mall-1/400/250', 2, 8.00, 1),
+(1, '[测试] Spring Boot 实战课程包', '包含视频课程与实验手册的 Java 微服务学习包。', 'https://picsum.photos/seed/java-mall-2/400/250', 3, 25.00, 1),
+(2, '[测试] 程序员键盘垫', '印有 Java 咖啡杯图案的桌面配件。', 'https://picsum.photos/seed/java-mall-3/400/250', 1, 5.00, 1);
 
 -- 企业学习资料
-INSERT INTO org_material (org_id, publisher_id, title, description, material_type, status) VALUES
-(2, 3, '[测试] Java 编码规范手册', '企业内部 Java 开发规范与 Code Review 清单，供学员参考学习。', 1, 1),
-(2, 3, '[测试] Spring Boot 项目模板', '可快速启动的 Java 微服务项目骨架与部署说明。', 1, 1);
+INSERT INTO org_material (org_id, publisher_id, title, description, file_url, material_type, status) VALUES
+(2, 3, '[测试] Java 编码规范手册', '企业内部 Java 开发规范与 Code Review 清单，供学员参考学习。', '/files/materials/java-coding-guide.pdf', 1, 1),
+(2, 3, '[测试] Spring Boot 项目模板', '可快速启动的 Java 微服务项目骨架与部署说明。', '/files/materials/springboot-template.zip', 1, 1);

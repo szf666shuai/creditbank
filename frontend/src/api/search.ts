@@ -6,6 +6,7 @@ export interface SearchItem {
   id: number
   title: string
   summary?: string
+  coverUrl?: string
   extra?: string
   createTime?: string
 }
