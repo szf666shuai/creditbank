@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { ArrowDown, HomeFilled, Search } from '@element-plus/icons-vue'
 import { useLayout } from '@/composables/useLayout'
+import { searchCategories } from '@/config/search-categories'
 
 const {
   siteNav,
   profileNav,
   searchKeyword,
+  searchCategory,
   isLoggedIn,
   displayName,
   userRoleName,
@@ -88,10 +90,24 @@ const {
       <!-- 右侧：搜索 + 登录/个人中心 -->
       <div class="header-actions">
         <div class="search-box">
+          <el-select
+            v-model="searchCategory"
+            class="search-category"
+            size="small"
+            :teleported="false"
+          >
+            <el-option
+              v-for="cat in searchCategories"
+              :key="cat.value"
+              :label="cat.label"
+              :value="cat.value"
+            />
+          </el-select>
+          <span class="search-divider" aria-hidden="true" />
           <input
             v-model="searchKeyword"
             type="text"
-            placeholder="搜索"
+            placeholder="搜索关键词"
             @keyup.enter="handleSearch"
           />
           <button class="search-btn" aria-label="搜索" @click="handleSearch">
@@ -256,9 +272,38 @@ const {
   align-items: center;
   background: #f0f2f5;
   border-radius: 20px;
-  padding: 0 4px 0 14px;
+  padding: 0 4px 0 2px;
   height: 34px;
-  width: 160px;
+  width: 280px;
+}
+
+.search-category {
+  width: 92px;
+  flex-shrink: 0;
+}
+
+.search-category :deep(.el-select__wrapper) {
+  box-shadow: none !important;
+  background: transparent !important;
+  padding: 0 6px 0 10px;
+  min-height: 28px;
+}
+
+.search-category :deep(.el-select__selected-item) {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.search-category :deep(.el-select__caret) {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.search-divider {
+  width: 1px;
+  height: 18px;
+  background: #dcdfe6;
+  flex-shrink: 0;
 }
 
 .search-box input {
@@ -357,7 +402,11 @@ const {
   }
 
   .search-box {
-    width: 120px;
+    width: 210px;
+  }
+
+  .search-category {
+    width: 76px;
   }
 }
 </style>

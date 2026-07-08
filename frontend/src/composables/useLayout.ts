@@ -1,6 +1,7 @@
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { siteNav, profileNavByRole } from '@/config/site-nav'
+import { DEFAULT_SEARCH_CATEGORY } from '@/config/search-categories'
 import { useAuthStore } from '@/stores/auth'
 import { roleLabel } from '@/types/auth'
 
@@ -9,6 +10,7 @@ export function useLayout() {
   const router = useRouter()
   const authStore = useAuthStore()
   const searchKeyword = ref('')
+  const searchCategory = ref(DEFAULT_SEARCH_CATEGORY)
 
   const isLoggedIn = computed(() => authStore.isLoggedIn)
   const displayName = computed(() => authStore.displayName)
@@ -29,7 +31,13 @@ export function useLayout() {
 
   function handleSearch() {
     if (!searchKeyword.value.trim()) return
-    router.push({ path: '/search', query: { q: searchKeyword.value.trim() } })
+    router.push({
+      path: '/search',
+      query: {
+        q: searchKeyword.value.trim(),
+        type: searchCategory.value,
+      },
+    })
   }
 
   function navigate(path: string) {
@@ -45,6 +53,7 @@ export function useLayout() {
     siteNav,
     profileNav,
     searchKeyword,
+    searchCategory,
     isLoggedIn,
     displayName,
     userRoleName,
