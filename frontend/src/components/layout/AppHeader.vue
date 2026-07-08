@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ArrowDown, HomeFilled, Search } from '@element-plus/icons-vue'
 import { useLayout } from '@/composables/useLayout'
+import { useHeaderScroll } from '@/composables/useHeaderScroll'
 import { searchCategories } from '@/config/search-categories'
 
 const {
@@ -16,10 +17,18 @@ const {
   navigate,
   logout,
 } = useLayout()
+
+const { isHeaderVisible, isTransparent } = useHeaderScroll()
 </script>
 
 <template>
-  <header class="app-header">
+  <header
+    class="app-header"
+    :class="{
+      'is-hidden': !isHeaderVisible,
+      'is-transparent': isTransparent,
+    }"
+  >
     <div class="header-inner">
       <!-- Logo -->
       <router-link to="/" class="logo">
@@ -157,11 +166,87 @@ const {
 
 <style scoped>
 .app-header {
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 1000;
   background: var(--color-white);
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  transform: translateY(0);
+  transition:
+    transform 0.32s ease,
+    background 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.app-header.is-hidden {
+  transform: translateY(-100%);
+  pointer-events: none;
+}
+
+.app-header.is-transparent {
+  background: transparent;
+  box-shadow: none;
+}
+
+.app-header.is-transparent .nav-item {
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+
+.app-header.is-transparent .nav-item:hover,
+.app-header.is-transparent .nav-dropdown:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.app-header.is-transparent .nav-item.active {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.22);
+  border-radius: 20px;
+}
+
+.app-header.is-transparent .search-box {
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(6px);
+}
+
+.app-header.is-transparent .search-box input {
+  color: #fff;
+}
+
+.app-header.is-transparent .search-box input::placeholder {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.app-header.is-transparent .search-category :deep(.el-select__selected-item) {
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.app-header.is-transparent .search-category :deep(.el-select__caret),
+.app-header.is-transparent .search-btn {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.app-header.is-transparent .search-divider {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.app-header.is-transparent .profile-trigger {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.app-header.is-transparent .profile-trigger:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.app-header.is-transparent .role-badge {
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
 }
 
 .header-inner {
