@@ -2,11 +2,12 @@
 @echo off
 setlocal
 
-set MAVEN_PROJECTBASEDIR=%~dp0
-set WRAPPER_JAR="%MAVEN_PROJECTBASEDIR%.mvn\wrapper\maven-wrapper.jar"
+set "MAVEN_PROJECTBASEDIR=%~dp0"
+set "MAVEN_PROJECTBASEDIR=%MAVEN_PROJECTBASEDIR:~0,-1%"
+set "WRAPPER_JAR=%MAVEN_PROJECTBASEDIR%\.mvn\wrapper\maven-wrapper.jar"
 set WRAPPER_LAUNCHER=org.apache.maven.wrapper.MavenWrapperMain
 
-if not exist %WRAPPER_JAR% (
+if not exist "%WRAPPER_JAR%" (
     echo Error: Maven wrapper JAR not found at %WRAPPER_JAR%
     echo Please run: mvn -N wrapper:wrapper
     exit /B 1
@@ -14,7 +15,7 @@ if not exist %WRAPPER_JAR% (
 
 set MAVEN_OPTS=-Xmx512m
 
-java %MAVEN_OPTS% -classpath %WRAPPER_JAR% "-Dmaven.multiModuleProjectDirectory=%MAVEN_PROJECTBASEDIR%" %WRAPPER_LAUNCHER% %*
+java %MAVEN_OPTS% -classpath "%WRAPPER_JAR%" "-Dmaven.multiModuleProjectDirectory=%MAVEN_PROJECTBASEDIR%" %WRAPPER_LAUNCHER% %*
 if ERRORLEVEL 1 goto error
 goto end
 
