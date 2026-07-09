@@ -590,7 +590,11 @@ INSERT INTO credit_rule (rule_code, rule_name, amount, biz_type, description) VA
 ('REPLY_CREATE', '回复奖励', 1.00, 'reply', '回复帖子'),
 ('POST_LIKE', '被点赞奖励', 0.50, 'like_received', '帖子/回复被点赞'),
 ('COURSE_COMPLETE', '完成课程', 10.00, 'course_complete', '完成一门课程'),
-('ACTIVITY_CHECKIN', '活动签到', 5.00, 'activity_checkin', '活动签到奖励');
+('ACTIVITY_CHECKIN', '活动签到', 5.00, 'activity_checkin', '活动签到奖励'),
+('REGISTER_BONUS', '新用户注册奖励', 20.00, 'register', '学员注册成功一次性奖励'),
+('DAILY_CHECKIN', '每日签到', 2.00, 'daily_checkin', '每日签到奖励'),
+('CHECKIN_STREAK_7', '连续签到7天', 5.00, 'checkin_streak', '连续签到满7天额外奖励'),
+('ACHIEVE_VERIFY', '成果校验通过', 15.00, 'achieve_verify', '学习成果区块链校验通过奖励');
 
 INSERT INTO forum_board (name, description, sort_order) VALUES
 ('校园频道', '学习交流、课程讨论', 1),
