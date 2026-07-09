@@ -1,7 +1,13 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
 import AppHeader from '@/components/layout/AppHeader.vue'
 import AppFooter from '@/components/layout/AppFooter.vue'
+import BackToTop from '@/components/layout/BackToTop.vue'
 import ParticleBackground from '@/components/effects/ParticleBackground.vue'
+
+const route = useRoute()
+const isHomePage = computed(() => route.name === 'home')
 </script>
 
 <template>
@@ -9,10 +15,11 @@ import ParticleBackground from '@/components/effects/ParticleBackground.vue'
     <ParticleBackground />
     <div class="layout-content">
       <AppHeader />
-      <main class="main-content">
+      <main class="main-content" :class="{ 'main-content--offset': !isHomePage }">
         <router-view />
       </main>
       <AppFooter />
+      <BackToTop />
     </div>
   </div>
 </template>
@@ -34,5 +41,9 @@ import ParticleBackground from '@/components/effects/ParticleBackground.vue'
 .main-content {
   flex: 1;
   width: 100%;
+}
+
+.main-content--offset {
+  padding-top: var(--header-height);
 }
 </style>

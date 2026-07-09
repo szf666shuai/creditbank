@@ -5,6 +5,7 @@ import PlaceholderView from '@/views/PlaceholderView.vue'
 import LoginView from '@/views/auth/LoginView.vue'
 import RegisterView from '@/views/auth/RegisterView.vue'
 import ProfileView from '@/views/ProfileView.vue'
+import SearchView from '@/views/SearchView.vue'
 
 const placeholder = (title: string) => ({
   component: PlaceholderView,
@@ -34,7 +35,7 @@ const router = createRouter({
         { path: 'integrity', ...placeholder('诚信评定') },
         { path: 'partners', ...placeholder('合作单位') },
         { path: 'contact', ...placeholder('联系我们') },
-        { path: 'search', ...placeholder('搜索结果') },
+        { path: 'search', name: 'search', component: SearchView },
         { path: 'login', name: 'login', component: LoginView, meta: { guest: true } },
         { path: 'register', name: 'register', component: RegisterView, meta: { guest: true } },
         { path: 'profile', name: 'profile', component: ProfileView, meta: { requiresAuth: true } },

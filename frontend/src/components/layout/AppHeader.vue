@@ -1,11 +1,16 @@
 <script setup lang="ts">
 import { ArrowDown, HomeFilled, Search } from '@element-plus/icons-vue'
 import { useLayout } from '@/composables/useLayout'
+import { useHeaderScroll } from '@/composables/useHeaderScroll'
+import { useSearchSuggest } from '@/composables/useSearchSuggest'
+import { searchCategories } from '@/config/search-categories'
+import type { SearchItem } from '@/api/search'
 
 const {
   siteNav,
   profileNav,
   searchKeyword,
+  searchCategory,
   isLoggedIn,
   displayName,
   userRoleName,
@@ -14,10 +19,67 @@ const {
   navigate,
   logout,
 } = useLayout()
+
+const { isHeaderVisible, isTransparent } = useHeaderScroll()
+
+const {
+  suggestions,
+  showSuggest,
+  loadingSuggest,
+  activeIndex,
+  hideSuggest,
+  openSuggestIfAny,
+  moveActive,
+  pickActive,
+} = useSearchSuggest(searchKeyword, searchCategory)
+
+function applySuggestion(item: SearchItem) {
+  searchKeyword.value = item.title
+  hideSuggest()
+  handleSearch()
+}
+
+function onSearchKeydown(e: KeyboardEvent) {
+  if (e.key === 'ArrowDown') {
+    e.preventDefault()
+    moveActive(1)
+    return
+  }
+  if (e.key === 'ArrowUp') {
+    e.preventDefault()
+    moveActive(-1)
+    return
+  }
+  if (e.key === 'Escape') {
+    hideSuggest()
+    return
+  }
+  if (e.key === 'Enter') {
+    const picked = pickActive()
+    if (picked) {
+      e.preventDefault()
+      applySuggestion(picked)
+      return
+    }
+    hideSuggest()
+    handleSearch()
+  }
+}
+
+function onSearchBlur() {
+  // 延迟关闭，保证点击联想项能触发
+  window.setTimeout(() => hideSuggest(), 150)
+}
 </script>
 
 <template>
-  <header class="app-header">
+  <header
+    class="app-header"
+    :class="{
+      'is-hidden': !isHeaderVisible,
+      'is-transparent': isTransparent,
+    }"
+  >
     <div class="header-inner">
       <!-- Logo -->
       <router-link to="/" class="logo">
@@ -87,13 +149,52 @@ const {
 
       <!-- 右侧：搜索 + 登录/个人中心 -->
       <div class="header-actions">
-        <div class="search-box">
-          <input
-            v-model="searchKeyword"
-            type="text"
-            placeholder="搜索"
-            @keyup.enter="handleSearch"
-          />
+        <div class="search-box" :class="{ 'is-suggest-open': showSuggest }">
+          <el-select
+            v-model="searchCategory"
+            class="search-category"
+            size="small"
+            :teleported="false"
+          >
+            <el-option
+              v-for="cat in searchCategories"
+              :key="cat.value"
+              :label="cat.label"
+              :value="cat.value"
+            />
+          </el-select>
+          <span class="search-divider" aria-hidden="true" />
+          <div class="search-input-wrap">
+            <input
+              v-model="searchKeyword"
+              type="text"
+              placeholder="搜索关键词"
+              autocomplete="off"
+              @focus="openSuggestIfAny"
+              @blur="onSearchBlur"
+              @keydown="onSearchKeydown"
+            />
+            <div
+              v-show="showSuggest"
+              class="suggest-panel"
+              role="listbox"
+              aria-label="搜索联想"
+            >
+              <div v-if="loadingSuggest" class="suggest-loading">加载中…</div>
+              <button
+                v-for="(item, index) in suggestions"
+                :key="`${item.type}-${item.id}`"
+                type="button"
+                class="suggest-item"
+                :class="{ active: index === activeIndex }"
+                role="option"
+                @mousedown.prevent="applySuggestion(item)"
+              >
+                <span class="suggest-title">{{ item.title }}</span>
+                <span class="suggest-type">{{ item.typeName }}</span>
+              </button>
+            </div>
+          </div>
           <button class="search-btn" aria-label="搜索" @click="handleSearch">
             <el-icon><Search /></el-icon>
           </button>
@@ -141,11 +242,87 @@ const {
 
 <style scoped>
 .app-header {
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 1000;
   background: var(--color-white);
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  transform: translateY(0);
+  transition:
+    transform 0.32s ease,
+    background 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.app-header.is-hidden {
+  transform: translateY(-100%);
+  pointer-events: none;
+}
+
+.app-header.is-transparent {
+  background: transparent;
+  box-shadow: none;
+}
+
+.app-header.is-transparent .nav-item {
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+
+.app-header.is-transparent .nav-item:hover,
+.app-header.is-transparent .nav-dropdown:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.app-header.is-transparent .nav-item.active {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.22);
+  border-radius: 20px;
+}
+
+.app-header.is-transparent .search-box {
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(6px);
+}
+
+.app-header.is-transparent .search-box input {
+  color: #fff;
+}
+
+.app-header.is-transparent .search-box input::placeholder {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.app-header.is-transparent .search-category :deep(.el-select__selected-item) {
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.app-header.is-transparent .search-category :deep(.el-select__caret),
+.app-header.is-transparent .search-btn {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.app-header.is-transparent .search-divider {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.app-header.is-transparent .profile-trigger {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.app-header.is-transparent .profile-trigger:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.app-header.is-transparent .role-badge {
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
 }
 
 .header-inner {
@@ -256,23 +433,121 @@ const {
   align-items: center;
   background: #f0f2f5;
   border-radius: 20px;
-  padding: 0 4px 0 14px;
+  padding: 0 4px 0 2px;
   height: 34px;
-  width: 160px;
+  width: 280px;
+}
+
+.search-category {
+  width: 92px;
+  flex-shrink: 0;
+}
+
+.search-category :deep(.el-select__wrapper) {
+  box-shadow: none !important;
+  background: transparent !important;
+  padding: 0 6px 0 10px;
+  min-height: 28px;
+}
+
+.search-category :deep(.el-select__selected-item) {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.search-category :deep(.el-select__caret) {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.search-divider {
+  width: 1px;
+  height: 18px;
+  background: #dcdfe6;
+  flex-shrink: 0;
+}
+
+.search-input-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
 }
 
 .search-box input {
   flex: 1;
+  width: 100%;
   border: none;
   background: transparent;
   outline: none;
   font-size: 13px;
   color: var(--color-text);
   min-width: 0;
+  height: 100%;
 }
 
 .search-box input::placeholder {
   color: var(--color-text-muted);
+}
+
+.suggest-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: -96px;
+  right: -36px;
+  z-index: 1200;
+  max-height: 320px;
+  overflow-y: auto;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.14);
+  padding: 6px 0;
+}
+
+.suggest-loading {
+  padding: 10px 14px;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.suggest-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 14px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
+}
+
+.suggest-item:hover,
+.suggest-item.active {
+  background: var(--color-primary-light);
+}
+
+.suggest-title {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.suggest-type {
+  flex-shrink: 0;
+  font-size: 11px;
+  color: var(--color-primary);
+  background: rgba(32, 148, 243, 0.1);
+  padding: 2px 8px;
+  border-radius: 10px;
 }
 
 .search-btn {
@@ -357,7 +632,11 @@ const {
   }
 
   .search-box {
-    width: 120px;
+    width: 210px;
+  }
+
+  .search-category {
+    width: 76px;
   }
 }
 </style>
