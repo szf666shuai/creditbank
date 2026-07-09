@@ -195,38 +195,40 @@ watch(() => [route.query.q, route.query.type], fetchResults)
             </div>
           </section>
 
-          <!-- 资讯 + 活动：左右并排卡片 -->
+          <!-- 资讯 + 活动：标题在框外，内容左右并排 -->
           <div class="dual-row">
-            <div
+            <section
               v-for="panel in allSearchSections.dual"
               :key="panel.value"
-              class="identity-card"
+              class="dual-panel"
             >
-              <div class="identity-header">
+              <div class="stack-header">
                 <span
-                  class="identity-icon"
+                  class="stack-icon"
                   :style="{ background: panel.color + '18', color: panel.color }"
                 >
                   {{ panel.icon }}
                 </span>
-                <span class="identity-title">{{ panel.label }}</span>
+                <h3 class="block-title inline">{{ panel.label }}</h3>
               </div>
-              <el-empty
-                v-if="!resultsMap[panel.value]?.length"
-                description="暂无结果"
-                :image-size="48"
-              />
-              <ul v-else class="panel-list">
-                <li
-                  v-for="item in resultsMap[panel.value]"
-                  :key="`${item.type}-${item.id}`"
-                  class="panel-item"
-                >
-                  <p class="panel-item-title" v-html="highlightKeyword(item.title)" />
-                  <p v-if="item.summary" class="panel-item-summary">{{ item.summary }}</p>
-                </li>
-              </ul>
-            </div>
+              <div class="identity-card">
+                <el-empty
+                  v-if="!resultsMap[panel.value]?.length"
+                  description="暂无结果"
+                  :image-size="48"
+                />
+                <ul v-else class="panel-list">
+                  <li
+                    v-for="item in resultsMap[panel.value]"
+                    :key="`${item.type}-${item.id}`"
+                    class="panel-item"
+                  >
+                    <p class="panel-item-title" v-html="highlightKeyword(item.title)" />
+                    <p v-if="item.summary" class="panel-item-summary">{{ item.summary }}</p>
+                  </li>
+                </ul>
+              </div>
+            </section>
           </div>
 
           <!-- 招聘、论坛：上下排列 -->
@@ -426,7 +428,8 @@ watch(() => [route.query.q, route.query.type], fetchResults)
   font-size: 16px;
   font-weight: 600;
   margin-bottom: 14px;
-  color: var(--color-text);
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
 }
 
 .block-title.inline {
@@ -480,14 +483,21 @@ watch(() => [route.query.q, route.query.type], fetchResults)
   font-size: 13px;
   font-weight: 500;
   line-height: 1.5;
-  color: var(--color-text);
+  color: rgba(255, 255, 255, 0.92);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-.grid-title :deep(mark),
+.grid-title :deep(mark) {
+  background: none;
+  color: #7ec8ff;
+  font-weight: 600;
+  padding: 0;
+}
+
 .panel-item-title :deep(mark),
 .stack-title :deep(mark),
 .enterprise-title :deep(mark),
@@ -498,11 +508,15 @@ watch(() => [route.query.q, route.query.type], fetchResults)
   padding: 0;
 }
 
-/* 资讯 + 活动 左右并排 */
+/* 资讯 + 活动 左右并排，标题在框外 */
 .dual-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
+}
+
+.dual-panel {
+  min-width: 0;
 }
 
 .identity-card {
@@ -511,30 +525,6 @@ watch(() => [route.query.q, route.query.type], fetchResults)
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   padding: 16px 18px;
   min-height: 160px;
-}
-
-.identity-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-
-.identity-icon {
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8px;
-  font-size: 16px;
-  flex-shrink: 0;
-}
-
-.identity-title {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--color-text);
 }
 
 .panel-list {

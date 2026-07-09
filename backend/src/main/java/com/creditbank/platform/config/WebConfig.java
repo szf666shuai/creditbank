@@ -30,6 +30,7 @@ public class WebConfig implements WebMvcConfigurer {
                         "/api/auth/register",
                         "/api/health",
                         "/api/search",
+                        "/api/search/**",
                         "/api/home"
                 );
     }
