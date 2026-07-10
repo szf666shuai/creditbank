@@ -35,6 +35,15 @@ const request = {
   post<T>(url: string, data?: unknown) {
     return instance.post<unknown, ApiResponse<T>>(url, data)
   },
+  put<T>(url: string, data?: unknown) {
+    return instance.put<unknown, ApiResponse<T>>(url, data)
+  },
+  patch<T>(url: string, data?: unknown) {
+    return instance.patch<unknown, ApiResponse<T>>(url, data)
+  },
+  delete<T>(url: string) {
+    return instance.delete<unknown, ApiResponse<T>>(url)
+  },
 }
 
 export default request

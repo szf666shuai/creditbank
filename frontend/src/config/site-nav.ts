@@ -7,11 +7,8 @@ export interface NavChild {
 export interface NavItem {
   key: string
   label: string
-  /** 无下拉时直接跳转（如首页） */
   path?: string
-  /** 是否为首页图标按钮 */
   icon?: boolean
-  /** 下拉子页面，留空数组表示待组员补充 */
   children: NavChild[]
 }
 
@@ -27,39 +24,27 @@ export const siteNav: NavItem[] = [
   {
     key: 'credit',
     label: '积分商城',
-    children: [
-      // 积分模块负责人补充，例如：
-      // { label: '积分查询', path: '/credit' },
-      // { label: '积分兑换', path: '/credit/exchange' },
-    ],
+    children: [],
   },
   {
     key: 'resources',
     label: '学习资源',
-    children: [
-      // 学习资源负责人补充
-    ],
+    children: [],
   },
   {
     key: 'forum',
     label: '论坛',
-    children: [
-      // 论坛负责人补充
-    ],
+    children: [],
   },
   {
     key: 'news',
     label: '资讯中心',
-    children: [
-      // 资讯负责人补充
-    ],
+    children: [],
   },
   {
     key: 'enterprise',
     label: '企业中心',
-    children: [
-      // 企业中心负责人补充
-    ],
+    children: [{ label: '加盟企业', path: '/enterprise' }],
   },
 ]
 
@@ -67,20 +52,28 @@ export const siteNav: NavItem[] = [
 export const profileNavByRole: Record<number, NavChild[]> = {
   /** 学员 */
   0: [
-    { label: '学习档案', path: '/archive' },
-    { label: '积分商城', path: '/credit' },
+    { label: '个人中心', path: '/profile' },
+    { label: '我的简历', path: '/profile/resume' },
+    { label: '学习档案', path: '/profile/learning' },
+    { label: '学分流水', path: '/profile/credit' },
+    { label: '诚信评定', path: '/profile/integrity' },
+    { label: '消息中心', path: '/profile/messages' },
   ],
   /** 企业用户 */
   1: [
-    { label: '企业中心', path: '/enterprise' },
-    { label: '活动报名', path: '/activity' },
-    { label: '招聘求职', path: '/job' },
+    { label: '账号概览', path: '/profile' },
+    { label: '企业工作台', path: '/profile/enterprise' },
+    { label: '加盟企业', path: '/enterprise' },
+    { label: '消息中心', path: '/profile/messages' },
   ],
   /** 管理员 */
   2: [
-    { label: '机构加盟', path: '/organization' },
+    { label: '管理概览', path: '/profile/admin' },
+    { label: '机构加盟', path: '/profile/admin/organizations' },
+    { label: '用户管理', path: '/profile/admin/users' },
+    { label: '消息中心', path: '/profile/messages' },
   ],
 }
 
-/** @deprecated 使用 profileNavByRole，保留空数组兼容旧引用 */
+/** @deprecated 使用 profileNavByRole */
 export const profileNav: NavChild[] = []

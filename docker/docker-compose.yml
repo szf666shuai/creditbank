@@ -5,7 +5,7 @@ services:
     container_name: credit-bank-mysql
     restart: unless-stopped
     ports:
-      - "3307:3306"
+      - "3307:3306"   # 3306 常被本机 MySQL 占用，开发环境映射到 3307
     environment:
       MYSQL_ROOT_PASSWORD: root123456
       MYSQL_DATABASE: credit_bank

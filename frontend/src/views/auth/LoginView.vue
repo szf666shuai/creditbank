@@ -3,6 +3,7 @@ import { reactive, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useAuthStore } from '@/stores/auth'
+import { getDefaultHomePath } from '@/config/role-routes'
 
 const router = useRouter()
 const route = useRoute()
@@ -23,7 +24,12 @@ async function handleLogin() {
   try {
     await authStore.login(form)
     ElMessage.success('登录成功')
-    const redirect = (route.query.redirect as string) || '/'
+    const role = authStore.userInfo?.role ?? 0
+    const rawRedirect = route.query.redirect as string | undefined
+    const redirect =
+      rawRedirect && rawRedirect !== '/' && rawRedirect !== '/profile'
+        ? rawRedirect
+        : getDefaultHomePath(role)
     router.push(redirect)
   } catch (e) {
     ElMessage.error(e instanceof Error ? e.message : '登录失败')

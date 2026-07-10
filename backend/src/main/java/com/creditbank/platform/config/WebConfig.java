@@ -31,7 +31,8 @@ public class WebConfig implements WebMvcConfigurer {
                         "/api/health",
                         "/api/search",
                         "/api/search/**",
-                        "/api/home"
+                        "/api/home",
+                        "/api/enterprise/orgs/**"
                 );
     }
 }
