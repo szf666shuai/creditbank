@@ -1,14 +1,14 @@
 spring:
   application:
     name: credit-bank-platform
-  profiles:
-    active: ${SPRING_PROFILES_ACTIVE:local}
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3307/credit_bank?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://localhost:3307/credit_bank?useUnicode=true&characterEncoding=UTF-8&connectionCollation=utf8mb4_unicode_ci&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
     username: creditbank
     password: creditbank123
+    hikari:
+      connection-init-sql: SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci
 
   data:
     redis:
@@ -21,6 +21,10 @@ spring:
 server:
   port: 8080
   servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
     context-path: /
 
 mybatis-plus:
@@ -44,16 +48,3 @@ jwt:
 
 app:
   seed-search-data: true
-
-# DeepSeek（OpenAI 兼容）。本地密钥放 application-local.yml，勿提交仓库
-llm:
-  enabled: true
-  provider: deepseek
-  api-key: ${LLM_API_KEY:}
-  base-url: ${LLM_BASE_URL:https://api.deepseek.com}
-  model: ${LLM_MODEL:deepseek-chat}
-  timeout-ms: 60000
-  system-prompt: |
-    你是「学分银行」平台的学习助手。请用简洁、友好的中文回答。
-    你可以帮助用户：找课程与活动、了解积分商城与诚信分、给出学习建议。
-    若问题超出平台能力，请诚实说明，并给出可操作的下一步建议。
