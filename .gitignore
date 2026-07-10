@@ -28,10 +28,12 @@ desktop.ini
 *.log
 logs/
 
-# Env
+# Env / local secrets
 .env
 .env.local
 .env.*.local
+**/application-local.yml
+backend/.env
 
 # Docker volumes (local data)
 docker/mysql/data/

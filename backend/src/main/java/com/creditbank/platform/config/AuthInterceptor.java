@@ -9,9 +9,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+import java.util.Set;
+
 @Component
 @RequiredArgsConstructor
 public class AuthInterceptor implements HandlerInterceptor {
+
+    private static final Set<String> OPTIONAL_AUTH_PATHS = Set.of(
+            "/api/agent/chat"
+    );
 
     private final JwtUtil jwtUtil;
 
@@ -21,8 +27,14 @@ public class AuthInterceptor implements HandlerInterceptor {
             return true;
         }
 
+        String path = request.getRequestURI();
+        boolean optional = OPTIONAL_AUTH_PATHS.contains(path);
+
         String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            if (optional) {
+                return true;
+            }
             throw new BusinessException(401, "未登录或登录已过期");
         }
 
@@ -32,6 +44,9 @@ public class AuthInterceptor implements HandlerInterceptor {
             UserContext.setUserId(userId);
             return true;
         } catch (Exception e) {
+            if (optional) {
+                return true;
+            }
             throw new BusinessException(401, "未登录或登录已过期");
         }
     }

@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { searchApi } from '@/api/search'
 import type { SearchItem } from '@/api/search'
+import SearchAgentPanel from '@/components/agent/SearchAgentPanel.vue'
 import {
   ALL_SEARCH_TYPE_VALUES,
   allSearchSections,
@@ -14,7 +15,7 @@ import {
 const route = useRoute()
 const router = useRouter()
 
-const loading = ref(false)
+const loading = ref(Boolean(((route.query.q as string) || '').trim()))
 const items = ref<SearchItem[]>([])
 const resultsMap = ref<Record<string, SearchItem[]>>({})
 
@@ -28,6 +29,23 @@ const isGridView = computed(() =>
 const gridColumns = computed(() => {
   if (searchType.value === 'all') return gridSearchTypes
   return gridSearchTypes.filter((c) => c.value === searchType.value)
+})
+
+/** 供智能助手使用的扁平结果摘要 */
+const agentItems = computed(() => {
+  if (isAllView.value || isGridView.value) {
+    const list: SearchItem[] = []
+    const order =
+      searchType.value === 'all'
+        ? [...ALL_SEARCH_TYPE_VALUES]
+        : [searchType.value]
+    for (const type of order) {
+      const chunk = resultsMap.value[type] || []
+      list.push(...chunk.slice(0, 4))
+    }
+    return list.slice(0, 12)
+  }
+  return items.value.slice(0, 12)
 })
 
 function showCoverImage(url?: string) {
@@ -135,15 +153,12 @@ watch(() => [route.query.q, route.query.type], fetchResults)
 <template>
   <div class="search-page">
     <div class="section-inner">
-      <div class="agent-slot">
-        <div class="agent-slot-inner">
-          <span class="agent-slot-icon">🤖</span>
-          <div class="agent-slot-text">
-            <span class="agent-slot-title">智能搜索助手</span>
-            <span class="agent-slot-desc">Agent 模块接入后，将在此提供语义理解、学习路径推荐等能力</span>
-          </div>
-        </div>
-      </div>
+      <SearchAgentPanel
+        :keyword="keyword"
+        :search-type="searchType"
+        :loading="loading"
+        :items="agentItems"
+      />
 
       <div class="type-tabs">
         <el-check-tag
@@ -366,44 +381,6 @@ watch(() => [route.query.q, route.query.type], fetchResults)
 .section-inner {
   max-width: var(--content-max-width);
   margin: 0 auto;
-}
-
-.agent-slot {
-  margin-bottom: 20px;
-  border: 1px dashed var(--color-primary);
-  border-radius: 12px;
-  background: linear-gradient(135deg, var(--color-primary-light) 0%, #fff 100%);
-  min-height: 88px;
-}
-
-.agent-slot-inner {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 20px 24px;
-}
-
-.agent-slot-icon {
-  font-size: 32px;
-  flex-shrink: 0;
-}
-
-.agent-slot-text {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.agent-slot-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--color-text);
-}
-
-.agent-slot-desc {
-  font-size: 13px;
-  color: var(--color-text-muted);
-  line-height: 1.5;
 }
 
 .type-tabs {
