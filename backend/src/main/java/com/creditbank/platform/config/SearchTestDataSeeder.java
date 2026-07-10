@@ -29,10 +29,11 @@ public class SearchTestDataSeeder {
         try {
             ResourceDatabasePopulator populator = new ResourceDatabasePopulator();
             populator.addScript(new ClassPathResource("db/004_seed_search_test_data.sql"));
+            populator.addScript(new ClassPathResource("db/006_seed_learning_profile_demo.sql"));
             populator.setSeparator(";");
             populator.setCommentPrefix("--");
             populator.execute(dataSource);
-            log.info("搜索测试数据已加载（前缀 [测试]）");
+            log.info("搜索与学习画像演示数据已加载（前缀 [测试]/[画像演示]）");
         } catch (Exception e) {
             log.warn("搜索测试数据加载失败: {}", e.getMessage());
         }

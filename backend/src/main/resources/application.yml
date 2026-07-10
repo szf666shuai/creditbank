@@ -1,6 +1,8 @@
 spring:
   application:
     name: credit-bank-platform
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -43,3 +45,15 @@ jwt:
 app:
   seed-search-data: true
 
+# DeepSeek（OpenAI 兼容）。本地密钥放 application-local.yml，勿提交仓库
+llm:
+  enabled: true
+  provider: deepseek
+  api-key: ${LLM_API_KEY:}
+  base-url: ${LLM_BASE_URL:https://api.deepseek.com}
+  model: ${LLM_MODEL:deepseek-chat}
+  timeout-ms: 60000
+  system-prompt: |
+    你是「学分银行」平台的学习助手。请用简洁、友好的中文回答。
+    你可以帮助用户：找课程与活动、了解积分商城与诚信分、给出学习建议。
+    若问题超出平台能力，请诚实说明，并给出可操作的下一步建议。

@@ -1,0 +1,16 @@
+package com.creditbank.platform.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class AgentChatResponse {
+
+    private String reply;
+    private String model;
+}
