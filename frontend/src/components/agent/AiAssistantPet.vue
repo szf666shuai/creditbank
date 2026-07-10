@@ -41,7 +41,20 @@ const bubbleVisible = ref(false)
 const chatInput = ref('')
 const sending = ref(false)
 const generatingProfile = ref(false)
-const messages = ref<{ role: 'assistant' | 'user'; text: string }[]>([
+type ChatMessage = {
+  role: 'assistant' | 'user'
+  text: string
+  profile?: {
+    targetJob: string
+    summary: string
+    skills: string[]
+    strengths: string[]
+    gaps: string[]
+    suggestions: string[]
+  }
+}
+
+const messages = ref<ChatMessage[]>([
   {
     role: 'assistant',
     text: '你好，我是学分银行 AI 助手。登录后可基于你的课程进度与档案生成学习画像～',
@@ -269,17 +282,17 @@ async function generateMyProfile() {
       throw new Error(res.message || '生成失败')
     }
     const p = res.data
-    const skills = p.profile?.skills?.slice(0, 5)?.join('、') || '暂无'
-    const tips = p.profile?.suggestions?.slice(0, 2)?.join('；') || ''
     messages.value.push({
       role: 'assistant',
-      text:
-        `已根据你的课程进度、档案与学分情况生成画像。\n` +
-        `心仪职位：${p.targetJob || '待明确'}\n` +
-        `摘要：${p.summary || '—'}\n` +
-        `技能：${skills}` +
-        (tips ? `\n建议：${tips}` : '') +
-        `\n也可在「个人中心」查看完整画像。`,
+      text: '已根据你的课程进度、档案与学分情况生成画像。',
+      profile: {
+        targetJob: p.targetJob || '待明确',
+        summary: p.summary || '暂无摘要',
+        skills: p.profile?.skills?.slice(0, 6) || [],
+        strengths: p.profile?.strengths?.slice(0, 4) || [],
+        gaps: p.profile?.gaps?.slice(0, 4) || [],
+        suggestions: p.profile?.suggestions?.slice(0, 3) || [],
+      },
     })
     setMood('happy', 1000)
     showBubble('学习画像已生成～', 2200)
@@ -346,9 +359,56 @@ onUnmounted(() => {
             v-for="(msg, idx) in messages"
             :key="idx"
             class="ai-msg"
-            :class="msg.role"
+            :class="[msg.role, { 'has-profile': !!msg.profile }]"
           >
-            {{ msg.text }}
+            <p class="ai-msg-text">{{ msg.text }}</p>
+            <div v-if="msg.profile" class="ai-profile-card">
+              <div class="ai-profile-row">
+                <span class="ai-profile-label">心仪职位</span>
+                <span class="ai-profile-job">{{ msg.profile.targetJob }}</span>
+              </div>
+              <div class="ai-profile-row">
+                <span class="ai-profile-label">摘要</span>
+                <p class="ai-profile-summary">{{ msg.profile.summary }}</p>
+              </div>
+              <div v-if="msg.profile.skills.length" class="ai-profile-row">
+                <span class="ai-profile-label">技能</span>
+                <div class="ai-profile-tags">
+                  <span
+                    v-for="(skill, sIdx) in msg.profile.skills"
+                    :key="`skill-${sIdx}`"
+                    class="ai-profile-tag"
+                  >
+                    {{ skill }}
+                  </span>
+                </div>
+              </div>
+              <div v-if="msg.profile.strengths.length" class="ai-profile-row">
+                <span class="ai-profile-label">优势</span>
+                <ul class="ai-profile-list">
+                  <li v-for="(item, i) in msg.profile.strengths" :key="`str-${i}`">
+                    {{ item }}
+                  </li>
+                </ul>
+              </div>
+              <div v-if="msg.profile.gaps.length" class="ai-profile-row">
+                <span class="ai-profile-label">待补齐</span>
+                <ul class="ai-profile-list">
+                  <li v-for="(item, i) in msg.profile.gaps" :key="`gap-${i}`">
+                    {{ item }}
+                  </li>
+                </ul>
+              </div>
+              <div v-if="msg.profile.suggestions.length" class="ai-profile-row">
+                <span class="ai-profile-label">建议</span>
+                <ol class="ai-profile-list numbered">
+                  <li v-for="(item, i) in msg.profile.suggestions" :key="`tip-${i}`">
+                    {{ item }}
+                  </li>
+                </ol>
+              </div>
+              <p class="ai-profile-foot">也可在「个人中心」查看完整画像</p>
+            </div>
           </div>
         </div>
         <div class="ai-panel-actions">
@@ -678,6 +738,18 @@ onUnmounted(() => {
   letter-spacing: 0.02em;
 }
 
+.ai-msg.has-profile {
+  max-width: 100%;
+  width: 100%;
+  padding: 12px;
+}
+
+.ai-msg-text {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
 .ai-msg.assistant {
   align-self: flex-start;
   background: #fff;
@@ -689,6 +761,89 @@ onUnmounted(() => {
   align-self: flex-end;
   background: #2094f3;
   color: #fff;
+}
+
+.ai-profile-card {
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #f4f9ff 0%, #f8fbff 100%);
+  border: 1px solid #dceaf8;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ai-profile-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ai-profile-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #5a7a9a;
+  letter-spacing: 0.04em;
+}
+
+.ai-profile-job {
+  display: inline-flex;
+  align-self: flex-start;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #2094f3;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.ai-profile-summary {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.65;
+  color: #334155;
+}
+
+.ai-profile-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.ai-profile-tag {
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: #fff;
+  border: 1px solid #cfe3f7;
+  color: #1a7fd4;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.ai-profile-list {
+  margin: 0;
+  padding-left: 1.1em;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: #334155;
+}
+
+.ai-profile-list.numbered {
+  padding-left: 1.25em;
+}
+
+.ai-profile-foot {
+  margin: 2px 0 0;
+  padding-top: 10px;
+  border-top: 1px dashed #d5e4f3;
+  font-size: 12px;
+  color: #7a90a8;
+  line-height: 1.4;
 }
 
 .ai-panel-footer {

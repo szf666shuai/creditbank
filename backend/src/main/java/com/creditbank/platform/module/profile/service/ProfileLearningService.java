@@ -13,9 +13,9 @@ import com.creditbank.platform.security.AuthSupport;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -51,14 +51,19 @@ public class ProfileLearningService {
                 .filter(id -> id != null)
                 .distinct()
                 .toList();
-        Map<Long, String> orgNameMap = orgIds.isEmpty()
-                ? Map.of()
-                : orgMapper.selectList(new LambdaQueryWrapper<SysOrganization>().in(SysOrganization::getId, orgIds))
-                        .stream()
-                        .collect(Collectors.toMap(SysOrganization::getId, SysOrganization::getName));
+        // HashMap 允许 get(null)；Map.of() 在 key 为 null 时会 NPE
+        Map<Long, String> orgNameMap = new HashMap<>();
+        if (!orgIds.isEmpty()) {
+            orgMapper.selectList(new LambdaQueryWrapper<SysOrganization>().in(SysOrganization::getId, orgIds))
+                    .forEach(org -> {
+                        if (org.getId() != null && org.getName() != null) {
+                            orgNameMap.put(org.getId(), org.getName());
+                        }
+                    });
+        }
 
         return achievements.stream()
-                .map(item -> toAchievementVO(item, orgNameMap.get(item.getOrgId())))
+                .map(item -> toAchievementVO(item, item.getOrgId() == null ? null : orgNameMap.get(item.getOrgId())))
                 .toList();
     }
 
