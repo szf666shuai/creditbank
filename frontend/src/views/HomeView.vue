@@ -5,13 +5,13 @@ import { identityRecommends } from '@/config/home-recommendations'
 
 const quickEntries = [
   { icon: '💰', label: '积分商城', path: '/credit', color: '#2094f3' },
-  { icon: '📁', label: '学习档案', path: '/archive', color: '#52c41a' },
+  { icon: '📁', label: '学习档案', path: '/profile/learning', color: '#52c41a' },
   { icon: '🏆', label: '学习成果', path: '/achievement', color: '#faad14' },
   { icon: '💬', label: '学习论坛', path: '/forum', color: '#722ed1' },
-  { icon: '📅', label: '活动报名', path: '/activity', color: '#13c2c2' },
-  { icon: '💼', label: '招聘求职', path: '/job', color: '#eb2f96' },
+  { icon: '📅', label: '活动报名', path: '/enterprise', color: '#13c2c2' },
+  { icon: '💼', label: '招聘求职', path: '/enterprise', color: '#eb2f96' },
   { icon: '🔗', label: '区块链校验', path: '/achievement', color: '#2f54eb' },
-  { icon: '⭐', label: '诚信评定', path: '/integrity', color: '#fa8c16' },
+  { icon: '⭐', label: '诚信评定', path: '/profile/integrity', color: '#fa8c16' },
 ]
 
 interface HealthData {

@@ -45,7 +45,7 @@ docker compose up -d
 
 服务端口：
 
-- MySQL：`localhost:3306`（用户 `creditbank` / 密码 `creditbank123`，库名 `credit_bank`）
+- MySQL：`localhost:3307`（用户 `creditbank` / 密码 `creditbank123`，库名 `credit_bank`）
 - Redis：`localhost:6379`（密码 `redis123456`）
 - Nginx：`localhost:80`
 

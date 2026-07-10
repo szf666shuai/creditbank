@@ -8,7 +8,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@MapperScan("com.creditbank.platform.mapper")
+@MapperScan({
+        "com.creditbank.platform.mapper",
+        "com.creditbank.platform.module.enterprise.mapper",
+        "com.creditbank.platform.module.profile.mapper",
+        "com.creditbank.platform.module.message.mapper"
+})
 public class MybatisPlusConfig {
 
     @Bean
