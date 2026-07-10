@@ -13,16 +13,16 @@ const footerLinks = {
     title: '交流互动',
     items: [
       { label: '学习论坛', path: '/forum' },
-      { label: '活动报名', path: '/enterprise' },
-      { label: '招聘求职', path: '/enterprise' },
-      { label: '诚信评定', path: '/profile/integrity' },
+      { label: '活动报名', path: '/activity' },
+      { label: '招聘求职', path: '/job' },
+      { label: '诚信评定', path: '/integrity' },
     ],
   },
   about: {
     title: '关于平台',
     items: [
       { label: '平台介绍', path: '/about' },
-      { label: '机构加盟', path: '/register' },
+      { label: '机构加盟', path: '/organization' },
       { label: '合作单位', path: '/partners' },
       { label: '联系我们', path: '/contact' },
     ],

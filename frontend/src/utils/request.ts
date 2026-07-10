@@ -1,5 +1,4 @@
 import axios from 'axios'
-import type { AxiosRequestConfig } from 'axios'
 
 export interface ApiResponse<T = unknown> {
   code: number
@@ -30,20 +29,11 @@ instance.interceptors.response.use(
 )
 
 const request = {
-  get<T>(url: string, config?: AxiosRequestConfig) {
-    return instance.get<unknown, ApiResponse<T>>(url, config)
+  get<T>(url: string) {
+    return instance.get<unknown, ApiResponse<T>>(url)
   },
-  post<T>(url: string, data?: unknown, config?: AxiosRequestConfig) {
-    return instance.post<unknown, ApiResponse<T>>(url, data, config)
-  },
-  put<T>(url: string, data?: unknown) {
-    return instance.put<unknown, ApiResponse<T>>(url, data)
-  },
-  patch<T>(url: string, data?: unknown) {
-    return instance.patch<unknown, ApiResponse<T>>(url, data)
-  },
-  delete<T>(url: string) {
-    return instance.delete<unknown, ApiResponse<T>>(url)
+  post<T>(url: string, data?: unknown) {
+    return instance.post<unknown, ApiResponse<T>>(url, data)
   },
 }
 

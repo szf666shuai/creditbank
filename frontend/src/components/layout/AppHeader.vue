@@ -1,12 +1,10 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
-import { ArrowDown, ChatDotRound, HomeFilled, Search } from '@element-plus/icons-vue'
+import { ArrowDown, HomeFilled, Search } from '@element-plus/icons-vue'
 import { useLayout } from '@/composables/useLayout'
 import { useHeaderScroll } from '@/composables/useHeaderScroll'
 import { useSearchSuggest } from '@/composables/useSearchSuggest'
 import { searchCategories } from '@/config/search-categories'
 import type { SearchItem } from '@/api/search'
-import { useMessageStore } from '@/stores/message'
 
 const {
   siteNav,
@@ -72,15 +70,6 @@ function onSearchBlur() {
   // 延迟关闭，保证点击联想项能触发
   window.setTimeout(() => hideSuggest(), 150)
 }
-
-const messageStore = useMessageStore()
-const unreadCount = computed(() => messageStore.unreadCount)
-
-onMounted(() => {
-  if (isLoggedIn.value) {
-    messageStore.refreshUnreadCount()
-  }
-})
 </script>
 
 <template>
@@ -217,18 +206,12 @@ onMounted(() => {
           <router-link to="/register" class="btn-register">注册</router-link>
         </div>
 
-        <!-- 已登录：消息 + 个人中心 -->
-        <template v-else>
-          <router-link to="/profile/messages" class="message-entry" title="消息中心">
-            <el-badge :value="unreadCount" :hidden="unreadCount <= 0" :max="99">
-              <el-icon :size="20"><ChatDotRound /></el-icon>
-            </el-badge>
-          </router-link>
-
-          <el-dropdown
-            trigger="hover"
-            placement="bottom-end"
-          >
+        <!-- 已登录：个人中心下拉 -->
+        <el-dropdown
+          v-else
+          trigger="hover"
+          placement="bottom-end"
+        >
           <span class="nav-item profile-trigger">
             {{ displayName }}
             <span class="role-badge">{{ userRoleName }}</span>
@@ -236,6 +219,9 @@ onMounted(() => {
           </span>
           <template #dropdown>
             <el-dropdown-menu>
+              <el-dropdown-item @click="navigate('/profile')">
+                个人中心
+              </el-dropdown-item>
               <el-dropdown-item
                 v-for="child in profileNav"
                 :key="child.path"
@@ -249,7 +235,6 @@ onMounted(() => {
             </el-dropdown-menu>
           </template>
         </el-dropdown>
-        </template>
       </div>
     </div>
   </header>
@@ -639,23 +624,6 @@ onMounted(() => {
 
 .profile-trigger:hover {
   background: var(--color-primary-light);
-}
-
-.message-entry {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  color: var(--color-text-secondary);
-  text-decoration: none;
-  transition: background 0.2s, color 0.2s;
-}
-
-.message-entry:hover {
-  background: var(--color-primary-light);
-  color: var(--color-primary);
 }
 
 @media (max-width: 1100px) {
