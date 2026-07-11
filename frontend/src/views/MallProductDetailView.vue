@@ -148,7 +148,7 @@ onMounted(loadProduct)
               <el-button v-if="product.productType === 3" type="primary" @click="viewCourse">
                 查看已购课程
               </el-button>
-              <el-button @click="router.push('/credit#mall-orders')">查看订单记录</el-button>
+              <el-button @click="router.push('/credit/orders')">查看订单记录</el-button>
             </div>
           </template>
         </el-result>

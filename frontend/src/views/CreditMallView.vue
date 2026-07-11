@@ -2,11 +2,10 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { Delete, Goods, ShoppingCart, Tickets, Wallet } from '@element-plus/icons-vue'
+import { Delete, Goods, ShoppingCart, Wallet } from '@element-plus/icons-vue'
 import {
   createMallOrder,
   fetchMallCategories,
-  fetchMallOrders,
   fetchMallProducts,
   payMallOrder,
   type MallCategory,
@@ -27,7 +26,6 @@ const loading = ref(false)
 const orderLoading = ref(false)
 const categories = ref<MallCategory[]>([])
 const products = ref<MallProduct[]>([])
-const orders = ref<MallOrder[]>([])
 const cart = ref<CartLine[]>([])
 const activeCategoryId = ref<number | undefined>()
 const keyword = ref('')
@@ -81,14 +79,6 @@ async function loadProducts() {
     ElMessage.error(e instanceof Error ? e.message : '加载商品失败')
   } finally {
     loading.value = false
-  }
-}
-
-async function loadOrders() {
-  if (!authStore.isLoggedIn) return
-  const res = await fetchMallOrders(20)
-  if (res.code === 200 && res.data) {
-    orders.value = res.data
   }
 }
 
@@ -154,7 +144,6 @@ async function submitOrder() {
     paymentVisible.value = true
     cart.value = []
     remark.value = ''
-    await loadOrders()
   } catch (e) {
     ElMessage.error(e instanceof Error ? e.message : '提交订单失败')
   } finally {
@@ -171,8 +160,7 @@ async function payOrder(order: MallOrder) {
     paymentResultNo.value = res.data.payNo
     const balance = res.data.creditChange?.balanceAfter
     ElMessage.success(balance === undefined ? '支付成功' : `支付成功，剩余 ${formatAmount(balance)} 学分`)
-    await Promise.all([loadProducts(), loadOrders()])
-    pendingOrder.value = orders.value.find((item) => item.id === order.id) || order
+    await loadProducts()
   } catch (e) {
     ElMessage.error(e instanceof Error ? e.message : '支付失败')
   } finally {
@@ -191,13 +179,18 @@ function viewProductDetail(productId: number) {
 }
 
 onMounted(async () => {
-  await Promise.all([loadCategories(), loadProducts(), loadOrders()])
+  await Promise.all([loadCategories(), loadProducts()])
 })
 </script>
 
 <template>
   <div class="mall-page">
     <div class="section-inner">
+      <nav class="mall-subnav">
+        <router-link to="/credit" class="subnav-item is-active">商品兑换</router-link>
+        <router-link to="/credit/orders" class="subnav-item">订单记录</router-link>
+      </nav>
+
       <section class="mall-header">
         <div>
           <p class="eyebrow">Credit Mall</p>
@@ -248,7 +241,7 @@ onMounted(async () => {
       </div>
 
       <div class="mall-layout">
-        <main id="mall-products">
+        <main>
           <el-skeleton v-if="loading" :rows="8" animated />
           <el-empty v-else-if="!products.length" description="暂无商品" />
           <div v-else class="product-grid">
@@ -339,6 +332,9 @@ onMounted(async () => {
           >
             创建订单并支付
           </el-button>
+          <el-button class="orders-link-btn" @click="router.push('/credit/orders')">
+            查看订单记录
+          </el-button>
         </aside>
       </div>
 
@@ -421,6 +417,30 @@ onMounted(async () => {
   border-radius: 16px;
   box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
   padding: 28px;
+}
+
+.mall-subnav {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.subnav-item {
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  transition: all 0.2s;
+}
+
+.subnav-item:hover,
+.subnav-item.is-active {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
 }
 
 .mall-header,
@@ -700,46 +720,9 @@ h1 {
   color: var(--color-text-secondary);
 }
 
-.submit-btn {
+.submit-btn,
+.orders-link-btn {
   width: 100%;
-}
-
-.orders-section {
-  margin-top: 28px;
-}
-
-.section-title {
-  margin-bottom: 14px;
-}
-
-.section-title h2 {
-  font-size: 20px;
-  margin: 0;
-}
-
-.order-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 14px;
-}
-
-.order-card {
-  padding: 14px;
-}
-
-.order-items {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 12px 0;
-}
-
-.order-items span {
-  background: #f5f7fa;
-  border-radius: 4px;
-  padding: 4px 8px;
-  color: var(--color-text-secondary);
-  font-size: 12px;
 }
 
 .payment-sheet {

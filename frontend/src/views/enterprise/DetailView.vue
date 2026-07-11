@@ -316,15 +316,6 @@ onMounted(async () => {
                     >
                       投递简历
                     </el-button>
-                    <el-button
-                      v-else
-                      type="primary"
-                      size="small"
-                      plain
-                      @click="openApplyDialog(job)"
-                    >
-                      投递简历
-                    </el-button>
                   </div>
                 </div>
                 <p class="tab-desc">{{ job.description || '暂无描述' }}</p>
@@ -372,7 +363,7 @@ onMounted(async () => {
                       已报名
                     </el-tag>
                     <el-button
-                      v-else-if="canRegisterActivity(activity)"
+                      v-else-if="canOperateAsStudent && canRegisterActivity(activity)"
                       type="primary"
                       size="small"
                       :loading="actionLoading === activity.id"
