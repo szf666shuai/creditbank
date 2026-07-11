@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { ArrowDown, HomeFilled, Search } from '@element-plus/icons-vue'
+import { computed, onMounted } from 'vue'
+import { ArrowDown, ChatDotRound, HomeFilled, Search } from '@element-plus/icons-vue'
 import { useLayout } from '@/composables/useLayout'
 import { useHeaderScroll } from '@/composables/useHeaderScroll'
 import { useSearchSuggest } from '@/composables/useSearchSuggest'
+import { useMessageStore } from '@/stores/message'
 import { searchCategories } from '@/config/search-categories'
 import type { SearchItem } from '@/api/search'
 
@@ -19,6 +21,9 @@ const {
   navigate,
   logout,
 } = useLayout()
+
+const messageStore = useMessageStore()
+const unreadCount = computed(() => messageStore.unreadCount)
 
 const { isHeaderVisible, isTransparent } = useHeaderScroll()
 
@@ -70,6 +75,12 @@ function onSearchBlur() {
   // 延迟关闭，保证点击联想项能触发
   window.setTimeout(() => hideSuggest(), 150)
 }
+
+onMounted(() => {
+  if (isLoggedIn.value) {
+    messageStore.refreshUnreadCount()
+  }
+})
 </script>
 
 <template>
@@ -78,6 +89,7 @@ function onSearchBlur() {
     :class="{
       'is-hidden': !isHeaderVisible,
       'is-transparent': isTransparent,
+      'is-logged-in': isLoggedIn,
     }"
   >
     <div class="header-inner">
@@ -98,6 +110,7 @@ function onSearchBlur() {
         </div>
       </router-link>
 
+      <div class="header-main">
       <!-- 主导航 -->
       <nav class="main-nav">
         <template v-for="item in siteNav" :key="item.key">
@@ -206,35 +219,40 @@ function onSearchBlur() {
           <router-link to="/register" class="btn-register">注册</router-link>
         </div>
 
-        <!-- 已登录：个人中心下拉 -->
-        <el-dropdown
-          v-else
-          trigger="hover"
-          placement="bottom-end"
-        >
-          <span class="nav-item profile-trigger">
-            {{ displayName }}
-            <span class="role-badge">{{ userRoleName }}</span>
-            <el-icon class="nav-arrow"><ArrowDown /></el-icon>
-          </span>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item @click="navigate('/profile')">
-                个人中心
-              </el-dropdown-item>
-              <el-dropdown-item
-                v-for="child in profileNav"
-                :key="child.path"
-                @click="navigate(child.path)"
-              >
-                {{ child.label }}
-              </el-dropdown-item>
-              <el-dropdown-item divided @click="logout">
-                退出登录
-              </el-dropdown-item>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
+        <!-- 已登录：消息 + 个人中心 -->
+        <template v-else>
+          <router-link to="/profile/messages" class="message-entry" title="消息中心">
+            <el-badge :value="unreadCount" :hidden="unreadCount <= 0" :max="99">
+              <el-icon :size="20"><ChatDotRound /></el-icon>
+            </el-badge>
+          </router-link>
+
+          <el-dropdown
+            trigger="hover"
+            placement="bottom-end"
+          >
+            <span class="nav-item profile-trigger">
+              <span class="profile-name">{{ displayName }}</span>
+              <span class="role-badge">{{ userRoleName }}</span>
+              <el-icon class="nav-arrow"><ArrowDown /></el-icon>
+            </span>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item
+                  v-for="child in profileNav"
+                  :key="child.path"
+                  @click="navigate(child.path)"
+                >
+                  {{ child.label }}
+                </el-dropdown-item>
+                <el-dropdown-item divided @click="logout">
+                  退出登录
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+        </template>
+      </div>
       </div>
     </div>
   </header>
@@ -332,7 +350,21 @@ function onSearchBlur() {
   height: var(--header-height);
   margin: 0 auto;
   padding: 0 16px;
-  gap: 20px;
+  gap: 16px;
+}
+
+.header-main {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-left: auto;
+  min-width: 0;
+  flex: 1;
+  justify-content: flex-end;
+}
+
+.app-header.is-logged-in .header-main {
+  gap: 12px;
 }
 
 .logo {
@@ -375,18 +407,32 @@ function onSearchBlur() {
   color: rgba(255, 255, 255, 0.75);
 }
 
+.app-header.is-logged-in .logo {
+  padding: 7px 12px;
+}
+
+.app-header.is-logged-in .logo-sub {
+  display: block;
+}
+
 .main-nav {
   display: flex;
   align-items: center;
   gap: 2px;
-  flex: 1;
   min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+
+.main-nav::-webkit-scrollbar {
+  display: none;
 }
 
 .nav-item {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
   padding: 6px 14px;
   font-size: 14px;
   color: var(--color-text);
@@ -396,6 +442,19 @@ function onSearchBlur() {
   cursor: pointer;
   transition: color 0.2s, background 0.2s;
   outline: none;
+}
+
+.app-header.is-logged-in .main-nav {
+  gap: 2px;
+}
+
+.app-header.is-logged-in .nav-item {
+  padding: 6px 11px;
+  font-size: 14px;
+}
+
+.app-header.is-logged-in .nav-home {
+  padding: 6px 9px;
 }
 
 .nav-item:hover,
@@ -424,8 +483,16 @@ function onSearchBlur() {
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   flex-shrink: 0;
+}
+
+.app-header.is-logged-in .search-box {
+  width: 240px;
+}
+
+.app-header.is-logged-in .search-category {
+  width: 88px;
 }
 
 .search-box {
@@ -435,7 +502,8 @@ function onSearchBlur() {
   border-radius: 20px;
   padding: 0 4px 0 2px;
   height: 34px;
-  width: 280px;
+  width: 260px;
+  flex-shrink: 0;
 }
 
 .search-category {
@@ -606,11 +674,17 @@ function onSearchBlur() {
 }
 
 .profile-trigger {
-  padding: 6px 16px;
+  padding: 6px 14px;
   border: 1px solid var(--color-primary);
   border-radius: 20px;
   color: var(--color-primary);
   font-weight: 500;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.profile-name {
+  white-space: nowrap;
 }
 
 .role-badge {
@@ -626,7 +700,52 @@ function onSearchBlur() {
   background: var(--color-primary-light);
 }
 
+.message-entry {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  transition: background 0.2s, color 0.2s;
+}
+
+.message-entry:hover {
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+.app-header.is-transparent .message-entry {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.app-header.is-transparent .message-entry:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+}
+
+@media (max-width: 1280px) {
+  .header-main {
+    gap: 10px;
+  }
+
+  .app-header.is-logged-in .nav-item {
+    padding: 6px 9px;
+    font-size: 13px;
+  }
+
+  .app-header.is-logged-in .search-box {
+    width: 210px;
+  }
+}
+
 @media (max-width: 1100px) {
+  .header-main {
+    gap: 8px;
+  }
+
   .main-nav {
     display: none;
   }
