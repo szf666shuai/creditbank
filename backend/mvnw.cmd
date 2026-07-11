@@ -2,20 +2,26 @@
 @echo off
 setlocal
 
-if defined MAVEN_HOME if exist "%MAVEN_HOME%\bin\mvn.cmd" (
-    call "%MAVEN_HOME%\bin\mvn.cmd" %*
-    exit /B %ERRORLEVEL%
-)
-
-set "MAVEN_PROJECTBASEDIR=%~dp0."
-set "WRAPPER_JAR=%~dp0.mvn\wrapper\maven-wrapper.jar"
-set "WRAPPER_LAUNCHER=org.apache.maven.wrapper.MavenWrapperMain"
+set "MAVEN_PROJECTBASEDIR=%~dp0"
+set "MAVEN_PROJECTBASEDIR=%MAVEN_PROJECTBASEDIR:~0,-1%"
+set "WRAPPER_JAR=%MAVEN_PROJECTBASEDIR%\.mvn\wrapper\maven-wrapper.jar"
+set WRAPPER_LAUNCHER=org.apache.maven.wrapper.MavenWrapperMain
 
 if not exist "%WRAPPER_JAR%" (
-    echo Error: Maven wrapper JAR not found at "%WRAPPER_JAR%"
+    echo Error: Maven wrapper JAR not found at %WRAPPER_JAR%
+    echo Please run: mvn -N wrapper:wrapper
     exit /B 1
 )
 
-java -Xmx512m -classpath "%WRAPPER_JAR%" "-Dmaven.multiModuleProjectDirectory=%MAVEN_PROJECTBASEDIR%" %WRAPPER_LAUNCHER% %*
-set "ERROR_CODE=%ERRORLEVEL%"
+set MAVEN_OPTS=-Xmx512m
+
+java %MAVEN_OPTS% -classpath "%WRAPPER_JAR%" "-Dmaven.multiModuleProjectDirectory=%MAVEN_PROJECTBASEDIR%" %WRAPPER_LAUNCHER% %*
+if ERRORLEVEL 1 goto error
+goto end
+
+:error
+set ERROR_CODE=1
+
+:end
+endlocal & set ERROR_CODE=%ERROR_CODE%
 exit /B %ERROR_CODE%

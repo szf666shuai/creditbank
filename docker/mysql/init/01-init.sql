@@ -127,8 +127,6 @@ CREATE TABLE IF NOT EXISTS course (
     title           VARCHAR(200) NOT NULL COMMENT '课程标题',
     description     TEXT COMMENT '课程描述',
     cover_url       VARCHAR(255) COMMENT '封面',
-    video_url       VARCHAR(1000) COMMENT '课程视频播放地址',
-    video_duration_seconds INT DEFAULT 0 COMMENT '视频时长(秒)',
     price_credit    DECIMAL(10,2) DEFAULT 0 COMMENT '学分定价',
     price_money     DECIMAL(10,2) DEFAULT 0 COMMENT '现金定价(模拟)',
     duration_hours  DECIMAL(6,1) COMMENT '学时',
@@ -153,9 +151,6 @@ CREATE TABLE IF NOT EXISTS user_course (
     user_id         BIGINT NOT NULL COMMENT '学员ID',
     course_id       BIGINT NOT NULL COMMENT '课程ID',
     progress        TINYINT DEFAULT 0 COMMENT '进度0-100',
-    watched_seconds INT DEFAULT 0 COMMENT '累计实际观看秒数',
-    max_watched_position_seconds INT DEFAULT 0 COMMENT '从开头连续看过的最远位置(秒)',
-    last_position_seconds INT DEFAULT 0 COMMENT '最后播放位置(秒)',
     status          TINYINT DEFAULT 0 COMMENT '0学习中 1已完成 2已退课',
     paid_credit     DECIMAL(10,2) DEFAULT 0 COMMENT '消耗学分',
     start_time      DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -285,7 +280,6 @@ CREATE TABLE IF NOT EXISTS mall_order_item (
     quantity        INT NOT NULL DEFAULT 1,
     price_credit    DECIMAL(10,2) DEFAULT 0,
     price_money     DECIMAL(10,2) DEFAULT 0,
-    redemption_code VARCHAR(64) COMMENT '虚拟商品或课程兑换码',
     INDEX idx_order_item_order (order_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='订单明细';
 

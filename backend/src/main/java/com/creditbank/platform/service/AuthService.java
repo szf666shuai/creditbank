@@ -89,7 +89,7 @@ public class AuthService {
             org.setContact(StringUtils.hasText(request.getOrgContact()) ? request.getOrgContact() : request.getRealName());
             org.setPhone(StringUtils.hasText(request.getOrgPhone()) ? request.getOrgPhone() : request.getPhone());
             org.setEmail(request.getEmail());
-            org.setJoinStatus(1);
+            org.setJoinStatus(0);
             org.setStatus(1);
             orgMapper.insert(org);
             orgId = org.getId();

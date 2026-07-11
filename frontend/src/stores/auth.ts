@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import { getMeApi, loginApi, registerApi } from '@/api/auth'
 import type { LoginForm, RegisterForm, UserInfo } from '@/types/auth'
 import { ROLE_ADMIN, ROLE_ENTERPRISE, ROLE_STUDENT } from '@/types/auth'
+import { useMessageStore } from '@/stores/message'
 
 const TOKEN_KEY = 'credit_bank_token'
 
@@ -36,6 +37,7 @@ export const useAuthStore = defineStore('auth', () => {
     }
     setToken(res.data.token)
     userInfo.value = res.data.userInfo
+    await useMessageStore().refreshUnreadCount()
     return res.data
   }
 
@@ -46,6 +48,7 @@ export const useAuthStore = defineStore('auth', () => {
     }
     setToken(res.data.token)
     userInfo.value = res.data.userInfo
+    await useMessageStore().refreshUnreadCount()
     return res.data
   }
 
@@ -71,6 +74,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   function logout() {
     clearAuth()
+    useMessageStore().reset()
   }
 
   return {

@@ -34,7 +34,7 @@ INSERT INTO activity (org_id, publisher_id, title, description, location, start_
 INSERT INTO forum_post (board_id, user_id, title, content, status) VALUES
 (1, 2, '[测试] Java 学习路线求助', '请问学分银行平台上有没有推荐的 Java 入门课程？想先从基础语法学起。', 1),
 (3, 2, '[测试] 春招 Java 后端面经', '分享一下 Java 后端岗位面试题，包括 JVM、Spring、MySQL 等。', 1),
-(2, 2, '[测试] 转让二手显示器', '毕业出显示器，有意私信联系我。', 1);
+(2, 2, '[测试] 转让二手显示器', '毕业出显示器，与 Java 学习无关。', 1);
 
 -- 招聘
 INSERT INTO job_posting (org_id, publisher_id, title, description, requirements, salary_range, location, edu_requirement, status) VALUES

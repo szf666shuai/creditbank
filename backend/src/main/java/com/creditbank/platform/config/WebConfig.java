@@ -32,11 +32,7 @@ public class WebConfig implements WebMvcConfigurer {
                         "/api/search",
                         "/api/search/**",
                         "/api/home",
-                        "/api/learning/tags",
-                        "/api/learning/certificates/verify",
-                        "/api/mall/categories",
-                        "/api/mall/products",
-                        "/api/mall/products/**"
+                        "/api/enterprise/orgs/**"
                 );
     }
 }

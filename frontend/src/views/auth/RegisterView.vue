@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useAuthStore } from '@/stores/auth'
 import { ROLE_ENTERPRISE, ROLE_STUDENT } from '@/types/auth'
+import { getDefaultHomePath } from '@/config/role-routes'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -53,8 +54,12 @@ async function handleRegister() {
       orgContact: form.orgContact || undefined,
       orgPhone: form.orgPhone || undefined,
     })
-    ElMessage.success('注册成功')
-    router.push('/profile')
+    if (form.roleType === ROLE_ENTERPRISE) {
+      ElMessage.success('注册成功，机构加盟申请已提交，请等待管理员审核')
+    } else {
+      ElMessage.success('注册成功')
+    }
+    router.push(getDefaultHomePath(authStore.userInfo?.role ?? ROLE_STUDENT))
   } catch (e) {
     ElMessage.error(e instanceof Error ? e.message : '注册失败')
   } finally {
