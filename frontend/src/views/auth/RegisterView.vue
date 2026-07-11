@@ -1,9 +1,10 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useAuthStore } from '@/stores/auth'
 import { ROLE_ENTERPRISE, ROLE_STUDENT } from '@/types/auth'
+import { BRAND_FULL } from '@/config/brand'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -67,7 +68,7 @@ async function handleRegister() {
   <div class="auth-page">
     <div class="auth-card wide">
       <h2 class="auth-title">注册账号</h2>
-      <p class="auth-sub">请选择身份并完成注册</p>
+      <p class="auth-sub">{{ BRAND_FULL }}</p>
 
       <div class="role-select">
         <div
@@ -77,7 +78,7 @@ async function handleRegister() {
         >
           <span class="role-icon">🎓</span>
           <span class="role-name">学员注册</span>
-          <span class="role-desc">学习课程、获取学分</span>
+          <span class="role-desc">学习课程、获取秩点</span>
         </div>
         <div
           class="role-item"

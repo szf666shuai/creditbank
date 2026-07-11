@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import PageShell from '@/components/common/PageShell.vue'
 import LearningChartsPanel from '@/components/profile/LearningChartsPanel.vue'
@@ -75,7 +75,7 @@ onMounted(fetchData)
           {{ formatDate(row.startDate) }} ~ {{ formatDate(row.endDate) }}
         </template>
       </el-table-column>
-      <el-table-column label="获得学分" width="100" align="right">
+      <el-table-column label="获得秩点" width="100" align="right">
         <template #default="{ row }">{{ row.creditEarned ?? 0 }}</template>
       </el-table-column>
       <el-table-column label="状态" width="90">
@@ -98,7 +98,7 @@ onMounted(fetchData)
       <el-table-column prop="orgName" label="认证机构" width="140" show-overflow-tooltip>
         <template #default="{ row }">{{ row.orgName || '-' }}</template>
       </el-table-column>
-      <el-table-column label="可兑换学分" width="110" align="right">
+      <el-table-column label="可兑换秩点" width="110" align="right">
         <template #default="{ row }">{{ row.creditValue ?? '-' }}</template>
       </el-table-column>
       <el-table-column label="校验状态" width="100">

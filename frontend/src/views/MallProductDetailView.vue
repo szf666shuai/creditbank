@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
@@ -110,7 +110,7 @@ onMounted(loadProduct)
             <h1>{{ product.name }}</h1>
             <p>{{ product.description }}</p>
             <el-descriptions :column="2" border>
-              <el-descriptions-item label="所需学分">{{ formatAmount(product.priceCredit) }}</el-descriptions-item>
+              <el-descriptions-item label="所需秩点">{{ formatAmount(product.priceCredit) }}</el-descriptions-item>
               <el-descriptions-item label="模拟现金">¥{{ formatAmount(product.priceMoney) }}</el-descriptions-item>
               <el-descriptions-item label="当前库存">{{ product.stock }}</el-descriptions-item>
               <el-descriptions-item label="交付方式">

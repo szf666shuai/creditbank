@@ -26,7 +26,7 @@ import java.util.Map;
 public class LearningProfileService {
 
     private static final String GENERATE_PROMPT = """
-            你是学分银行平台的学习画像分析师。请严格依据【当前业务上下文】中的学习事实，为该登录用户生成学习画像。
+            你是星秩存册平台的学习画像分析师。请严格依据【当前业务上下文】中的学习事实，为该登录用户生成学习画像。
             要求：
             1. 不要编造上下文中不存在的课程、成绩或经历。
             2. 用简洁中文。
@@ -147,7 +147,7 @@ public class LearningProfileService {
             LearningSituationVO s = profile.getSituation();
             if (s != null) {
                 sb.append("- 用户：").append(s.getRealName()).append("（").append(s.getUsername()).append("）\n");
-                sb.append("- 学分余额：").append(s.getCreditBalance())
+                sb.append("- 秩点余额：").append(s.getCreditBalance())
                         .append("，累计获得：").append(s.getCreditEarned()).append('\n');
                 sb.append("- 诚信分：").append(s.getIntegrityScore()).append('\n');
                 if (s.getCourses() != null && !s.getCourses().isEmpty()) {

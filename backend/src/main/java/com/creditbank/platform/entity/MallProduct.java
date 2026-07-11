@@ -16,6 +16,8 @@ public class MallProduct {
     @TableId(type = IdType.AUTO)
     private Long id;
     private Long categoryId;
+    private Long orgId;
+    private Long publisherId;
     private String name;
     private String description;
     private String coverUrl;
@@ -25,6 +27,10 @@ public class MallProduct {
     private BigDecimal priceMoney;
     private Integer stock;
     private Integer status;
+    private Integer approvalStatus;
+    private String reviewRemark;
+    private Long reviewedBy;
+    private LocalDateTime reviewedAt;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
 

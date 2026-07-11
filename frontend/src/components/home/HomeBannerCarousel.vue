@@ -1,12 +1,38 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { homeBannerSlides, BANNER_AUTOPLAY_MS } from '@/config/home-banner'
+import { getRoleTheme, type RoleThemeVariant } from '@/config/role-theme'
+
+const props = withDefaults(
+  defineProps<{
+    /** 学员门户等场景使用更紧凑的轮播高度 */
+    compact?: boolean
+    /** 与角色星空主题适配的深色玻璃风格 */
+    variant?: RoleThemeVariant
+  }>(),
+  {
+    variant: 'student',
+  },
+)
 
 const router = useRouter()
 const slides = homeBannerSlides
 const currentIndex = ref(0)
 const isPaused = ref(false)
+
+const theme = computed(() => getRoleTheme(props.variant))
+
+const carouselStyle = computed(() => ({
+  '--banner-border': theme.value.border,
+  '--banner-shadow': theme.value.shadow,
+  '--banner-accent': theme.value.primarySoft,
+  '--banner-accent-strong': theme.value.primaryDark,
+  '--banner-text': theme.value.text,
+  '--banner-text-muted': theme.value.textMuted,
+  '--banner-overlay': theme.value.surfaceStrong,
+  '--banner-hero': theme.value.heroGradient,
+}))
 
 let timer: ReturnType<typeof setInterval> | null = null
 
@@ -42,7 +68,9 @@ onUnmounted(stopAutoplay)
 
 <template>
   <section
-    class="banner-carousel"
+    class="banner-carousel banner-carousel--themed"
+    :class="{ 'banner-carousel--compact': compact }"
+    :style="carouselStyle"
     @mouseenter="isPaused = true"
     @mouseleave="isPaused = false"
   >
@@ -58,10 +86,12 @@ onUnmounted(stopAutoplay)
         >
           <template v-if="slide.type === 'hero'">
             <div class="hero-slide">
-              <div class="hero-pattern" />
-              <div class="hero-glow hero-glow--left" />
-              <div class="hero-glow hero-glow--right" />
+              <div class="hero-stars" aria-hidden="true" />
+              <div class="hero-pattern" aria-hidden="true" />
+              <div class="hero-glow hero-glow--left" aria-hidden="true" />
+              <div class="hero-glow hero-glow--right" aria-hidden="true" />
               <div class="hero-content">
+                <span class="hero-eyebrow">学习门户</span>
                 <h1 class="hero-title">{{ slide.title }}</h1>
                 <p class="hero-sub">{{ slide.subtitle }}</p>
               </div>
@@ -75,6 +105,8 @@ onUnmounted(stopAutoplay)
                 :alt="slide.alt ?? ''"
                 draggable="false"
               />
+              <div class="image-overlay" aria-hidden="true" />
+              <p v-if="slide.alt" class="image-caption">{{ slide.alt }}</p>
             </div>
           </template>
         </div>
@@ -96,13 +128,19 @@ onUnmounted(stopAutoplay)
 </template>
 
 <style scoped>
-.banner-carousel {
+.banner-carousel--themed {
   position: relative;
   width: 100%;
-  /* 限制高度，避免占满整屏；超宽屏封顶后用 cover 铺满宽度 */
-  height: clamp(240px, 38vw, 480px);
+  height: clamp(200px, 26vw, 300px);
   overflow: hidden;
-  background: linear-gradient(135deg, #2094f3 0%, #1a6fc4 50%, #0d4d8a 100%);
+  border-radius: 18px;
+  border: 1px solid var(--banner-border);
+  box-shadow: var(--banner-shadow);
+  backdrop-filter: blur(8px);
+}
+
+.banner-carousel--themed.banner-carousel--compact {
+  height: clamp(180px, 24vw, 280px);
 }
 
 .banner-track {
@@ -122,7 +160,6 @@ onUnmounted(stopAutoplay)
   cursor: pointer;
 }
 
-/* 统领图 */
 .hero-slide {
   position: relative;
   width: 100%;
@@ -130,65 +167,98 @@ onUnmounted(stopAutoplay)
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #2094f3 0%, #1a6fc4 45%, #0d4d8a 100%);
   overflow: hidden;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, transparent 50%),
+    var(--banner-hero);
+}
+
+.hero-stars {
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(1.2px 1.2px at 12% 24%, rgba(255, 255, 255, 0.55) 0%, transparent 100%),
+    radial-gradient(1px 1px at 78% 18%, rgba(165, 243, 252, 0.7) 0%, transparent 100%),
+    radial-gradient(1.4px 1.4px at 64% 72%, rgba(255, 255, 255, 0.45) 0%, transparent 100%),
+    radial-gradient(1px 1px at 28% 68%, rgba(103, 232, 249, 0.55) 0%, transparent 100%),
+    radial-gradient(1px 1px at 88% 58%, rgba(255, 255, 255, 0.35) 0%, transparent 100%),
+    radial-gradient(1.2px 1.2px at 42% 38%, rgba(255, 255, 255, 0.4) 0%, transparent 100%);
+  opacity: 0.85;
 }
 
 .hero-pattern {
   position: absolute;
   inset: 0;
-  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  opacity: 0.18;
+  background-image:
+    linear-gradient(rgba(103, 232, 249, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(103, 232, 249, 0.08) 1px, transparent 1px);
+  background-size: 32px 32px;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.5), transparent 90%);
 }
 
 .hero-glow {
   position: absolute;
   border-radius: 50%;
-  filter: blur(60px);
-  opacity: 0.35;
+  filter: blur(64px);
+  opacity: 0.42;
 }
 
 .hero-glow--left {
-  width: 320px;
-  height: 320px;
-  top: -80px;
-  left: -60px;
-  background: #5eb8ff;
+  width: 280px;
+  height: 280px;
+  top: -90px;
+  left: -70px;
+  background: var(--banner-accent);
 }
 
 .hero-glow--right {
-  width: 280px;
-  height: 280px;
-  bottom: -60px;
-  right: -40px;
-  background: #13c2c2;
+  width: 240px;
+  height: 240px;
+  bottom: -70px;
+  right: -50px;
+  background: var(--banner-accent-strong);
 }
 
 .hero-content {
   position: relative;
   text-align: center;
-  color: var(--color-white);
+  color: #fff;
   padding: 0 24px;
 }
 
+.hero-eyebrow {
+  display: inline-block;
+  margin-bottom: 12px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--banner-accent-strong);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(103, 232, 249, 0.24);
+}
+
 .hero-title {
-  font-size: 42px;
+  font-size: clamp(28px, 4vw, 40px);
   font-weight: 700;
-  letter-spacing: 6px;
-  margin-bottom: 16px;
-  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+  letter-spacing: 4px;
+  margin: 0 0 12px;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.35);
 }
 
 .hero-sub {
-  font-size: 18px;
-  opacity: 0.9;
-  letter-spacing: 3px;
+  margin: 0;
+  font-size: clamp(14px, 2vw, 18px);
+  color: var(--banner-text-muted);
+  letter-spacing: 2px;
 }
 
-/* 图片轮播 — 容器与图片同比例，cover 铺满全宽 */
 .image-slide {
+  position: relative;
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #2094f3 0%, #1a6fc4 50%, #0d4d8a 100%);
+  background: #061525;
 }
 
 .slide-image {
@@ -198,41 +268,67 @@ onUnmounted(stopAutoplay)
   object-position: center;
   display: block;
   user-select: none;
+  filter: saturate(0.88) brightness(0.82);
 }
 
-/* 底部指示条 — 参考学银在线风格 */
+.image-overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(6, 22, 38, 0.72) 0%, rgba(6, 22, 38, 0.18) 42%, rgba(6, 22, 38, 0.55) 100%),
+    linear-gradient(180deg, rgba(6, 22, 38, 0.08) 0%, rgba(6, 22, 38, 0.72) 100%);
+  pointer-events: none;
+}
+
+.image-caption {
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  bottom: 52px;
+  margin: 0;
+  font-size: clamp(16px, 2.4vw, 22px);
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--banner-text);
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.45);
+}
+
 .banner-indicators {
   position: absolute;
-  bottom: 24px;
+  bottom: 18px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   align-items: center;
   gap: 6px;
   z-index: 10;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(6, 22, 38, 0.45);
+  border: 1px solid rgba(103, 232, 249, 0.16);
+  backdrop-filter: blur(6px);
 }
 
 .indicator {
-  width: 28px;
+  width: 24px;
   height: 4px;
   padding: 0;
   border: none;
   border-radius: 2px;
-  background: rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.28);
   cursor: pointer;
   transition: width 0.3s ease, background 0.3s ease;
 }
 
 .indicator.active {
-  width: 40px;
-  background: #fff;
+  width: 36px;
+  background: var(--banner-accent-strong);
 }
 
 .indicator:hover {
-  background: rgba(255, 255, 255, 0.75);
+  background: rgba(103, 232, 249, 0.55);
 }
 
-/* 淡入淡出 */
 .banner-fade-enter-active,
 .banner-fade-leave-active {
   transition: opacity 0.6s ease;
@@ -244,30 +340,35 @@ onUnmounted(stopAutoplay)
 }
 
 @media (max-width: 768px) {
-  .banner-carousel {
-    height: clamp(200px, 48vw, 300px);
+  .banner-carousel--themed {
+    height: clamp(170px, 44vw, 240px);
   }
 
   .hero-title {
-    font-size: 26px;
-    letter-spacing: 3px;
+    letter-spacing: 2px;
   }
 
   .hero-sub {
-    font-size: 14px;
     letter-spacing: 1px;
   }
 
+  .image-caption {
+    left: 16px;
+    right: 16px;
+    bottom: 46px;
+    font-size: 15px;
+  }
+
   .banner-indicators {
-    bottom: 16px;
+    bottom: 12px;
   }
 
   .indicator {
-    width: 20px;
+    width: 18px;
   }
 
   .indicator.active {
-    width: 32px;
+    width: 28px;
   }
 }
 </style>

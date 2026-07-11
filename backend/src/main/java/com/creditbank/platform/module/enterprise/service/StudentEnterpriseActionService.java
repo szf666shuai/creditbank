@@ -2,11 +2,13 @@ package com.creditbank.platform.module.enterprise.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.creditbank.platform.common.BusinessException;
+import com.creditbank.platform.dto.CreditEarnRequest;
 import com.creditbank.platform.entity.SysOrganization;
 import com.creditbank.platform.entity.SysUser;
 import com.creditbank.platform.entity.UserResume;
 import com.creditbank.platform.mapper.SysOrganizationMapper;
 import com.creditbank.platform.mapper.SysUserMapper;
+import com.creditbank.platform.module.enterprise.dto.ActivityCheckinResultVO;
 import com.creditbank.platform.module.enterprise.dto.ActivityRegisterResultVO;
 import com.creditbank.platform.module.enterprise.dto.ApplyJobRequest;
 import com.creditbank.platform.module.enterprise.dto.JobApplyResultVO;
@@ -21,11 +23,13 @@ import com.creditbank.platform.module.enterprise.mapper.JobApplicationMapper;
 import com.creditbank.platform.module.enterprise.mapper.JobPostingMapper;
 import com.creditbank.platform.module.profile.service.ProfileResumeService;
 import com.creditbank.platform.security.AuthSupport;
+import com.creditbank.platform.service.CreditService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -48,6 +52,7 @@ public class StudentEnterpriseActionService {
     private final JobApplicationMapper jobApplicationMapper;
     private final ActivityMapper activityMapper;
     private final ActivityRegistrationMapper activityRegistrationMapper;
+    private final CreditService creditService;
 
     public OrgParticipationStatusVO getOrgParticipationStatus(Long orgId) {
         SysUser user = authSupport.requireStudent();
@@ -175,6 +180,60 @@ public class StudentEnterpriseActionService {
                 .status(REG_REGISTERED)
                 .statusName("已报名")
                 .createTime(saved != null ? saved.getCreateTime() : null)
+                .build();
+    }
+
+    @Transactional
+    public ActivityCheckinResultVO checkInActivity(Long activityId) {
+        SysUser user = authSupport.requireStudent();
+        Activity activity = activityMapper.selectById(activityId);
+        if (activity == null) {
+            throw new BusinessException(404, "活动不存在");
+        }
+        if (activity.getStatus() == null || activity.getStatus() != ACTIVITY_ONGOING) {
+            throw new BusinessException(400, "活动进行中才可签到");
+        }
+        LocalDateTime now = LocalDateTime.now();
+        if (activity.getStartTime() != null && now.isBefore(activity.getStartTime().minusHours(1))) {
+            throw new BusinessException(400, "活动尚未开始，暂不可签到");
+        }
+        if (activity.getEndTime() != null && now.isAfter(activity.getEndTime().plusHours(1))) {
+            throw new BusinessException(400, "活动已结束，无法签到");
+        }
+
+        ActivityRegistration registration = activityRegistrationMapper.selectOne(
+                new LambdaQueryWrapper<ActivityRegistration>()
+                        .eq(ActivityRegistration::getActivityId, activityId)
+                        .eq(ActivityRegistration::getUserId, user.getId()));
+        if (registration == null || registration.getStatus() == null || registration.getStatus() != REG_REGISTERED) {
+            throw new BusinessException(400, "请先报名该活动后再签到");
+        }
+        if (registration.getStatus() == REG_CHECKED_IN) {
+            throw new BusinessException(409, "您已签到该活动");
+        }
+
+        registration.setStatus(REG_CHECKED_IN);
+        registration.setCheckInTime(now);
+        activityRegistrationMapper.updateById(registration);
+
+        try {
+            CreditEarnRequest earnRequest = new CreditEarnRequest();
+            earnRequest.setRuleCode("ACTIVITY_CHECKIN");
+            earnRequest.setSource("活动签到: " + activity.getTitle());
+            earnRequest.setRefType("activity_registration");
+            earnRequest.setRefId(registration.getId());
+            creditService.earnByRule(user.getId(), earnRequest);
+        } catch (BusinessException ignored) {
+            // 奖励发放失败不阻断签到
+        }
+
+        return ActivityCheckinResultVO.builder()
+                .registrationId(registration.getId())
+                .activityId(activityId)
+                .status(REG_CHECKED_IN)
+                .statusName("已签到")
+                .checkInTime(now)
+                .message("签到成功，感谢参与！")
                 .build();
     }
 

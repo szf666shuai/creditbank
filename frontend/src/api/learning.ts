@@ -76,6 +76,44 @@ export interface LearningRecord {
   status: number
 }
 
+export interface CourseComment {
+  id: number
+  courseId: number
+  userId: number
+  parentId?: number | null
+  authorName: string
+  replyToAuthorName?: string
+  avatar?: string
+  content: string
+  likeCount: number
+  createTime: string
+  replies?: CourseComment[]
+}
+
+export interface CourseDanmaku {
+  id: number
+  courseId: number
+  userId: number
+  authorName: string
+  content: string
+  videoTimeSeconds: number
+  color: string
+  createTime: string
+}
+
+export interface CourseMaterial {
+  id: number
+  courseId: number
+  title: string
+  fileType: string
+  fileUrl: string
+  sortOrder: number
+}
+
+export function fetchLearningResource(courseId: number) {
+  return request.get<LearningResource>(`/learning/resources/${courseId}`)
+}
+
 export function fetchLearningResources(params?: { keyword?: string; tag?: string }) {
   const query = new URLSearchParams()
   if (params?.keyword) query.set('keyword', params.keyword)
@@ -92,15 +130,96 @@ export function startLearning(courseId: number) {
   return request.post<LearningRecord>(`/learning/resources/${courseId}/start`)
 }
 
+export interface CourseEpisode {
+  id: number
+  courseId: number
+  title: string
+  videoUrl?: string
+  videoDurationSeconds?: number
+  sortOrder?: number
+  progress?: number
+  maxWatchedPositionSeconds?: number
+  lastPositionSeconds?: number
+}
+
+export interface LearningReminder {
+  courseId: number
+  enabled: boolean
+  intervalMinutes: number
+}
+
+export interface LearningCheckin {
+  courseId: number
+  checkedInToday: boolean
+  streakDays: number
+  creditReward?: number
+  message?: string
+}
+
+export function fetchCourseEpisodes(courseId: number) {
+  return request.get<CourseEpisode[]>(`/learning/resources/${courseId}/episodes`)
+}
+
+export function fetchLearningReminder(courseId: number) {
+  return request.get<LearningReminder>(`/learning/resources/${courseId}/reminder`)
+}
+
+export function saveLearningReminder(
+  courseId: number,
+  payload: { enabled: boolean; intervalMinutes: number },
+) {
+  return request.post<LearningReminder>(`/learning/resources/${courseId}/reminder`, payload)
+}
+
+export function fetchLearningCheckinStatus(courseId: number) {
+  return request.get<LearningCheckin>(`/learning/resources/${courseId}/checkin/status`)
+}
+
+export function postLearningCheckin(courseId: number) {
+  return request.post<LearningCheckin>(`/learning/resources/${courseId}/checkin`)
+}
+
+export function purchaseCourse(courseId: number) {
+  return request.post<{
+    courseId: number
+    paidCredit: number
+    balanceAfter?: number
+    purchased: boolean
+  }>(`/learning/resources/${courseId}/purchase`)
+}
+
 export function reportLearningProgress(
   courseId: number,
-  payload: { watchedDeltaSeconds: number; currentTimeSeconds: number },
+  payload: { watchedDeltaSeconds: number; currentTimeSeconds: number; episodeId?: number },
 ) {
   return request.post<LearningRecord>(`/learning/resources/${courseId}/progress`, payload)
 }
 
 export function completeLearning(courseId: number) {
   return request.post<LearningCompletionResult>(`/learning/resources/${courseId}/complete`)
+}
+
+export function fetchCourseComments(courseId: number, limit = 50) {
+  return request.get<CourseComment[]>(`/learning/resources/${courseId}/comments?limit=${limit}`)
+}
+
+export function postCourseComment(courseId: number, payload: { content: string; parentId?: number }) {
+  return request.post<CourseComment>(`/learning/resources/${courseId}/comments`, payload)
+}
+
+export function fetchCourseDanmaku(courseId: number) {
+  return request.get<CourseDanmaku[]>(`/learning/resources/${courseId}/danmaku`)
+}
+
+export function postCourseDanmaku(
+  courseId: number,
+  payload: { content: string; videoTimeSeconds: number; color?: string },
+) {
+  return request.post<CourseDanmaku>(`/learning/resources/${courseId}/danmaku`, payload)
+}
+
+export function fetchCourseMaterials(courseId: number) {
+  return request.get<CourseMaterial[]>(`/learning/resources/${courseId}/materials`)
 }
 
 export function fetchLearningArchives(limit = 20) {

@@ -1,12 +1,16 @@
 <script setup lang="ts">
 import { computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import { ArrowDown, ChatDotRound, HomeFilled, Search } from '@element-plus/icons-vue'
 import { useLayout } from '@/composables/useLayout'
 import { useHeaderScroll } from '@/composables/useHeaderScroll'
 import { useSearchSuggest } from '@/composables/useSearchSuggest'
-import { searchCategories } from '@/config/search-categories'
-import type { SearchItem } from '@/api/search'
 import { useMessageStore } from '@/stores/message'
+import { useAuthStore } from '@/stores/auth'
+import { searchCategories } from '@/config/search-categories'
+import { BRAND_NAME, BRAND_NAME_EN, BRAND_SITE } from '@/config/brand'
+import { getRoleTheme, resolveHeaderThemeVariant } from '@/config/role-theme'
+import BrandLogo from '@/components/brand/BrandLogo.vue'
 
 const {
   siteNav,
@@ -22,7 +26,40 @@ const {
   logout,
 } = useLayout()
 
-const { isHeaderVisible, isTransparent } = useHeaderScroll()
+const route = useRoute()
+const messageStore = useMessageStore()
+const authStore = useAuthStore()
+const unreadCount = computed(() => messageStore.unreadCount)
+
+const isHomePage = computed(() => route.name === 'home')
+
+const headerVariant = computed(() =>
+  resolveHeaderThemeVariant({
+    isHomePage: isHomePage.value,
+    isLoggedIn: authStore.isLoggedIn,
+    isStudent: authStore.isStudent,
+    isEnterprise: authStore.isEnterprise,
+    isAdmin: authStore.isAdmin,
+  }),
+)
+
+const headerTheme = computed(() => getRoleTheme(headerVariant.value))
+
+const logoStyle = computed(() => ({
+  background: `linear-gradient(135deg, ${headerTheme.value.logoBgFrom} 0%, ${headerTheme.value.logoBgTo} 100%)`,
+  boxShadow: `0 4px 14px ${headerTheme.value.logoShadow}`,
+}))
+
+const headerStyle = computed(() => ({
+  '--header-bg': headerTheme.value.headerBg,
+  '--header-border': headerTheme.value.headerBorder,
+  '--header-accent': headerTheme.value.primarySoft,
+  '--header-accent-strong': headerTheme.value.primaryDark,
+  '--header-text': headerTheme.value.text,
+  '--header-text-muted': headerTheme.value.textMuted,
+}))
+
+const { isHeaderVisible } = useHeaderScroll()
 
 const {
   suggestions,
@@ -73,9 +110,6 @@ function onSearchBlur() {
   window.setTimeout(() => hideSuggest(), 150)
 }
 
-const messageStore = useMessageStore()
-const unreadCount = computed(() => messageStore.unreadCount)
-
 onMounted(() => {
   if (isLoggedIn.value) {
     messageStore.refreshUnreadCount()
@@ -85,30 +119,26 @@ onMounted(() => {
 
 <template>
   <header
-    class="app-header"
+    class="app-header is-themed"
+    :style="headerStyle"
     :class="{
       'is-hidden': !isHeaderVisible,
-      'is-transparent': isTransparent,
+      'is-logged-in': isLoggedIn,
     }"
   >
     <div class="header-inner">
       <!-- Logo -->
-      <router-link to="/" class="logo">
+      <router-link to="/" class="logo" :style="logoStyle">
         <div class="logo-icon">
-          <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect width="40" height="40" rx="4" fill="white" fill-opacity="0.15" />
-            <path
-              d="M10 28V12h4l6 10 6-10h4v16h-3.5V18l-5.5 9h-2l-5.5-9v10H10z"
-              fill="white"
-            />
-          </svg>
+          <BrandLogo :size="36" :variant="headerVariant" />
         </div>
         <div class="logo-text">
-          <span class="logo-title">学分银行</span>
-          <span class="logo-sub">creditbank.edu.cn</span>
+          <span class="logo-title">{{ BRAND_NAME }}</span>
+          <span class="logo-sub">{{ BRAND_NAME_EN }} · {{ BRAND_SITE }}</span>
         </div>
       </router-link>
 
+      <div class="header-main">
       <!-- 主导航 -->
       <nav class="main-nav">
         <template v-for="item in siteNav" :key="item.key">
@@ -120,7 +150,7 @@ onMounted(() => {
             :class="{ active: isNavActive(item) }"
             title="首页"
           >
-            <el-icon :size="20"><HomeFilled /></el-icon>
+            <el-icon :size="18"><HomeFilled /></el-icon>
           </router-link>
 
           <!-- 带下拉的菜单 -->
@@ -229,36 +259,28 @@ onMounted(() => {
             trigger="hover"
             placement="bottom-end"
           >
-          <button
-            type="button"
-            class="profile-avatar"
-            :title="`${displayName}（${userRoleName}）`"
-            aria-label="个人中心"
-          >
-            {{ displayName.charAt(0) || '用' }}
-          </button>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item disabled class="profile-meta-item">
-                <div class="profile-meta">
-                  <strong>{{ displayName }}</strong>
-                  <span>{{ userRoleName }}</span>
-                </div>
-              </el-dropdown-item>
-              <el-dropdown-item
-                v-for="child in profileNav"
-                :key="child.path"
-                @click="navigate(child.path)"
-              >
-                {{ child.label }}
-              </el-dropdown-item>
-              <el-dropdown-item divided @click="logout">
-                退出登录
-              </el-dropdown-item>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
+            <span class="nav-item profile-trigger">
+              <span class="profile-name">{{ displayName }}</span>
+              <span class="role-badge">{{ userRoleName }}</span>
+              <el-icon class="nav-arrow"><ArrowDown /></el-icon>
+            </span>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item
+                  v-for="child in profileNav"
+                  :key="child.path"
+                  @click="navigate(child.path)"
+                >
+                  {{ child.label }}
+                </el-dropdown-item>
+                <el-dropdown-item divided @click="logout">
+                  退出登录
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
         </template>
+      </div>
       </div>
     </div>
   </header>
@@ -276,8 +298,17 @@ onMounted(() => {
   transform: translateY(0);
   transition:
     transform 0.32s ease,
-    background 0.3s ease,
-    box-shadow 0.3s ease;
+    background 0.35s ease,
+    border-color 0.35s ease,
+    box-shadow 0.35s ease;
+}
+
+.app-header.is-themed {
+  background: var(--header-bg);
+  border-bottom: 1px solid var(--header-border);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.22);
 }
 
 .app-header.is-hidden {
@@ -285,91 +316,127 @@ onMounted(() => {
   pointer-events: none;
 }
 
-.app-header.is-transparent {
-  background: transparent;
-  box-shadow: none;
+.app-header.is-themed .nav-item {
+  color: var(--header-text);
 }
 
-.app-header.is-transparent .nav-item {
-  color: #fff;
-  font-weight: 650;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+.app-header.is-themed .nav-item:hover,
+.app-header.is-themed .nav-dropdown:hover {
+  color: var(--header-accent-strong);
+  background: rgba(255, 255, 255, 0.08);
 }
 
-.app-header.is-transparent .nav-item:hover,
-.app-header.is-transparent .nav-dropdown:hover {
-  color: #fff;
+.app-header.is-themed .nav-item.active {
+  color: var(--header-accent-strong);
   background: rgba(255, 255, 255, 0.14);
-}
-
-.app-header.is-transparent .nav-item.active {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.22);
   border-radius: 20px;
-  box-shadow: inset 0 -2px 0 #fff;
 }
 
-.app-header.is-transparent .search-box {
-  background: rgba(255, 255, 255, 0.18);
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  backdrop-filter: blur(6px);
+.app-header.is-themed .search-box {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
 }
 
-.app-header.is-transparent .search-box input {
-  color: #fff;
+.app-header.is-themed .search-box input {
+  color: var(--header-text);
 }
 
-.app-header.is-transparent .search-box input::placeholder {
-  color: rgba(255, 255, 255, 0.72);
+.app-header.is-themed .search-box input::placeholder {
+  color: var(--header-text-muted);
 }
 
-.app-header.is-transparent .search-category :deep(.el-select__selected-item) {
-  color: rgba(255, 255, 255, 0.92);
+.app-header.is-themed .search-category :deep(.el-select__selected-item) {
+  color: var(--header-text);
 }
 
-.app-header.is-transparent .search-category :deep(.el-select__caret),
-.app-header.is-transparent .search-btn {
-  color: rgba(255, 255, 255, 0.85);
+.app-header.is-themed .search-category :deep(.el-select__caret),
+.app-header.is-themed .search-btn {
+  color: var(--header-text-muted);
 }
 
-.app-header.is-transparent .search-divider {
-  background: rgba(255, 255, 255, 0.4);
+.app-header.is-themed .search-btn:hover {
+  color: var(--header-accent-strong);
 }
 
-.app-header.is-transparent .profile-avatar {
-  color: #fff;
-  border-color: rgba(255, 255, 255, 0.7);
-  background: rgba(255, 255, 255, 0.18);
+.app-header.is-themed .search-divider {
+  background: rgba(255, 255, 255, 0.16);
 }
 
-.app-header.is-transparent .profile-avatar:hover {
-  background: rgba(255, 255, 255, 0.28);
+.app-header.is-themed .profile-trigger {
+  color: var(--header-accent-strong);
+  border-color: rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.app-header.is-themed .profile-trigger:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.app-header.is-themed .role-badge {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--header-accent-strong);
+}
+
+.app-header.is-themed .message-entry {
+  color: var(--header-text);
+}
+
+.app-header.is-themed .message-entry:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--header-accent-strong);
+}
+
+.app-header.is-themed .auth-btns {
+  background: linear-gradient(135deg, var(--header-accent), var(--header-accent-strong));
+}
+
+.app-header.is-themed .btn-register {
+  color: var(--header-accent-strong);
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.app-header.is-themed .btn-register:hover {
+  background: #fff;
 }
 
 .header-inner {
   display: flex;
   align-items: center;
-  max-width: min(1440px, 100%);
+  max-width: var(--content-max-width);
   height: var(--header-height);
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 16px;
+  gap: 16px;
+}
+
+.header-main {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-left: auto;
+  min-width: 0;
+  flex: 1;
+  justify-content: flex-end;
+}
+
+.app-header.is-logged-in .header-main {
   gap: 12px;
 }
 
 .logo {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   flex-shrink: 0;
   text-decoration: none;
-  background: var(--color-primary);
-  padding: 6px 12px;
-  border-radius: 4px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  transition: background 0.35s ease, box-shadow 0.35s ease;
 }
 
 .logo-icon {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   flex-shrink: 0;
 }
 
@@ -385,10 +452,10 @@ onMounted(() => {
 }
 
 .logo-title {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--color-white);
-  letter-spacing: 1px;
+  letter-spacing: 2px;
 }
 
 .logo-sub {
@@ -396,60 +463,68 @@ onMounted(() => {
   color: rgba(255, 255, 255, 0.75);
 }
 
+.app-header.is-logged-in .logo {
+  padding: 7px 12px;
+}
+
+.app-header.is-logged-in .logo-sub {
+  display: block;
+}
+
 .main-nav {
   display: flex;
   align-items: center;
-  gap: 4px;
-  flex: 1;
+  gap: 2px;
   min-width: 0;
   overflow-x: auto;
   overflow-y: hidden;
   scrollbar-width: none;
-  -ms-overflow-style: none;
 }
 
 .main-nav::-webkit-scrollbar {
   display: none;
 }
 
-.main-nav :deep(.el-dropdown) {
-  flex-shrink: 0;
-}
-
 .nav-item {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 8px 16px;
-  font-size: 15px;
-  font-weight: 600;
-  color: #1e293b;
+  gap: 3px;
+  padding: 6px 14px;
+  font-size: 14px;
+  color: var(--color-text);
   text-decoration: none;
   white-space: nowrap;
-  border-radius: 6px;
+  border-radius: 4px;
   cursor: pointer;
   transition: color 0.2s, background 0.2s;
   outline: none;
 }
 
+.app-header.is-logged-in .main-nav {
+  gap: 2px;
+}
+
+.app-header.is-logged-in .nav-item {
+  padding: 6px 11px;
+  font-size: 14px;
+}
+
+.app-header.is-logged-in .nav-home {
+  padding: 6px 9px;
+}
+
 .nav-item:hover,
 .nav-dropdown:hover {
-  color: #0b5cab;
-  background: rgba(11, 92, 171, 0.06);
+  color: var(--color-primary);
 }
 
 .nav-item.active {
-  color: #0b5cab;
-  font-weight: 700;
-  background: rgba(11, 92, 171, 0.1);
+  color: var(--color-primary);
+  font-weight: 600;
 }
 
 .nav-home {
-  padding: 8px 12px;
-}
-
-.nav-home :deep(.el-icon) {
-  font-size: 18px;
+  padding: 6px 10px;
 }
 
 .nav-arrow {
@@ -466,9 +541,14 @@ onMounted(() => {
   align-items: center;
   gap: 10px;
   flex-shrink: 0;
-  margin-left: auto;
-  position: relative;
-  z-index: 2;
+}
+
+.app-header.is-logged-in .search-box {
+  width: 240px;
+}
+
+.app-header.is-logged-in .search-category {
+  width: 88px;
 }
 
 .search-box {
@@ -649,55 +729,31 @@ onMounted(() => {
   background: var(--color-primary-light);
 }
 
-.profile-avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: 2px solid var(--color-primary);
-  background: var(--color-primary-light);
+.profile-trigger {
+  padding: 6px 14px;
+  border: 1px solid var(--color-primary);
+  border-radius: 20px;
   color: var(--color-primary);
-  font-size: 15px;
-  font-weight: 700;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
+  font-weight: 500;
   flex-shrink: 0;
-  padding: 0;
-  line-height: 1;
-  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+  white-space: nowrap;
 }
 
-.profile-avatar:hover {
-  background: #d6ebfc;
-  box-shadow: 0 0 0 3px rgba(32, 148, 243, 0.18);
+.profile-name {
+  white-space: nowrap;
 }
 
-.profile-meta {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  line-height: 1.3;
-  padding: 2px 0;
-}
-
-.profile-meta strong {
-  font-size: 13px;
-  color: var(--color-text);
-}
-
-.profile-meta span {
-  font-size: 12px;
-  color: var(--color-text-muted);
+.role-badge {
+  font-size: 11px;
+  padding: 1px 6px;
+  background: var(--color-primary-light);
+  border-radius: 10px;
+  color: var(--color-primary);
   font-weight: 400;
 }
 
-.profile-meta-item {
-  cursor: default;
-}
-
-.profile-meta-item:hover {
-  background: transparent !important;
+.profile-trigger:hover {
+  background: var(--color-primary-light);
 }
 
 .message-entry {
@@ -710,7 +766,6 @@ onMounted(() => {
   color: var(--color-text-secondary);
   text-decoration: none;
   transition: background 0.2s, color 0.2s;
-  flex-shrink: 0;
 }
 
 .message-entry:hover {
@@ -718,27 +773,37 @@ onMounted(() => {
   color: var(--color-primary);
 }
 
+
 @media (max-width: 1280px) {
-  .logo-sub {
-    display: none;
+  .header-main {
+    gap: 10px;
   }
 
-  .search-box {
-    width: 220px;
+  .app-header.is-logged-in .nav-item {
+    padding: 6px 9px;
+    font-size: 13px;
   }
 
-  .search-category {
-    width: 76px;
+  .app-header.is-logged-in .search-box {
+    width: 210px;
   }
 }
 
 @media (max-width: 1100px) {
+  .header-main {
+    gap: 8px;
+  }
+
   .main-nav {
     display: none;
   }
 
   .search-box {
-    width: 200px;
+    width: 210px;
+  }
+
+  .search-category {
+    width: 76px;
   }
 }
 </style>

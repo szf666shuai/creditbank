@@ -176,7 +176,7 @@ public class EnterpriseActivityInvitationService {
             sb.append("活动地点：").append(activity.getLocation()).append('\n');
         }
         if (activity.getCreditReward() != null && activity.getCreditReward().signum() > 0) {
-            sb.append("参与奖励：").append(activity.getCreditReward()).append(" 学分\n");
+            sb.append("参与奖励：").append(activity.getCreditReward()).append(" 秩点\n");
         }
         sb.append('\n');
         if (StringUtils.hasText(remark)) {

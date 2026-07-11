@@ -6,6 +6,8 @@ import com.creditbank.platform.module.admin.dto.AdminActivityVO;
 import com.creditbank.platform.module.admin.dto.AdminCreditTransactionVO;
 import com.creditbank.platform.module.admin.dto.AdminIntegrityRecordVO;
 import com.creditbank.platform.module.admin.dto.AdminJobVO;
+import com.creditbank.platform.module.admin.dto.AdminMallProductVO;
+import com.creditbank.platform.module.admin.dto.AdminProductApprovalRequest;
 import com.creditbank.platform.module.admin.dto.UpdateContentStatusRequest;
 import com.creditbank.platform.module.admin.service.AdminOversightService;
 import jakarta.validation.Valid;
@@ -55,6 +57,22 @@ public class AdminOversightController {
             @PathVariable Long id,
             @Valid @RequestBody UpdateContentStatusRequest request) {
         return Result.ok(adminOversightService.updateActivityStatus(id, request));
+    }
+
+    @GetMapping("/products")
+    public Result<PageResult<AdminMallProductVO>> pageProducts(
+            @RequestParam(defaultValue = "1") long page,
+            @RequestParam(defaultValue = "10") long pageSize,
+            @RequestParam(required = false) Integer approvalStatus,
+            @RequestParam(required = false) String keyword) {
+        return Result.ok(adminOversightService.pageProducts(page, pageSize, approvalStatus, keyword));
+    }
+
+    @PatchMapping("/products/{id}/approval")
+    public Result<AdminMallProductVO> reviewProduct(
+            @PathVariable Long id,
+            @Valid @RequestBody AdminProductApprovalRequest request) {
+        return Result.ok(adminOversightService.reviewProduct(id, request));
     }
 
     @GetMapping("/integrity-records")

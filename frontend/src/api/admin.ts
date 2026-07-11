@@ -296,3 +296,50 @@ export function listAdminActivitiesApi(params: {
 export function updateAdminActivityStatusApi(id: number, status: number) {
   return request.patch<AdminActivity>(`/admin/oversight/activities/${id}/status`, { status })
 }
+
+export interface AdminMallProduct {
+  id: number
+  orgId: number
+  orgName?: string
+  name: string
+  description?: string
+  coverUrl?: string
+  productType: number
+  productTypeName: string
+  priceCredit: number
+  priceMoney: number
+  stock: number
+  status: number
+  approvalStatus: number
+  approvalStatusName: string
+  reviewRemark?: string
+  createTime?: string
+}
+
+export const PRODUCT_APPROVAL_OPTIONS = [
+  { label: '全部审核状态', value: undefined },
+  { label: '待审核', value: 0 },
+  { label: '已通过', value: 1 },
+  { label: '已驳回', value: 2 },
+] as const
+
+export function listAdminProductsApi(params: {
+  page?: number
+  pageSize?: number
+  approvalStatus?: number
+  keyword?: string
+} = {}) {
+  const query = new URLSearchParams()
+  query.set('page', String(params.page ?? 1))
+  query.set('pageSize', String(params.pageSize ?? 10))
+  if (params.approvalStatus !== undefined) query.set('approvalStatus', String(params.approvalStatus))
+  if (params.keyword) query.set('keyword', params.keyword)
+  return request.get<PageResult<AdminMallProduct>>(`/admin/oversight/products?${query.toString()}`)
+}
+
+export function reviewAdminProductApi(
+  id: number,
+  data: { approvalStatus: number; reviewRemark?: string },
+) {
+  return request.patch<AdminMallProduct>(`/admin/oversight/products/${id}/approval`, data)
+}

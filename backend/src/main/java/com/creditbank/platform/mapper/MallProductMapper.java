@@ -19,7 +19,7 @@ public interface MallProductMapper extends BaseMapper<MallProduct> {
                    p.price_credit AS priceCredit, p.price_money AS priceMoney, p.stock
             FROM mall_product p
             JOIN mall_category c ON c.id = p.category_id
-            WHERE p.deleted = 0 AND p.status = 1 AND c.status = 1
+            WHERE p.deleted = 0 AND p.status = 1 AND p.approval_status = 1 AND c.status = 1
               AND (#{categoryId} IS NULL OR p.category_id = #{categoryId})
               AND (#{keyword} IS NULL OR #{keyword} = ''
                    OR p.name LIKE CONCAT('%', #{keyword}, '%')

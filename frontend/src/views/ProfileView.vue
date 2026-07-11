@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Medal, Tickets, TrendCharts, Wallet } from '@element-plus/icons-vue'
@@ -64,7 +64,7 @@ onMounted(loadSummary)
         <section class="metric-grid">
           <article class="metric-card">
             <el-icon><Wallet /></el-icon>
-            <span>当前学分</span>
+            <span>当前秩点</span>
             <strong>{{ formatAmount(summary.creditAccount.balance) }}</strong>
           </article>
           <article class="metric-card">
@@ -97,7 +97,7 @@ onMounted(loadSummary)
                   <strong>{{ item.title }}</strong>
                   <span>{{ item.description }}</span>
                 </div>
-                <el-tag size="small" type="success">+{{ formatAmount(item.creditEarned) }} 学分</el-tag>
+                <el-tag size="small" type="success">+{{ formatAmount(item.creditEarned) }} 秩点</el-tag>
               </div>
             </div>
           </article>
@@ -133,7 +133,7 @@ onMounted(loadSummary)
                   <span>{{ order.items.map((item) => `${item.productName} x ${item.quantity}`).join('、') }}</span>
                 </div>
                 <div class="order-price">
-                  <strong>{{ formatAmount(order.totalCredit) }} 学分</strong>
+                  <strong>{{ formatAmount(order.totalCredit) }} 秩点</strong>
                   <el-tag size="small" :type="order.payStatus === 1 ? 'success' : 'warning'">
                     {{ order.payStatusName }}
                   </el-tag>

@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import PageShell from '@/components/common/PageShell.vue'
@@ -158,7 +158,7 @@ onMounted(fetchActivities)
       <el-table-column label="人数上限" width="100">
         <template #default="{ row }">{{ row.maxParticipants ?? '不限' }}</template>
       </el-table-column>
-      <el-table-column label="奖励学分" width="100">
+      <el-table-column label="奖励秩点" width="100">
         <template #default="{ row }">{{ row.creditReward ?? 0 }}</template>
       </el-table-column>
       <el-table-column label="状态" width="100">
@@ -219,7 +219,7 @@ onMounted(fetchActivities)
         <el-form-item label="人数上限">
           <el-input-number v-model="form.maxParticipants" :min="1" :max="99999" />
         </el-form-item>
-        <el-form-item label="奖励学分">
+        <el-form-item label="奖励秩点">
           <el-input-number v-model="form.creditReward" :min="0" :max="9999" :precision="2" />
         </el-form-item>
         <el-form-item label="活动详情">

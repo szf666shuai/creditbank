@@ -53,6 +53,9 @@ public class SearchTestDataSeeder {
         executeScript("db/006_learning_mall_demo.sql", "学习资源与积分商城");
         executeScript("db/008_course_watched_position.sql", "课程观看位置字段");
         executeScript("db/009_mall_redemption_code.sql", "商城兑换码字段");
+        executeScript("db/010_course_interaction.sql", "课程评论弹幕课件");
+        executeScript("db/011_course_comment_reply_materials.sql", "评论回复与课件文件");
+        executeScript("db/012_course_episodes_checkin_mall.sql", "课程分集打卡与商城审核");
     }
 
     private void executeScript(String path, String description) {

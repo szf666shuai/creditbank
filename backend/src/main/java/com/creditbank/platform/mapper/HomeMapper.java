@@ -13,11 +13,7 @@ public interface HomeMapper {
     /** 与学习资源列表同源：course 表上架课程，展示学时与完成奖励 */
     @Select("""
             SELECT 'course' AS type, '课程' AS typeName, id, title, description AS summary, cover_url AS coverUrl,
-                   CONCAT(TRIM(TRAILING '.' FROM TRIM(TRAILING '0' FROM CAST(IFNULL(duration_hours, 0) AS CHAR))),
-                          ' 学时 · 奖励 ',
-                          TRIM(TRAILING '.' FROM TRIM(TRAILING '0' FROM CAST(IFNULL(credit_reward, 0) AS CHAR))),
-                          ' 学分') AS extra,
-                   create_time AS createTime
+                   CONCAT(IFNULL(price_credit, 0), ' 秩点') AS extra, create_time AS createTime
             FROM course
             WHERE deleted = 0 AND status = 1
             ORDER BY create_time DESC, id DESC
@@ -27,7 +23,7 @@ public interface HomeMapper {
 
     @Select("""
             SELECT 'credit' AS type, id, name AS title, description AS summary, cover_url AS coverUrl,
-                   CONCAT(IFNULL(price_credit, 0), ' 学分') AS extra, create_time AS createTime
+                   CONCAT(IFNULL(price_credit, 0), ' 秩点') AS extra, create_time AS createTime
             FROM mall_product
             WHERE deleted = 0 AND status = 1
             ORDER BY create_time DESC

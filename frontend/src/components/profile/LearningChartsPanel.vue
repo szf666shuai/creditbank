@@ -1,10 +1,10 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import * as echarts from 'echarts'
 import { listLearningStatsApi, type LearningStatDaily } from '@/api/profile'
 import { getErrorMessage, unwrapApi } from '@/utils/api'
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     embedded?: boolean
   }>(),
@@ -35,39 +35,20 @@ function toDateStr(d: Date) {
   return `${y}-${m}-${day}`
 }
 
-function normalizeStatDate(value: unknown): string {
-  if (typeof value === 'string') return value.slice(0, 10)
-  if (Array.isArray(value) && value.length >= 3) {
-    const [y, m, d] = value
-    return `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`
-  }
-  return String(value ?? '')
-}
-
-function hasDayActivity(item: LearningStatDaily) {
-  return (item.studyMinutes ?? 0) > 0
-    || (item.coursesCompleted ?? 0) > 0
-    || Number(item.creditEarned ?? 0) > 0
-}
-
-const hasActivity = computed(() => stats.value.some(hasDayActivity))
-
 const summary = computed(() => {
   let totalMinutes = 0
   let totalCourses = 0
   let totalCredit = 0
-  let activeDays = 0
   for (const item of stats.value) {
     totalMinutes += item.studyMinutes ?? 0
     totalCourses += item.coursesCompleted ?? 0
     totalCredit += Number(item.creditEarned ?? 0)
-    if (hasDayActivity(item)) activeDays += 1
   }
   return {
     totalHours: (totalMinutes / 60).toFixed(1),
     totalCourses,
     totalCredit: totalCredit.toFixed(1),
-    days: activeDays,
+    days: stats.value.length,
   }
 })
 
@@ -76,38 +57,20 @@ async function fetchStats() {
   loadError.value = null
   try {
     const [startDate, endDate] = dateRange.value
-    const raw = unwrapApi(await listLearningStatsApi({ startDate, endDate }))
-    stats.value = (raw ?? []).map((item) => ({
-      ...item,
-      statDate: normalizeStatDate(item.statDate),
-      studyMinutes: item.studyMinutes ?? 0,
-      coursesCompleted: item.coursesCompleted ?? 0,
-      creditEarned: Number(item.creditEarned ?? 0),
-    }))
+    stats.value = unwrapApi(await listLearningStatsApi({ startDate, endDate }))
     await nextTick()
-    if (hasActivity.value) {
-      renderCharts()
-    } else {
-      disposeCharts()
-    }
+    renderCharts()
   } catch (e) {
     loadError.value = getErrorMessage(e, '加载失败')
-    disposeCharts()
   } finally {
     loading.value = false
   }
 }
 
-function ensureChart(instance: echarts.ECharts | null, el: HTMLDivElement | undefined) {
-  if (!el) return null
-  if (instance && !instance.isDisposed()) return instance
-  return echarts.init(el)
-}
-
 function renderCharts() {
-  lineChart = ensureChart(lineChart, lineChartRef.value)
-  barChart = ensureChart(barChart, barChartRef.value)
-  if (!lineChart || !barChart) return
+  if (!lineChartRef.value || !barChartRef.value) return
+  if (!lineChart) lineChart = echarts.init(lineChartRef.value)
+  if (!barChart) barChart = echarts.init(barChartRef.value)
 
   const dates = stats.value.map((item) => item.statDate)
   const studyMinutes = stats.value.map((item) => item.studyMinutes ?? 0)
@@ -116,45 +79,25 @@ function renderCharts() {
 
   lineChart.setOption({
     title: { text: '学习时长趋势', left: 'center', textStyle: { fontSize: 14, fontWeight: 600 } },
-    tooltip: {
-      trigger: 'axis',
-      formatter: (params: unknown) => {
-        if (!Array.isArray(params) || params.length === 0) return ''
-        const p = params[0] as { axisValue?: string; data?: number }
-        return `${p.axisValue ?? ''}<br/>学习时长：${p.data ?? 0} 分钟`
-      },
-    },
+    tooltip: { trigger: 'axis' },
     grid: { left: 48, right: 24, top: 48, bottom: 32 },
     xAxis: { type: 'category', data: dates, boundaryGap: false },
-    yAxis: { type: 'value', name: '分钟', minInterval: 1 },
-    series: [{
-      name: '学习时长',
-      type: 'line',
-      smooth: true,
-      data: studyMinutes,
-      areaStyle: { opacity: 0.15 },
-      itemStyle: { color: '#2094f3' },
-    }],
-  }, true)
+    yAxis: { type: 'value', name: '分钟' },
+    series: [{ name: '学习时长', type: 'line', smooth: true, data: studyMinutes, areaStyle: { opacity: 0.15 }, itemStyle: { color: '#2094f3' } }],
+  })
 
   barChart.setOption({
-    title: { text: '完课与学分', left: 'center', textStyle: { fontSize: 14, fontWeight: 600 } },
+    title: { text: '完课与秩点', left: 'center', textStyle: { fontSize: 14, fontWeight: 600 } },
     tooltip: { trigger: 'axis' },
-    legend: { data: ['完成课程', '获得学分'], top: 28 },
+    legend: { data: ['完成课程', '获得秩点'], top: 28 },
     grid: { left: 48, right: 24, top: 64, bottom: 32 },
     xAxis: { type: 'category', data: dates },
-    yAxis: [
-      { type: 'value', name: '门', minInterval: 1 },
-      { type: 'value', name: '学分', minInterval: 0.5 },
-    ],
+    yAxis: [{ type: 'value', name: '门', minInterval: 1 }, { type: 'value', name: '秩点', minInterval: 0.5 }],
     series: [
       { name: '完成课程', type: 'bar', data: coursesCompleted, itemStyle: { color: '#52c41a' }, barMaxWidth: 28 },
-      { name: '获得学分', type: 'bar', yAxisIndex: 1, data: creditEarned, itemStyle: { color: '#fa8c16' }, barMaxWidth: 28 },
+      { name: '获得秩点', type: 'bar', yAxisIndex: 1, data: creditEarned, itemStyle: { color: '#fa8c16' }, barMaxWidth: 28 },
     ],
-  }, true)
-
-  lineChart.resize()
-  barChart.resize()
+  })
 }
 
 function handleResize() {
@@ -217,15 +160,15 @@ defineExpose({ fetchStats })
           </div>
           <div class="page-summary-card">
             <div class="page-summary-value">{{ summary.totalCredit }}</div>
-            <div class="page-summary-label">获得学分</div>
+            <div class="page-summary-label">获得秩点</div>
           </div>
           <div class="page-summary-card">
             <div class="page-summary-value">{{ summary.days }}</div>
-            <div class="page-summary-label">有学习天数</div>
+            <div class="page-summary-label">统计天数</div>
           </div>
         </div>
 
-        <el-empty v-if="!hasActivity" class="page-empty" :image-size="64" description="所选范围内暂无学习数据，去学习资源看视频后会自动累计" />
+        <el-empty v-if="stats.length === 0" class="page-empty" :image-size="64" description="暂无学习统计数据" />
 
         <div v-else class="charts-wrap">
           <div ref="lineChartRef" class="chart-box" />
@@ -279,13 +222,11 @@ defineExpose({ fetchStats })
   height: 280px;
 }
 
-@media (max-width: 1100px) {
+@media (max-width: 768px) {
   .stats-summary {
     grid-template-columns: repeat(2, 1fr);
   }
-}
 
-@media (max-width: 768px) {
   .chart-box {
     height: 240px;
   }

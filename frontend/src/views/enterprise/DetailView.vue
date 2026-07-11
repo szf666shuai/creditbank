@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -377,7 +377,7 @@ onMounted(async () => {
                 <div class="tab-meta">
                   <span v-if="activity.location">📍 {{ activity.location }}</span>
                   <span>🕐 {{ formatTime(activity.startTime) }} - {{ formatTime(activity.endTime) }}</span>
-                  <span v-if="activity.creditReward">⭐ 奖励 {{ activity.creditReward }} 学分</span>
+                  <span v-if="activity.creditReward">⭐ 奖励 {{ activity.creditReward }} 秩点</span>
                 </div>
               </article>
             </div>

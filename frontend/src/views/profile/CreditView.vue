@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import PageShell from '@/components/common/PageShell.vue'
 import {
@@ -102,8 +102,8 @@ onMounted(async () => {
 
 <template>
   <PageShell
-    title="学分流水"
-    description="查看学分获取、转换、增长与消耗记录"
+    title="秩点流水"
+    description="查看秩点获取、转换、增长与消耗记录"
     :loading="loading"
     :error="loadError"
     @retry="fetchTransactions"
@@ -156,7 +156,7 @@ onMounted(async () => {
             <el-tag :type="typeTagType(row.type)" size="small">{{ row.typeName }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="变动学分" width="110" align="right">
+        <el-table-column label="变动秩点" width="110" align="right">
           <template #default="{ row }">
             <span :class="amountClass(row.amount)">{{ formatAmount(row.amount) }}</span>
           </template>
@@ -174,7 +174,7 @@ onMounted(async () => {
         v-if="!loading && transactions.length === 0"
         class="page-empty"
         :image-size="80"
-        description="暂无学分流水"
+        description="暂无秩点流水"
       />
 
       <div v-if="total > 0" class="page-pagination">

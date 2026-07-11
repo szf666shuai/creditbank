@@ -317,11 +317,11 @@ public class MallService {
     }
 
     private String payMethodName(Integer method) {
-        if (method == null) return "学分支付";
+        if (method == null) return "秩点支付";
         return switch (method) {
             case 2 -> "模拟支付";
             case 3 -> "混合支付";
-            default -> "学分支付";
+            default -> "秩点支付";
         };
     }
 

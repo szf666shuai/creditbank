@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Collection, Medal, Tickets } from '@element-plus/icons-vue'
@@ -46,7 +46,7 @@ onMounted(loadData)
         <div>
           <p class="eyebrow">Learning Profile</p>
           <h1>学习档案</h1>
-          <p class="subtitle">这里记录完成的学习资源、学习证书、奖励学分和区块链校验信息，个人中心也会同步体现。</p>
+          <p class="subtitle">这里记录完成的学习资源、学习证书、奖励秩点和区块链校验信息，个人中心也会同步体现。</p>
         </div>
         <div class="head-metrics">
           <div>
@@ -83,7 +83,7 @@ onMounted(loadData)
                 </div>
                 <div class="archive-meta">
                   <span>{{ item.statusName }}</span>
-                  <strong>+{{ formatCredit(item.creditEarned) }} 学分</strong>
+                  <strong>+{{ formatCredit(item.creditEarned) }} 秩点</strong>
                 </div>
               </article>
             </el-timeline-item>

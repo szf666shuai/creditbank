@@ -1,4 +1,4 @@
-/** 个人中心左侧菜单项 */
+﻿/** 个人中心左侧菜单项 */
 export interface ProfileMenuItem {
   key: string
   label: string
@@ -15,7 +15,7 @@ export const studentProfileMenu: ProfileMenuItem[] = [
   { key: 'dashboard', label: '个人概览', path: '/profile', icon: '🏠', roles: [0] },
   { key: 'resume', label: '我的简历', path: '/profile/resume', icon: '📄', roles: [0] },
   { key: 'learning', label: '学习档案', path: '/profile/learning', icon: '📁', roles: [0] },
-  { key: 'credit', label: '学分流水', path: '/profile/credit', icon: '💰', roles: [0] },
+  { key: 'credit', label: '秩点流水', path: '/profile/credit', icon: '💰', roles: [0] },
   { key: 'integrity', label: '诚信评定', path: '/profile/integrity', icon: '⭐', roles: [0] },
   { key: 'posts', label: '我的发言', path: '/profile/posts', icon: '📝', roles: [0] },
   { key: 'applications', label: '投递记录', path: '/profile/applications', icon: '📋', roles: [0] },
@@ -35,6 +35,7 @@ export const enterpriseProfileMenu: ProfileMenuItem[] = [
   { key: 'interviews', label: '面试管理', path: '/profile/enterprise/interviews', icon: '🤝', roles: [1] },
   { key: 'activity-invitations', label: '定向邀请', path: '/profile/enterprise/activity-invitations', icon: '🎟️', roles: [1] },
   { key: 'materials', label: '企业资料', path: '/profile/enterprise/materials', icon: '📁', roles: [1] },
+  { key: 'products', label: '商城管理', path: '/profile/enterprise/products', icon: '🛍️', roles: [1] },
   { key: 'messages', label: '消息中心', path: '/profile/messages', icon: '💬', roles: [1], dividerBefore: true },
 ]
 
@@ -46,9 +47,10 @@ export const adminProfileMenu: ProfileMenuItem[] = [
   { key: 'notifications', label: '系统通知', path: '/profile/admin/notifications', icon: '📢', roles: [2] },
   { key: 'reports', label: '举报处理', path: '/profile/admin/reports', icon: '🚩', roles: [2] },
   { key: 'integrity', label: '诚信监察', path: '/profile/admin/integrity', icon: '⭐', roles: [2] },
-  { key: 'credit', label: '学分监察', path: '/profile/admin/credit', icon: '💰', roles: [2] },
+  { key: 'credit', label: '秩点监察', path: '/profile/admin/credit', icon: '💰', roles: [2] },
   { key: 'jobs', label: '招聘监管', path: '/profile/admin/jobs', icon: '💼', roles: [2] },
   { key: 'activities', label: '活动监管', path: '/profile/admin/activities', icon: '🎪', roles: [2] },
+  { key: 'products', label: '商品审核', path: '/profile/admin/products', icon: '🛍️', roles: [2] },
   { key: 'messages', label: '消息中心', path: '/profile/messages', icon: '💬', roles: [2], dividerBefore: true },
 ]
 
