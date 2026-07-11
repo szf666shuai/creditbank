@@ -1,4 +1,5 @@
-import type { HomeData } from '@/api/home'
+﻿import type { HomeData } from '@/api/home'
+import { BRAND_NAME } from '@/config/brand'
 
 /** 接口不可用时的占位数据，保证首页区块结构可见 */
 export const homeFallbackData: HomeData = {
@@ -10,7 +11,7 @@ export const homeFallbackData: HomeData = {
       title: 'Java 程序设计基础',
       summary: '系统学习 Java 语法与面向对象',
       coverUrl: 'https://picsum.photos/seed/java-course-1/400/250',
-      extra: '20 学分',
+      extra: '20 秩点',
     },
     {
       type: 'course',
@@ -19,7 +20,7 @@ export const homeFallbackData: HomeData = {
       title: 'Spring Boot 微服务实战',
       summary: '构建 REST API 与微服务',
       coverUrl: 'https://picsum.photos/seed/java-course-2/400/250',
-      extra: '35 学分',
+      extra: '35 秩点',
     },
   ],
   hotProducts: [
@@ -29,7 +30,7 @@ export const homeFallbackData: HomeData = {
       id: 0,
       title: 'Java 电子书兑换券',
       coverUrl: 'https://picsum.photos/seed/java-mall-1/400/250',
-      extra: '8 学分',
+      extra: '8 秩点',
     },
   ],
   hotActivities: [
@@ -58,8 +59,8 @@ export const homeFallbackData: HomeData = {
       type: 'news',
       typeName: '资讯',
       id: 0,
-      title: '关于编程类课程学分认定指引',
-      extra: '学分银行管委会',
+      title: '关于编程类课程秩点认定指引',
+      extra: `${BRAND_NAME}管委会`,
       createTime: '2026-07-01T10:00:00',
     },
   ],

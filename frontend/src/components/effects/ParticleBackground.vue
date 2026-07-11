@@ -1,5 +1,15 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref, watch } from 'vue'
+import { getRoleTheme, type RoleThemeVariant } from '@/config/role-theme'
+
+const props = withDefaults(
+  defineProps<{
+    variant?: RoleThemeVariant
+  }>(),
+  {
+    variant: 'default',
+  },
+)
 
 interface Particle {
   x: number
@@ -36,11 +46,6 @@ const SLOW_SPEED = 3.5
 const EFFECT_FADE_IN = 0.008
 const EFFECT_FADE_OUT = 0.03
 const MIN_EFFECT = 0.25
-const EXPLOSION_COLORS = [
-  '#2094f3', '#52c41a', '#faad14', '#eb2f96',
-  '#722ed1', '#13c2c2', '#fa541c', '#fadb14',
-  '#64d2ff', '#ff6b9d',
-]
 
 let ctx: CanvasRenderingContext2D | null = null
 let particles: Particle[] = []
@@ -52,6 +57,16 @@ let effectStrength = 0
 let animId = 0
 let width = 0
 let height = 0
+
+function rgbaAlpha(color: string, alpha: number) {
+  const match = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/)
+  if (!match) return color
+  return `rgba(${match[1]}, ${match[2]}, ${match[3]}, ${alpha})`
+}
+
+function currentTheme() {
+  return getRoleTheme(props.variant)
+}
 
 function resize() {
   const canvas = canvasRef.value
@@ -90,6 +105,7 @@ function onMouseLeave() {
 }
 
 function onClick(e: MouseEvent) {
+  const colors = currentTheme().explosionColors
   const count = 50 + Math.floor(Math.random() * 30)
   for (let i = 0; i < count; i++) {
     const angle = (Math.PI * 2 * i) / count + Math.random() * 0.4
@@ -101,7 +117,7 @@ function onClick(e: MouseEvent) {
       vy: Math.sin(angle) * speed,
       life: 1,
       maxLife: Math.random() * 0.6 + 0.5,
-      color: EXPLOSION_COLORS[Math.floor(Math.random() * EXPLOSION_COLORS.length)],
+      color: colors[Math.floor(Math.random() * colors.length)],
       size: Math.random() * 5 + 2,
     })
   }
@@ -186,6 +202,7 @@ function updateExplosions() {
 function drawParticlePolylines() {
   if (!ctx || effectStrength < MIN_EFFECT) return
 
+  const theme = currentTheme()
   const alpha = effectStrength
   const sectorSize = (Math.PI * 2) / SECTOR_COUNT
   const buckets: Particle[][] = Array.from({ length: SECTOR_COUNT }, () => [])
@@ -220,9 +237,9 @@ function drawParticlePolylines() {
     const gradient = ctx.createLinearGradient(
       smoothMouse.x, smoothMouse.y, tail.x, tail.y,
     )
-    gradient.addColorStop(0, `rgba(120, 220, 255, ${0.85 * alpha})`)
-    gradient.addColorStop(0.5, `rgba(32, 148, 243, ${0.45 * alpha})`)
-    gradient.addColorStop(1, `rgba(32, 148, 243, ${0.05 * alpha})`)
+    gradient.addColorStop(0, rgbaAlpha(theme.particleLine[0], 0.85 * alpha))
+    gradient.addColorStop(0.5, rgbaAlpha(theme.particleLine[1], 0.45 * alpha))
+    gradient.addColorStop(1, rgbaAlpha(theme.particleLine[2], 0.05 * alpha))
 
     ctx.beginPath()
     ctx.moveTo(chain[0].x, chain[0].y)
@@ -236,12 +253,13 @@ function drawParticlePolylines() {
     ctx.stroke()
   }
 
+  const glowColor = theme.particleGlow
   const glow = ctx.createRadialGradient(
     smoothMouse.x, smoothMouse.y, 0,
     smoothMouse.x, smoothMouse.y, 60,
   )
-  glow.addColorStop(0, `rgba(120, 220, 255, ${0.25 * alpha})`)
-  glow.addColorStop(1, 'rgba(32, 148, 243, 0)')
+  glow.addColorStop(0, rgbaAlpha(glowColor, 0.25 * alpha))
+  glow.addColorStop(1, rgbaAlpha(glowColor, 0))
   ctx.fillStyle = glow
   ctx.beginPath()
   ctx.arc(smoothMouse.x, smoothMouse.y, 60, 0, Math.PI * 2)
@@ -250,16 +268,18 @@ function drawParticlePolylines() {
 
 function drawBackground() {
   if (!ctx) return
+  const theme = currentTheme()
   const grad = ctx.createLinearGradient(0, 0, width, height)
-  grad.addColorStop(0, '#0b1527')
-  grad.addColorStop(0.5, '#101e36')
-  grad.addColorStop(1, '#0d1829')
+  grad.addColorStop(0, theme.particleBg[0])
+  grad.addColorStop(0.5, theme.particleBg[1])
+  grad.addColorStop(1, theme.particleBg[2])
   ctx.fillStyle = grad
   ctx.fillRect(0, 0, width, height)
 }
 
 function drawParticles() {
   if (!ctx) return
+  const theme = currentTheme()
 
   for (const p of particles) {
     const dist = rawMouse.active ? distToSmooth(p.x, p.y) : MOUSE_RADIUS
@@ -272,11 +292,11 @@ function drawParticles() {
     ctx.arc(p.x, p.y, p.size + boost, 0, Math.PI * 2)
 
     if (attracted) {
-      ctx.fillStyle = `rgba(180, 235, 255, ${Math.min(p.opacity * 0.6 + boost, 0.95)})`
-      ctx.shadowColor = 'rgba(100, 210, 255, 0.6)'
+      ctx.fillStyle = rgbaAlpha(theme.particleDotActive, Math.min(p.opacity * 0.6 + boost, 0.95))
+      ctx.shadowColor = theme.particleGlow
       ctx.shadowBlur = 6 * effectStrength
     } else {
-      ctx.fillStyle = `rgba(140, 200, 240, ${p.opacity * 0.75})`
+      ctx.fillStyle = rgbaAlpha(theme.particleDot, p.opacity * 0.75)
       ctx.shadowBlur = 0
     }
     ctx.fill()
@@ -315,6 +335,13 @@ function animate() {
   draw()
   animId = requestAnimationFrame(animate)
 }
+
+watch(
+  () => props.variant,
+  () => {
+    explosions = []
+  },
+)
 
 onMounted(() => {
   const canvas = canvasRef.value

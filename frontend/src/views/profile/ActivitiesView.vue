@@ -7,6 +7,7 @@ import {
   listMyActivityRegistrationsApi,
   type MyActivityRegistrationItem,
 } from '@/api/profile-activity-registrations'
+import { checkInActivityApi } from '@/api/activity-checkin'
 import {
   listMyActivityInvitesApi,
   acceptActivityInviteApi,
@@ -65,6 +66,23 @@ function syncTabFromRoute() {
   if (tab === 'invitations' || tab === 'registrations') {
     activeTab.value = tab
   }
+}
+
+async function handleCheckIn(row: MyActivityRegistrationItem) {
+  actingId.value = row.id
+  try {
+    unwrapApi(await checkInActivityApi(row.activityId))
+    ElMessage.success('签到成功')
+    await fetchRegistrations()
+  } catch (e) {
+    ElMessage.error(getErrorMessage(e, '签到失败'))
+  } finally {
+    actingId.value = null
+  }
+}
+
+function canCheckIn(row: MyActivityRegistrationItem) {
+  return row.activityStatus === 2 && row.status === 0
 }
 
 async function fetchRegistrations() {
@@ -195,6 +213,21 @@ onMounted(() => {
         </el-table-column>
         <el-table-column label="报名时间" width="150">
           <template #default="{ row }">{{ formatTime(row.createTime) }}</template>
+        </el-table-column>
+        <el-table-column label="操作" width="100" fixed="right">
+          <template #default="{ row }">
+            <el-button
+              v-if="canCheckIn(row)"
+              link
+              type="success"
+              :loading="actingId === row.id"
+              @click="handleCheckIn(row)"
+            >
+              签到
+            </el-button>
+            <span v-else-if="row.status === 1" class="page-text-muted">已签到</span>
+            <span v-else class="page-text-muted">—</span>
+          </template>
         </el-table-column>
       </el-table>
 

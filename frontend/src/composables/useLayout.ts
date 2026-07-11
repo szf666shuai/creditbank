@@ -1,6 +1,6 @@
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { siteNav, profileNavByRole } from '@/config/site-nav'
+import { profileNavByRole, getSiteNavForRole } from '@/config/site-nav'
 import { DEFAULT_SEARCH_CATEGORY } from '@/config/search-categories'
 import { useAuthStore } from '@/stores/auth'
 import { roleLabel } from '@/types/auth'
@@ -21,6 +21,7 @@ export function useLayout() {
     const role = authStore.userInfo?.role
     return role != null ? profileNavByRole[role] ?? [] : []
   })
+  const visibleSiteNav = computed(() => getSiteNavForRole(authStore.userInfo?.role))
 
   function isNavActive(item: { path?: string; key: string; children: { path: string }[] }) {
     if (item.path) {
@@ -50,7 +51,7 @@ export function useLayout() {
   }
 
   return {
-    siteNav,
+    siteNav: visibleSiteNav,
     profileNav,
     searchKeyword,
     searchCategory,

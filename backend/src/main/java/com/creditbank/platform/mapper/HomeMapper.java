@@ -12,7 +12,7 @@ public interface HomeMapper {
 
     @Select("""
             SELECT 'course' AS type, id, title, description AS summary, cover_url AS coverUrl,
-                   CONCAT(IFNULL(price_credit, 0), ' 学分') AS extra, create_time AS createTime
+                   CONCAT(IFNULL(price_credit, 0), ' 秩点') AS extra, create_time AS createTime
             FROM course
             WHERE deleted = 0 AND status = 1
             ORDER BY create_time DESC
@@ -22,7 +22,7 @@ public interface HomeMapper {
 
     @Select("""
             SELECT 'credit' AS type, id, name AS title, description AS summary, cover_url AS coverUrl,
-                   CONCAT(IFNULL(price_credit, 0), ' 学分') AS extra, create_time AS createTime
+                   CONCAT(IFNULL(price_credit, 0), ' 秩点') AS extra, create_time AS createTime
             FROM mall_product
             WHERE deleted = 0 AND status = 1
             ORDER BY create_time DESC

@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import PageShell from '@/components/common/PageShell.vue'
@@ -33,7 +33,7 @@ const quickEntries = [
   { label: '系统通知', desc: '向平台用户发送通知', icon: '📢', path: '/profile/admin/notifications', color: '#722ed1' },
   { label: '举报处理', desc: '论坛内容举报审核', icon: '🚩', path: '/profile/admin/reports', color: '#fa541c' },
   { label: '诚信监察', desc: '全平台诚信变动记录', icon: '⭐', path: '/profile/admin/integrity', color: '#fa8c16' },
-  { label: '学分监察', desc: '全平台学分流水', icon: '💰', path: '/profile/admin/credit', color: '#13c2c2' },
+  { label: '秩点监察', desc: '全平台秩点流水', icon: '💰', path: '/profile/admin/credit', color: '#13c2c2' },
   { label: '招聘监管', desc: '职位上架与下架', icon: '💼', path: '/profile/admin/jobs', color: '#2f54eb' },
   { label: '活动监管', desc: '活动上架与下架', icon: '🎪', path: '/profile/admin/activities', color: '#eb2f96' },
   { label: '消息中心', desc: '查看平台私信', icon: '💬', path: '/profile/messages', color: '#595959' },

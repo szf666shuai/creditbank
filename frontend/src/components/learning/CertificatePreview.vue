@@ -3,6 +3,7 @@ import { computed, nextTick, ref, watch } from 'vue'
 import QRCode from 'qrcode'
 import { Download, Medal } from '@element-plus/icons-vue'
 import type { LearningCertificate } from '@/api/learning'
+import { BRAND_NAME, BRAND_NAME_EN } from '@/config/brand'
 
 const props = defineProps<{
   certificate: LearningCertificate
@@ -54,11 +55,11 @@ function drawCertificate() {
   ctx.fillStyle = '#0f172a'
   ctx.font = '700 42px Microsoft YaHei, Arial'
   ctx.textAlign = 'center'
-  ctx.fillText('学习证书', width / 2, 126)
+  ctx.fillText(`${BRAND_NAME} · 学习证书`, width / 2, 126)
 
   ctx.fillStyle = '#64748b'
   ctx.font = '18px Microsoft YaHei, Arial'
-  ctx.fillText('Credit Bank Learning Certificate', width / 2, 158)
+  ctx.fillText(`${BRAND_NAME_EN} Learning Certificate`, width / 2, 158)
 
   ctx.fillStyle = '#111827'
   ctx.font = '700 30px Microsoft YaHei, Arial'

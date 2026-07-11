@@ -3,6 +3,7 @@ import { reactive, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useAuthStore } from '@/stores/auth'
+import { BRAND_FULL, BRAND_NAME } from '@/config/brand'
 
 const router = useRouter()
 const route = useRoute()
@@ -36,8 +37,8 @@ async function handleLogin() {
 <template>
   <div class="auth-page">
     <div class="auth-card">
-      <h2 class="auth-title">登录学分银行</h2>
-      <p class="auth-sub">终身学习学分银行平台</p>
+      <h2 class="auth-title">登录 {{ BRAND_NAME }}</h2>
+      <p class="auth-sub">{{ BRAND_FULL }}</p>
 
       <el-form label-position="top" @submit.prevent="handleLogin">
         <el-form-item label="用户名">

@@ -16,4 +16,6 @@ public class LearningProgressRequest {
     @NotNull(message = "当前播放位置不能为空")
     @Min(value = 0, message = "当前播放位置不能小于 0")
     private Integer currentTimeSeconds;
+
+    private Long episodeId;
 }

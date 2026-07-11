@@ -1,6 +1,7 @@
 package com.creditbank.platform.module.enterprise.controller;
 
 import com.creditbank.platform.common.Result;
+import com.creditbank.platform.module.enterprise.dto.ActivityCheckinResultVO;
 import com.creditbank.platform.module.enterprise.dto.ActivityRegisterResultVO;
 import com.creditbank.platform.module.enterprise.dto.ApplyJobRequest;
 import com.creditbank.platform.module.enterprise.dto.JobApplyResultVO;
@@ -37,5 +38,10 @@ public class StudentEnterpriseActionController {
     @PostMapping("/activities/{activityId}/register")
     public Result<ActivityRegisterResultVO> registerActivity(@PathVariable Long activityId) {
         return Result.ok(studentEnterpriseActionService.registerActivity(activityId));
+    }
+
+    @PostMapping("/activities/{activityId}/check-in")
+    public Result<ActivityCheckinResultVO> checkInActivity(@PathVariable Long activityId) {
+        return Result.ok(studentEnterpriseActionService.checkInActivity(activityId));
     }
 }

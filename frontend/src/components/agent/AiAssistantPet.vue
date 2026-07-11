@@ -1,16 +1,18 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { agentChatApi } from '@/api/agent'
 import { generateLearningProfileApi } from '@/api/learning-profile'
 import { useAuthStore } from '@/stores/auth'
 
-const STORAGE_KEY = 'credit_bank_ai_pet_pos'
+import { BRAND_NAME } from '@/config/brand'
+
+const STORAGE_KEY = 'singularis_ai_pet_pos'
 const SIZE = 72
 const PANEL_W = 380
 const PANEL_H = 420
 
 const greetings = [
-  '你好呀，我是学分助手～',
+  '你好呀，我是秩点助手～',
   '有什么学习问题尽管问我！',
   '想找课程、活动，还是积分商城？',
   '双击我就能打开助手面板哦',
@@ -57,7 +59,7 @@ type ChatMessage = {
 const messages = ref<ChatMessage[]>([
   {
     role: 'assistant',
-    text: '你好，我是学分银行 AI 助手。登录后可基于你的课程进度与档案生成学习画像～',
+    text: `你好，我是${BRAND_NAME} AI 助手。登录后可基于你的课程进度与档案生成学习画像～`,
   },
 ])
 
@@ -284,7 +286,7 @@ async function generateMyProfile() {
     const p = res.data
     messages.value.push({
       role: 'assistant',
-      text: '已根据你的课程进度、档案与学分情况生成画像。',
+      text: '已根据你的课程进度、档案与秩点情况生成画像。',
       profile: {
         targetJob: p.targetJob || '待明确',
         summary: p.summary || '暂无摘要',
@@ -348,7 +350,7 @@ onUnmounted(() => {
         <div class="ai-panel-header">
           <div class="ai-panel-title">
             <span class="ai-panel-dot" />
-            学分 AI 助手
+            秩点 AI 助手
           </div>
           <button type="button" class="ai-panel-close" aria-label="关闭" @click="panelOpen = false">
             ×

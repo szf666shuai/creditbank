@@ -58,9 +58,8 @@ export function useHeaderScroll() {
   const route = useRoute()
 
   const isHomePage = computed(() => route.name === 'home')
-  const isTransparent = computed(
-    () => isHomePage.value && isAtTop.value && isHeaderVisible.value,
-  )
+  /** 导航条保持独立实色区域，内容不叠在导航下方 */
+  const isTransparent = computed(() => false)
   const showBackToTop = computed(() => scrollY.value > BACK_TO_TOP_THRESHOLD)
 
   onMounted(mountScrollListener)

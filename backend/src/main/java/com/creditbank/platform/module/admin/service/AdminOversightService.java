@@ -6,16 +6,20 @@ import com.creditbank.platform.common.BusinessException;
 import com.creditbank.platform.common.PageResult;
 import com.creditbank.platform.entity.CreditTransaction;
 import com.creditbank.platform.entity.IntegrityRecord;
+import com.creditbank.platform.entity.MallProduct;
 import com.creditbank.platform.entity.SysOrganization;
 import com.creditbank.platform.entity.SysUser;
 import com.creditbank.platform.mapper.CreditTransactionMapper;
 import com.creditbank.platform.mapper.IntegrityRecordMapper;
+import com.creditbank.platform.mapper.MallProductMapper;
 import com.creditbank.platform.mapper.SysOrganizationMapper;
 import com.creditbank.platform.mapper.SysUserMapper;
 import com.creditbank.platform.module.admin.dto.AdminActivityVO;
 import com.creditbank.platform.module.admin.dto.AdminCreditTransactionVO;
 import com.creditbank.platform.module.admin.dto.AdminIntegrityRecordVO;
 import com.creditbank.platform.module.admin.dto.AdminJobVO;
+import com.creditbank.platform.module.admin.dto.AdminMallProductVO;
+import com.creditbank.platform.module.admin.dto.AdminProductApprovalRequest;
 import com.creditbank.platform.module.admin.dto.UpdateContentStatusRequest;
 import com.creditbank.platform.module.enterprise.entity.Activity;
 import com.creditbank.platform.module.enterprise.entity.JobPosting;
@@ -27,6 +31,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -43,6 +48,7 @@ public class AdminOversightService {
     private final CreditTransactionMapper creditTransactionMapper;
     private final SysOrganizationMapper sysOrganizationMapper;
     private final SysUserMapper sysUserMapper;
+    private final MallProductMapper mallProductMapper;
 
     public PageResult<AdminJobVO> pageJobs(long page, long pageSize, Integer status, String keyword) {
         authSupport.requireAdmin();
@@ -62,6 +68,44 @@ public class AdminOversightService {
                 result.getTotal(),
                 result.getCurrent(),
                 result.getSize());
+    }
+
+    public PageResult<AdminMallProductVO> pageProducts(long page, long pageSize, Integer approvalStatus, String keyword) {
+        authSupport.requireAdmin();
+        AdminSupport.validatePage(page, pageSize);
+        LambdaQueryWrapper<MallProduct> wrapper = new LambdaQueryWrapper<MallProduct>()
+                .eq(MallProduct::getDeleted, 0)
+                .eq(approvalStatus != null, MallProduct::getApprovalStatus, approvalStatus)
+                .orderByDesc(MallProduct::getCreateTime);
+        if (StringUtils.hasText(keyword)) {
+            wrapper.like(MallProduct::getName, keyword.trim());
+        }
+        Page<MallProduct> result = mallProductMapper.selectPage(new Page<>(page, pageSize), wrapper);
+        Map<Long, String> orgNameMap = loadOrgNameMap(result.getRecords().stream().map(MallProduct::getOrgId).toList());
+        return PageResult.of(
+                result.getRecords().stream().map(product -> toProductVO(product, orgNameMap.get(product.getOrgId()))).toList(),
+                result.getTotal(),
+                result.getCurrent(),
+                result.getSize());
+    }
+
+    @Transactional
+    public AdminMallProductVO reviewProduct(Long productId, AdminProductApprovalRequest request) {
+        SysUser admin = authSupport.requireAdmin();
+        MallProduct product = mallProductMapper.selectById(productId);
+        if (product == null || product.getDeleted() != null && product.getDeleted() == 1) {
+            throw new BusinessException(404, "商品不存在");
+        }
+        if (request.getApprovalStatus() != 1 && request.getApprovalStatus() != 2) {
+            throw new BusinessException(400, "审核状态无效");
+        }
+        product.setApprovalStatus(request.getApprovalStatus());
+        product.setReviewRemark(request.getReviewRemark());
+        product.setReviewedBy(admin.getId());
+        product.setReviewedAt(LocalDateTime.now());
+        product.setStatus(request.getApprovalStatus() == 1 ? 1 : 0);
+        mallProductMapper.updateById(product);
+        return toProductVO(product, loadOrgName(product.getOrgId()));
     }
 
     @Transactional
@@ -245,6 +289,47 @@ public class AdminOversightService {
                 .source(tx.getSource())
                 .createTime(tx.getCreateTime())
                 .build();
+    }
+
+    private AdminMallProductVO toProductVO(MallProduct product, String orgName) {
+        AdminMallProductVO vo = new AdminMallProductVO();
+        vo.setId(product.getId());
+        vo.setOrgId(product.getOrgId());
+        vo.setOrgName(orgName);
+        vo.setName(product.getName());
+        vo.setDescription(product.getDescription());
+        vo.setCoverUrl(product.getCoverUrl());
+        vo.setProductType(product.getProductType());
+        vo.setProductTypeName(productTypeName(product.getProductType()));
+        vo.setPriceCredit(product.getPriceCredit());
+        vo.setPriceMoney(product.getPriceMoney());
+        vo.setStock(product.getStock());
+        vo.setStatus(product.getStatus());
+        vo.setApprovalStatus(product.getApprovalStatus());
+        vo.setApprovalStatusName(approvalStatusName(product.getApprovalStatus()));
+        vo.setReviewRemark(product.getReviewRemark());
+        vo.setCreateTime(product.getCreateTime());
+        return vo;
+    }
+
+    private static String productTypeName(Integer type) {
+        if (type == null) return "未知";
+        return switch (type) {
+            case 1 -> "实物商品";
+            case 2 -> "虚拟商品";
+            case 3 -> "课程兑换";
+            case 4 -> "服务权益";
+            default -> "其他";
+        };
+    }
+
+    private static String approvalStatusName(Integer status) {
+        if (status == null) return "待审核";
+        return switch (status) {
+            case 1 -> "已通过";
+            case 2 -> "已驳回";
+            default -> "待审核";
+        };
     }
 
     private static String integrityEventTypeName(Integer eventType) {

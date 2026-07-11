@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import PageShell from '@/components/common/PageShell.vue'
@@ -26,7 +26,7 @@ const studentStatCards = computed(() => {
   return [
     {
       key: 'credit',
-      label: '学分余额',
+      label: '秩点余额',
       value: data.creditBalance,
       suffix: '分',
       icon: '💰',
@@ -90,7 +90,7 @@ const enterpriseStatCards = computed(() => {
 const studentQuickEntries = [
   { label: '我的简历', desc: '编辑个人简历', icon: '📄', path: '/profile/resume', color: '#2094f3' },
   { label: '学习档案', desc: '学习记录与统计', icon: '📁', path: '/profile/learning', color: '#52c41a' },
-  { label: '学分流水', desc: '查看学分变动', icon: '💰', path: '/profile/credit', color: '#fa8c16' },
+  { label: '秩点流水', desc: '查看秩点变动', icon: '💰', path: '/profile/credit', color: '#fa8c16' },
   { label: '诚信评定', desc: '诚信分详情', icon: '⭐', path: '/profile/integrity', color: '#eb2f96' },
   { label: '投递记录', desc: '求职投递历史', icon: '📋', path: '/profile/applications', color: '#13c2c2' },
   { label: '我的活动', desc: '活动报名与邀请', icon: '🎪', path: '/profile/activities', color: '#722ed1' },
@@ -186,7 +186,7 @@ onMounted(() => {
         <el-descriptions-item label="姓名">{{ user.realName }}</el-descriptions-item>
         <el-descriptions-item label="手机号">{{ user.phone || '-' }}</el-descriptions-item>
         <el-descriptions-item label="邮箱">{{ user.email || '-' }}</el-descriptions-item>
-        <el-descriptions-item v-if="isStudent && dashboard" label="累计获得学分">
+        <el-descriptions-item v-if="isStudent && dashboard" label="累计获得秩点">
           {{ dashboard.totalEarned }} 分
         </el-descriptions-item>
         <el-descriptions-item v-if="isStudent && dashboard?.integrityScore != null" label="诚信分">

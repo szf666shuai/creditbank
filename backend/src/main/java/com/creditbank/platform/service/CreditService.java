@@ -134,7 +134,7 @@ public class CreditService {
                         .eq(CreditRule::getEnabled, 1)
         );
         if (rule == null) {
-            throw new BusinessException(404, "学分规则不存在或已停用: " + request.getRuleCode());
+            throw new BusinessException(404, "秩点规则不存在或已停用: " + request.getRuleCode());
         }
 
         IntegrityScore score = integrityService.ensureScore(userId);
@@ -148,7 +148,7 @@ public class CreditService {
             long exists = creditTransactionMapper.countByBizRef(
                     userId, rule.getBizType(), request.getRefType(), request.getRefId());
             if (exists > 0) {
-                throw new BusinessException(409, "该业务已发放过学分，请勿重复领取");
+                throw new BusinessException(409, "该业务已发放过秩点，请勿重复领取");
             }
         }
 
@@ -166,7 +166,7 @@ public class CreditService {
                 ? request.getAmountOverride()
                 : rule.getAmount();
         if (base == null || base.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new BusinessException("奖励学分必须大于 0");
+            throw new BusinessException("奖励秩点必须大于 0");
         }
 
         double multiplier = IntegrityLevel.fromScore(score.getScore()).getMultiplier();
@@ -199,13 +199,13 @@ public class CreditService {
             long exists = creditTransactionMapper.countByBizRef(
                     userId, request.getBizType(), request.getRefType(), request.getRefId());
             if (exists > 0) {
-                throw new BusinessException(409, "该业务已扣过学分，请勿重复提交");
+                throw new BusinessException(409, "该业务已扣过秩点，请勿重复提交");
             }
         }
 
         String source = StringUtils.hasText(request.getSource())
                 ? request.getSource()
-                : "学分消耗: " + request.getBizType();
+                : "秩点消耗: " + request.getBizType();
 
         return applyChange(
                 userId,
@@ -232,7 +232,7 @@ public class CreditService {
                 amount,
                 CreditTxnType.CONVERT,
                 bizType,
-                StringUtils.hasText(source) ? source : "学分退款",
+                StringUtils.hasText(source) ? source : "秩点退款",
                 refType,
                 refId
         );
@@ -244,7 +244,7 @@ public class CreditService {
         ensureAccount(userId);
         CreditAccount locked = creditAccountExtMapper.selectForUpdate(userId);
         if (locked == null) {
-            throw new BusinessException(404, "学分账户不存在");
+            throw new BusinessException(404, "秩点账户不存在");
         }
 
         BigDecimal balance = nz(locked.getBalance());
@@ -253,7 +253,7 @@ public class CreditService {
         BigDecimal after = balance.add(delta);
 
         if (after.compareTo(BigDecimal.ZERO) < 0) {
-            throw new BusinessException(400, "学分余额不足，当前余额 " + balance);
+            throw new BusinessException(400, "秩点余额不足，当前余额 " + balance);
         }
 
         if (delta.compareTo(BigDecimal.ZERO) > 0) {

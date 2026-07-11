@@ -23,9 +23,6 @@ public class AuthInterceptor implements HandlerInterceptor {
 
         String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            if (isOptionalAuthenticationRequest(request)) {
-                return true;
-            }
             throw new BusinessException(401, "未登录或登录已过期");
         }
 
@@ -37,11 +34,6 @@ public class AuthInterceptor implements HandlerInterceptor {
         } catch (Exception e) {
             throw new BusinessException(401, "未登录或登录已过期");
         }
-    }
-
-    private boolean isOptionalAuthenticationRequest(HttpServletRequest request) {
-        return "GET".equalsIgnoreCase(request.getMethod())
-                && "/api/learning/resources".equals(request.getRequestURI());
     }
 
     @Override

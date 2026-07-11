@@ -50,6 +50,7 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
       - ./videos:/usr/share/nginx/html/videos:ro
+      - ./materials:/usr/share/nginx/html/materials:ro
     depends_on:
       - mysql
       - redis

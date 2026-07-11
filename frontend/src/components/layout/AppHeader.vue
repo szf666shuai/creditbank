@@ -1,12 +1,16 @@
 <script setup lang="ts">
 import { computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import { ArrowDown, ChatDotRound, HomeFilled, Search } from '@element-plus/icons-vue'
 import { useLayout } from '@/composables/useLayout'
 import { useHeaderScroll } from '@/composables/useHeaderScroll'
 import { useSearchSuggest } from '@/composables/useSearchSuggest'
 import { useMessageStore } from '@/stores/message'
+import { useAuthStore } from '@/stores/auth'
 import { searchCategories } from '@/config/search-categories'
-import type { SearchItem } from '@/api/search'
+import { BRAND_NAME, BRAND_NAME_EN, BRAND_SITE } from '@/config/brand'
+import { getRoleTheme, resolveHeaderThemeVariant } from '@/config/role-theme'
+import BrandLogo from '@/components/brand/BrandLogo.vue'
 
 const {
   siteNav,
@@ -22,10 +26,40 @@ const {
   logout,
 } = useLayout()
 
+const route = useRoute()
 const messageStore = useMessageStore()
+const authStore = useAuthStore()
 const unreadCount = computed(() => messageStore.unreadCount)
 
-const { isHeaderVisible, isTransparent } = useHeaderScroll()
+const isHomePage = computed(() => route.name === 'home')
+
+const headerVariant = computed(() =>
+  resolveHeaderThemeVariant({
+    isHomePage: isHomePage.value,
+    isLoggedIn: authStore.isLoggedIn,
+    isStudent: authStore.isStudent,
+    isEnterprise: authStore.isEnterprise,
+    isAdmin: authStore.isAdmin,
+  }),
+)
+
+const headerTheme = computed(() => getRoleTheme(headerVariant.value))
+
+const logoStyle = computed(() => ({
+  background: `linear-gradient(135deg, ${headerTheme.value.logoBgFrom} 0%, ${headerTheme.value.logoBgTo} 100%)`,
+  boxShadow: `0 4px 14px ${headerTheme.value.logoShadow}`,
+}))
+
+const headerStyle = computed(() => ({
+  '--header-bg': headerTheme.value.headerBg,
+  '--header-border': headerTheme.value.headerBorder,
+  '--header-accent': headerTheme.value.primarySoft,
+  '--header-accent-strong': headerTheme.value.primaryDark,
+  '--header-text': headerTheme.value.text,
+  '--header-text-muted': headerTheme.value.textMuted,
+}))
+
+const { isHeaderVisible } = useHeaderScroll()
 
 const {
   suggestions,
@@ -85,28 +119,22 @@ onMounted(() => {
 
 <template>
   <header
-    class="app-header"
+    class="app-header is-themed"
+    :style="headerStyle"
     :class="{
       'is-hidden': !isHeaderVisible,
-      'is-transparent': isTransparent,
       'is-logged-in': isLoggedIn,
     }"
   >
     <div class="header-inner">
       <!-- Logo -->
-      <router-link to="/" class="logo">
+      <router-link to="/" class="logo" :style="logoStyle">
         <div class="logo-icon">
-          <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect width="40" height="40" rx="4" fill="white" fill-opacity="0.15" />
-            <path
-              d="M10 28V12h4l6 10 6-10h4v16h-3.5V18l-5.5 9h-2l-5.5-9v10H10z"
-              fill="white"
-            />
-          </svg>
+          <BrandLogo :size="36" :variant="headerVariant" />
         </div>
         <div class="logo-text">
-          <span class="logo-title">学分银行</span>
-          <span class="logo-sub">creditbank.edu.cn</span>
+          <span class="logo-title">{{ BRAND_NAME }}</span>
+          <span class="logo-sub">{{ BRAND_NAME_EN }} · {{ BRAND_SITE }}</span>
         </div>
       </router-link>
 
@@ -270,8 +298,17 @@ onMounted(() => {
   transform: translateY(0);
   transition:
     transform 0.32s ease,
-    background 0.3s ease,
-    box-shadow 0.3s ease;
+    background 0.35s ease,
+    border-color 0.35s ease,
+    box-shadow 0.35s ease;
+}
+
+.app-header.is-themed {
+  background: var(--header-bg);
+  border-bottom: 1px solid var(--header-border);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.22);
 }
 
 .app-header.is-hidden {
@@ -279,68 +316,87 @@ onMounted(() => {
   pointer-events: none;
 }
 
-.app-header.is-transparent {
-  background: transparent;
-  box-shadow: none;
+.app-header.is-themed .nav-item {
+  color: var(--header-text);
 }
 
-.app-header.is-transparent .nav-item {
-  color: rgba(255, 255, 255, 0.95);
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+.app-header.is-themed .nav-item:hover,
+.app-header.is-themed .nav-dropdown:hover {
+  color: var(--header-accent-strong);
+  background: rgba(255, 255, 255, 0.08);
 }
 
-.app-header.is-transparent .nav-item:hover,
-.app-header.is-transparent .nav-dropdown:hover {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.12);
-}
-
-.app-header.is-transparent .nav-item.active {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.22);
+.app-header.is-themed .nav-item.active {
+  color: var(--header-accent-strong);
+  background: rgba(255, 255, 255, 0.14);
   border-radius: 20px;
 }
 
-.app-header.is-transparent .search-box {
-  background: rgba(255, 255, 255, 0.18);
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  backdrop-filter: blur(6px);
+.app-header.is-themed .search-box {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
 }
 
-.app-header.is-transparent .search-box input {
-  color: #fff;
+.app-header.is-themed .search-box input {
+  color: var(--header-text);
 }
 
-.app-header.is-transparent .search-box input::placeholder {
-  color: rgba(255, 255, 255, 0.72);
+.app-header.is-themed .search-box input::placeholder {
+  color: var(--header-text-muted);
 }
 
-.app-header.is-transparent .search-category :deep(.el-select__selected-item) {
-  color: rgba(255, 255, 255, 0.92);
+.app-header.is-themed .search-category :deep(.el-select__selected-item) {
+  color: var(--header-text);
 }
 
-.app-header.is-transparent .search-category :deep(.el-select__caret),
-.app-header.is-transparent .search-btn {
-  color: rgba(255, 255, 255, 0.85);
+.app-header.is-themed .search-category :deep(.el-select__caret),
+.app-header.is-themed .search-btn {
+  color: var(--header-text-muted);
 }
 
-.app-header.is-transparent .search-divider {
-  background: rgba(255, 255, 255, 0.4);
+.app-header.is-themed .search-btn:hover {
+  color: var(--header-accent-strong);
 }
 
-.app-header.is-transparent .profile-trigger {
-  color: #fff;
-  border-color: rgba(255, 255, 255, 0.55);
+.app-header.is-themed .search-divider {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.app-header.is-themed .profile-trigger {
+  color: var(--header-accent-strong);
+  border-color: rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.app-header.is-themed .profile-trigger:hover {
   background: rgba(255, 255, 255, 0.12);
 }
 
-.app-header.is-transparent .profile-trigger:hover {
-  background: rgba(255, 255, 255, 0.22);
+.app-header.is-themed .role-badge {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--header-accent-strong);
 }
 
-.app-header.is-transparent .role-badge {
-  background: rgba(255, 255, 255, 0.22);
-  color: #fff;
+.app-header.is-themed .message-entry {
+  color: var(--header-text);
+}
+
+.app-header.is-themed .message-entry:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--header-accent-strong);
+}
+
+.app-header.is-themed .auth-btns {
+  background: linear-gradient(135deg, var(--header-accent), var(--header-accent-strong));
+}
+
+.app-header.is-themed .btn-register {
+  color: var(--header-accent-strong);
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.app-header.is-themed .btn-register:hover {
+  background: #fff;
 }
 
 .header-inner {
@@ -373,9 +429,9 @@ onMounted(() => {
   gap: 10px;
   flex-shrink: 0;
   text-decoration: none;
-  background: var(--color-primary);
   padding: 8px 14px;
-  border-radius: 4px;
+  border-radius: 8px;
+  transition: background 0.35s ease, box-shadow 0.35s ease;
 }
 
 .logo-icon {
@@ -399,7 +455,7 @@ onMounted(() => {
   font-size: 16px;
   font-weight: 700;
   color: var(--color-white);
-  letter-spacing: 1px;
+  letter-spacing: 2px;
 }
 
 .logo-sub {
@@ -717,14 +773,6 @@ onMounted(() => {
   color: var(--color-primary);
 }
 
-.app-header.is-transparent .message-entry {
-  color: rgba(255, 255, 255, 0.9);
-}
-
-.app-header.is-transparent .message-entry:hover {
-  background: rgba(255, 255, 255, 0.18);
-  color: #fff;
-}
 
 @media (max-width: 1280px) {
   .header-main {

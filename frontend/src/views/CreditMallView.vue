@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
@@ -159,7 +159,7 @@ async function payOrder(order: MallOrder) {
     if (res.code !== 200 || !res.data) throw new Error(res.message || '支付失败')
     paymentResultNo.value = res.data.payNo
     const balance = res.data.creditChange?.balanceAfter
-    ElMessage.success(balance === undefined ? '支付成功' : `支付成功，剩余 ${formatAmount(balance)} 学分`)
+    ElMessage.success(balance === undefined ? '支付成功' : `支付成功，剩余 ${formatAmount(balance)} 秩点`)
     await loadProducts()
   } catch (e) {
     ElMessage.error(e instanceof Error ? e.message : '支付失败')
@@ -258,7 +258,7 @@ onMounted(async () => {
                 <div class="product-footer">
                   <div class="price">
                     <strong>{{ formatAmount(product.priceCredit) }}</strong>
-                    <span>学分</span>
+                    <span>秩点</span>
                     <em v-if="product.priceMoney > 0">+ ¥{{ formatAmount(product.priceMoney) }}</em>
                   </div>
                   <div class="product-actions">
@@ -282,7 +282,7 @@ onMounted(async () => {
             <div v-for="line in cart" :key="line.product.id" class="cart-line">
               <div>
                 <strong>{{ line.product.name }}</strong>
-                <span>{{ formatAmount(line.product.priceCredit) }} 学分 / 件</span>
+                <span>{{ formatAmount(line.product.priceCredit) }} 秩点 / 件</span>
               </div>
               <el-input-number
                 v-model="line.quantity"
@@ -311,7 +311,7 @@ onMounted(async () => {
           />
           <div class="total-line">
             <span>合计</span>
-            <strong>{{ formatAmount(totalCredit) }} 学分</strong>
+            <strong>{{ formatAmount(totalCredit) }} 秩点</strong>
           </div>
           <div v-if="totalMoney > 0" class="total-line muted">
             <span>模拟现金</span>
@@ -367,12 +367,12 @@ onMounted(async () => {
             <div class="payment-items">
               <div v-for="item in pendingOrder.items" :key="item.id">
                 <span>{{ item.productName }} × {{ item.quantity }}</span>
-                <strong>{{ formatAmount(item.priceCredit * item.quantity) }} 学分</strong>
+                <strong>{{ formatAmount(item.priceCredit * item.quantity) }} 秩点</strong>
               </div>
             </div>
             <div class="payment-total">
               <span>应付合计</span>
-              <strong>{{ formatAmount(pendingOrder.totalCredit) }} 学分</strong>
+              <strong>{{ formatAmount(pendingOrder.totalCredit) }} 秩点</strong>
             </div>
             <el-alert
               title="本项目使用本地模拟支付，支付结果与流水记录写入本地数据库。"

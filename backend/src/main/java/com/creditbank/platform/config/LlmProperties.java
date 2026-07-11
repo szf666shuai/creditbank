@@ -15,5 +15,5 @@ public class LlmProperties {
     private String baseUrl = "https://api.deepseek.com";
     private String model = "deepseek-chat";
     private int timeoutMs = 60000;
-    private String systemPrompt = "你是学分银行学习助手。";
+    private String systemPrompt = "你是星秩存册学习助手。";
 }

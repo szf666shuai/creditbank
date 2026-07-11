@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import PageShell from '@/components/common/PageShell.vue'
 import { CREDIT_TYPE_OPTIONS } from '@/api/profile-credit'
@@ -32,7 +32,7 @@ onMounted(fetchData)
 </script>
 
 <template>
-  <PageShell title="学分监察" description="全平台学分流水记录（只读）" :loading="loading" :error="loadError" @retry="fetchData">
+  <PageShell title="秩点监察" description="全平台秩点流水记录（只读）" :loading="loading" :error="loadError" @retry="fetchData">
     <div class="page-toolbar">
       <el-select v-model="filters.type" placeholder="流水类型" clearable style="width: 120px">
         <el-option v-for="item in CREDIT_TYPE_OPTIONS.filter((o) => o.value !== undefined)" :key="String(item.value)" :label="item.label" :value="item.value" />

@@ -24,8 +24,18 @@ export const STUDENT_PROFILE_PATHS = [
   '/profile/activities',
 ] as const
 
+/** 仅学员可访问的学习课程相关路径 */
+export const STUDENT_LEARNING_PATHS = [
+  '/resources',
+  '/archive',
+] as const
+
 export function isStudentOnlyPath(path: string): boolean {
   return STUDENT_PROFILE_PATHS.some((p) => path === p || path.startsWith(`${p}/`))
+}
+
+export function isStudentLearningPath(path: string): boolean {
+  return STUDENT_LEARNING_PATHS.some((p) => path === p || path.startsWith(`${p}/`))
 }
 
 export function isEnterpriseOnlyPath(path: string): boolean {
@@ -37,6 +47,7 @@ export function isAdminOnlyPath(path: string): boolean {
 }
 
 export function canAccessPath(role: number, path: string): boolean {
+  if (isStudentLearningPath(path)) return role === ROLE_STUDENT
   if (isStudentOnlyPath(path)) return role === ROLE_STUDENT
   if (isEnterpriseOnlyPath(path)) return role === ROLE_ENTERPRISE
   if (isAdminOnlyPath(path)) return role === ROLE_ADMIN

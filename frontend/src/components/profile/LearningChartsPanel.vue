@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import * as echarts from 'echarts'
 import { listLearningStatsApi, type LearningStatDaily } from '@/api/profile'
@@ -87,15 +87,15 @@ function renderCharts() {
   })
 
   barChart.setOption({
-    title: { text: '完课与学分', left: 'center', textStyle: { fontSize: 14, fontWeight: 600 } },
+    title: { text: '完课与秩点', left: 'center', textStyle: { fontSize: 14, fontWeight: 600 } },
     tooltip: { trigger: 'axis' },
-    legend: { data: ['完成课程', '获得学分'], top: 28 },
+    legend: { data: ['完成课程', '获得秩点'], top: 28 },
     grid: { left: 48, right: 24, top: 64, bottom: 32 },
     xAxis: { type: 'category', data: dates },
-    yAxis: [{ type: 'value', name: '门', minInterval: 1 }, { type: 'value', name: '学分', minInterval: 0.5 }],
+    yAxis: [{ type: 'value', name: '门', minInterval: 1 }, { type: 'value', name: '秩点', minInterval: 0.5 }],
     series: [
       { name: '完成课程', type: 'bar', data: coursesCompleted, itemStyle: { color: '#52c41a' }, barMaxWidth: 28 },
-      { name: '获得学分', type: 'bar', yAxisIndex: 1, data: creditEarned, itemStyle: { color: '#fa8c16' }, barMaxWidth: 28 },
+      { name: '获得秩点', type: 'bar', yAxisIndex: 1, data: creditEarned, itemStyle: { color: '#fa8c16' }, barMaxWidth: 28 },
     ],
   })
 }
@@ -160,7 +160,7 @@ defineExpose({ fetchStats })
           </div>
           <div class="page-summary-card">
             <div class="page-summary-value">{{ summary.totalCredit }}</div>
-            <div class="page-summary-label">获得学分</div>
+            <div class="page-summary-label">获得秩点</div>
           </div>
           <div class="page-summary-card">
             <div class="page-summary-value">{{ summary.days }}</div>

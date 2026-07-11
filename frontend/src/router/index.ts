@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+﻿import { createRouter, createWebHistory } from 'vue-router'
 import MainLayout from '@/layouts/MainLayout.vue'
 import ProfileLayout from '@/layouts/ProfileLayout.vue'
 import HomeView from '@/views/HomeView.vue'
@@ -9,6 +9,7 @@ import SearchView from '@/views/SearchView.vue'
 import CreditMallView from '@/views/CreditMallView.vue'
 import MallOrdersView from '@/views/MallOrdersView.vue'
 import LearningResourcesView from '@/views/LearningResourcesView.vue'
+import CoursePlayerView from '@/views/CoursePlayerView.vue'
 import LearningArchiveView from '@/views/LearningArchiveView.vue'
 import MallProductDetailView from '@/views/MallProductDetailView.vue'
 import EnterpriseIndexView from '@/views/enterprise/IndexView.vue'
@@ -22,6 +23,7 @@ import ProfileEnterpriseInterviewsView from '@/views/profile/enterprise/Intervie
 import ProfileEnterpriseActivityInvitationsView from '@/views/profile/enterprise/ActivityInvitationsView.vue'
 import ProfileEnterpriseOrgView from '@/views/profile/enterprise/OrgView.vue'
 import ProfileEnterpriseMaterialsView from '@/views/profile/enterprise/MaterialsView.vue'
+import ProfileEnterpriseProductsView from '@/views/profile/enterprise/ProductsView.vue'
 import ProfileIndexView from '@/views/profile/IndexView.vue'
 import ProfileResumeView from '@/views/profile/ResumeView.vue'
 import ProfileLearningView from '@/views/profile/LearningView.vue'
@@ -43,6 +45,7 @@ import ProfileAdminIntegrityView from '@/views/profile/admin/IntegrityView.vue'
 import ProfileAdminCreditView from '@/views/profile/admin/CreditView.vue'
 import ProfileAdminJobsView from '@/views/profile/admin/JobsView.vue'
 import ProfileAdminActivitiesView from '@/views/profile/admin/ActivitiesView.vue'
+import ProfileAdminProductsView from '@/views/profile/admin/ProductsView.vue'
 
 import {
   canAccessPath,
@@ -72,8 +75,9 @@ const router = createRouter({
         { path: 'credit', name: 'credit', component: CreditMallView },
         { path: 'credit/orders', name: 'credit-orders', component: MallOrdersView, meta: { requiresAuth: true } },
         { path: 'credit/products/:productId', name: 'mall-product-detail', component: MallProductDetailView },
-        { path: 'resources', name: 'resources', component: LearningResourcesView },
-        { path: 'archive', name: 'archive', component: LearningArchiveView, meta: { requiresAuth: true } },
+        { path: 'resources', name: 'resources', component: LearningResourcesView, meta: studentRoute },
+        { path: 'resources/:courseId', name: 'course-player', component: CoursePlayerView, meta: studentRoute },
+        { path: 'archive', name: 'archive', component: LearningArchiveView, meta: studentRoute },
         { path: 'achievement', ...placeholder('学习成果') },
         { path: 'forum', ...placeholder('论坛') },
         { path: 'news', ...placeholder('资讯中心') },
@@ -164,7 +168,7 @@ const router = createRouter({
               path: 'credit',
               name: 'profile-credit',
               component: ProfileCreditView,
-              meta: { title: '学分流水', ...studentRoute },
+              meta: { title: '秩点流水', ...studentRoute },
             },
             {
               path: 'integrity',
@@ -256,7 +260,7 @@ const router = createRouter({
               path: 'admin/credit',
               name: 'profile-admin-credit',
               component: ProfileAdminCreditView,
-              meta: { title: '学分监察', ...adminRoute },
+              meta: { title: '秩点监察', ...adminRoute },
             },
             {
               path: 'admin/jobs',
@@ -269,6 +273,12 @@ const router = createRouter({
               name: 'profile-admin-activities',
               component: ProfileAdminActivitiesView,
               meta: { title: '活动监管', ...adminRoute },
+            },
+            {
+              path: 'admin/products',
+              name: 'profile-admin-products',
+              component: ProfileAdminProductsView,
+              meta: { title: '商品审核', ...adminRoute },
             },
             {
               path: 'enterprise',
@@ -318,6 +328,12 @@ const router = createRouter({
               component: ProfileEnterpriseMaterialsView,
               meta: { title: '企业资料', ...enterpriseRoute },
             },
+            {
+              path: 'enterprise/products',
+              name: 'profile-enterprise-products',
+              component: ProfileEnterpriseProductsView,
+              meta: { title: '商城管理', ...enterpriseRoute },
+            },
           ],
         },
 
@@ -348,7 +364,7 @@ router.beforeEach(async (to) => {
     return { path: '/login', query: { redirect: to.fullPath } }
   }
 
-  if (to.meta.requiresAuth || to.meta.guest) {
+  if (to.meta.requiresAuth || to.meta.guest || to.path === '/') {
     if (authStore.isLoggedIn && !authStore.userInfo) {
       await authStore.fetchUserInfo()
     }
@@ -357,6 +373,10 @@ router.beforeEach(async (to) => {
   const role = authStore.userInfo?.role ?? ROLE_STUDENT
 
   if (to.meta.requiresAuth && authStore.isLoggedIn && !canAccessPath(role, to.path)) {
+    return { path: getDefaultHomePath(role) }
+  }
+
+  if (!to.meta.requiresAuth && authStore.isLoggedIn && !canAccessPath(role, to.path)) {
     return { path: getDefaultHomePath(role) }
   }
 

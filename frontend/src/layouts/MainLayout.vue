@@ -1,21 +1,45 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { ElMessage } from 'element-plus'
+import { useAuthStore } from '@/stores/auth'
 import AppHeader from '@/components/layout/AppHeader.vue'
 import AppFooter from '@/components/layout/AppFooter.vue'
 import BackToTop from '@/components/layout/BackToTop.vue'
 import ParticleBackground from '@/components/effects/ParticleBackground.vue'
+import { resolveRoleThemeVariant } from '@/config/role-theme'
+import {
+  initGuestDailyReminder,
+  registerGuestReminderServiceWorker,
+} from '@/utils/guest-daily-reminder'
 
 const route = useRoute()
+const authStore = useAuthStore()
 const isHomePage = computed(() => route.name === 'home')
+
+const particleVariant = computed(() => {
+  if (!isHomePage.value) return 'default'
+  if (!authStore.isLoggedIn) return 'student'
+  return resolveRoleThemeVariant({
+    isLoggedIn: authStore.isLoggedIn,
+    isStudent: authStore.isStudent,
+    isEnterprise: authStore.isEnterprise,
+    isAdmin: authStore.isAdmin,
+  })
+})
+
+onMounted(() => {
+  void registerGuestReminderServiceWorker()
+  initGuestDailyReminder(authStore.isLoggedIn)
+})
 </script>
 
 <template>
   <div class="main-layout">
-    <ParticleBackground />
+    <ParticleBackground :variant="particleVariant" />
     <div class="layout-content">
       <AppHeader />
-      <main class="main-content" :class="{ 'main-content--offset': !isHomePage }">
+      <main class="main-content">
         <router-view />
       </main>
       <AppFooter />
@@ -41,9 +65,6 @@ const isHomePage = computed(() => route.name === 'home')
 .main-content {
   flex: 1;
   width: 100%;
-}
-
-.main-content--offset {
-  padding-top: var(--header-height);
+  padding-top: calc(var(--header-height) + var(--header-gap));
 }
 </style>

@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
@@ -61,7 +61,7 @@ async function payOrder(order: MallOrder) {
     if (res.code !== 200 || !res.data) throw new Error(res.message || '支付失败')
     paymentResultNo.value = res.data.payNo
     const balance = res.data.creditChange?.balanceAfter
-    ElMessage.success(balance === undefined ? '支付成功' : `支付成功，剩余 ${formatAmount(balance)} 学分`)
+    ElMessage.success(balance === undefined ? '支付成功' : `支付成功，剩余 ${formatAmount(balance)} 秩点`)
     await loadOrders()
     pendingOrder.value = orders.value.find((item) => item.id === order.id) || order
   } catch (e) {
@@ -145,7 +145,7 @@ onMounted(loadOrders)
               </div>
             </div>
             <div class="order-foot">
-              <strong>{{ formatAmount(order.totalCredit) }} 学分</strong>
+              <strong>{{ formatAmount(order.totalCredit) }} 秩点</strong>
               <el-button
                 v-if="order.payStatus === 0"
                 size="small"
@@ -195,12 +195,12 @@ onMounted(loadOrders)
             <div class="payment-items">
               <div v-for="item in pendingOrder.items" :key="item.id">
                 <span>{{ item.productName }} × {{ item.quantity }}</span>
-                <strong>{{ formatAmount(item.priceCredit * item.quantity) }} 学分</strong>
+                <strong>{{ formatAmount(item.priceCredit * item.quantity) }} 秩点</strong>
               </div>
             </div>
             <div class="payment-total">
               <span>应付合计</span>
-              <strong>{{ formatAmount(pendingOrder.totalCredit) }} 学分</strong>
+              <strong>{{ formatAmount(pendingOrder.totalCredit) }} 秩点</strong>
             </div>
             <el-alert
               title="本项目使用本地模拟支付，支付结果与流水记录写入本地数据库。"
