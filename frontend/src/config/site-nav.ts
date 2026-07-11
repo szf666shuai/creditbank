@@ -34,12 +34,23 @@ export const siteNav: NavItem[] = [
   {
     key: 'forum',
     label: '论坛',
-    children: [],
+    path: '/forum',
+    children: [
+      { label: '校园频道', path: '/forum?board=campus' },
+      { label: '校园集市', path: '/forum?board=market' },
+      { label: '求职经验', path: '/forum?board=jobs' },
+      { label: '政策解读', path: '/forum?board=policy' },
+    ],
   },
   {
     key: 'news',
     label: '资讯中心',
-    children: [],
+    path: '/news',
+    children: [
+      { label: '招聘信息', path: '/news?type=job' },
+      { label: '活动信息', path: '/news?type=activity' },
+      { label: '政策资讯', path: '/news?type=policy' },
+    ],
   },
   {
     key: 'enterprise',

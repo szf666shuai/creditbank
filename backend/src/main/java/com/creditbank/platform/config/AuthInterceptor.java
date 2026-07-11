@@ -23,6 +23,9 @@ public class AuthInterceptor implements HandlerInterceptor {
 
         String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            if (isPublicReadRequest(request)) {
+                return true;
+            }
             throw new BusinessException(401, "未登录或登录已过期");
         }
 
@@ -40,5 +43,13 @@ public class AuthInterceptor implements HandlerInterceptor {
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response,
                                 Object handler, Exception ex) {
         UserContext.clear();
+    }
+
+    private boolean isPublicReadRequest(HttpServletRequest request) {
+        if (!"GET".equalsIgnoreCase(request.getMethod())) {
+            return false;
+        }
+        String path = request.getRequestURI();
+        return path.startsWith("/api/forum/") || path.startsWith("/api/information/");
     }
 }

@@ -4,6 +4,12 @@
 -- 维护分支: db
 -- ============================================================
 
+CREATE DATABASE IF NOT EXISTS credit_bank
+    DEFAULT CHARACTER SET utf8mb4
+    DEFAULT COLLATE utf8mb4_unicode_ci;
+
+USE credit_bank;
+
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 

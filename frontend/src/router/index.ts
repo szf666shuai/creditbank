@@ -6,6 +6,8 @@ import PlaceholderView from '@/views/PlaceholderView.vue'
 import LoginView from '@/views/auth/LoginView.vue'
 import RegisterView from '@/views/auth/RegisterView.vue'
 import SearchView from '@/views/SearchView.vue'
+import ForumView from '@/views/ForumView.vue'
+import InformationView from '@/views/InformationView.vue'
 import EnterpriseIndexView from '@/views/enterprise/IndexView.vue'
 import EnterpriseDetailView from '@/views/enterprise/DetailView.vue'
 
@@ -68,8 +70,8 @@ const router = createRouter({
         { path: 'resources', ...placeholder('学习资源') },
         { path: 'archive', ...placeholder('学习档案') },
         { path: 'achievement', ...placeholder('学习成果') },
-        { path: 'forum', ...placeholder('论坛') },
-        { path: 'news', ...placeholder('资讯中心') },
+        { path: 'forum', name: 'forum', component: ForumView, meta: { title: '论坛' } },
+        { path: 'news', name: 'news', component: InformationView, meta: { title: '资讯中心' } },
         { path: 'organization', redirect: '/register' },
         { path: 'about', ...placeholder('关于我们') },
         { path: 'activity', ...placeholder('活动报名') },
