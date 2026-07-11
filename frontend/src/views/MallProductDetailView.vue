@@ -93,7 +93,7 @@ onMounted(loadProduct)
 <template>
   <div class="product-detail-page">
     <div class="section-inner">
-      <el-button class="back-link" :icon="ArrowLeft" text @click="router.push('/credit')">返回积分商城</el-button>
+      <el-button class="back-link" :icon="ArrowLeft" text @click="router.push('/credit')">返回秩点商城</el-button>
       <el-skeleton v-if="loading" :rows="8" animated />
       <el-empty v-else-if="!product" description="商品不存在或已下架" />
       <template v-else>

@@ -23,11 +23,27 @@ export function useLayout() {
   })
   const visibleSiteNav = computed(() => getSiteNavForRole(authStore.userInfo?.role))
 
+  function navigate(path: string) {
+    const [pathname, search = ''] = path.split('?')
+    if (!search) {
+      router.push({ path: pathname })
+      return
+    }
+    router.push({
+      path: pathname,
+      query: Object.fromEntries(new URLSearchParams(search)),
+    })
+  }
+
   function isNavActive(item: { path?: string; key: string; children: { path: string }[] }) {
     if (item.path) {
-      return item.path === '/' ? route.path === '/' : route.path.startsWith(item.path)
+      if (item.path === '/') return route.path === '/'
+      return route.path === item.path || route.path.startsWith(`${item.path}/`)
     }
-    return item.children.some((c) => route.path.startsWith(c.path))
+    return item.children.some((c) => {
+      const childPath = c.path.split('?')[0]
+      return route.path === childPath || route.path.startsWith(`${childPath}/`)
+    })
   }
 
   function handleSearch() {
@@ -39,10 +55,6 @@ export function useLayout() {
         type: searchCategory.value,
       },
     })
-  }
-
-  function navigate(path: string) {
-    router.push(path)
   }
 
   function logout() {

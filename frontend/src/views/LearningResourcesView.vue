@@ -1,18 +1,22 @@
 ﻿<script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
-import { Check, Collection, Search } from '@element-plus/icons-vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { Check, Collection, Search, VideoPlay } from '@element-plus/icons-vue'
 import {
+  completeLearning,
   fetchLearningResources,
   fetchLearningTags,
   type LearningResource,
 } from '@/api/learning'
+import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
 const route = useRoute()
+const authStore = useAuthStore()
 
 const loading = ref(false)
+const completingId = ref<number | null>(null)
 const resources = ref<LearningResource[]>([])
 const tags = ref<string[]>([])
 const keyword = ref('')
@@ -59,6 +63,10 @@ function requiredWatchSeconds(item?: LearningResource | null) {
   return Math.ceil(Number(item.videoDurationSeconds || 0) * 0.8)
 }
 
+function canComplete(item: LearningResource) {
+  return !item.certNo && Number(item.progress || 0) >= 80
+}
+
 async function loadResources() {
   loading.value = true
   try {
@@ -83,7 +91,43 @@ async function loadTags() {
 }
 
 function openCourse(item: LearningResource) {
+  if (!authStore.isLoggedIn) {
+    router.push({ path: '/login', query: { redirect: `/resources/${item.id}` } })
+    return
+  }
+  if (!authStore.isStudent) {
+    ElMessage.warning('学习页仅学员可进入')
+    return
+  }
   router.push({ name: 'course-player', params: { courseId: item.id } })
+}
+
+async function handleComplete(item: LearningResource) {
+  if (!canComplete(item)) {
+    ElMessage.warning('需先在学习页有效观看至 80% 进度，才能完成课程并领取合格证')
+    openCourse(item)
+    return
+  }
+  try {
+    await ElMessageBox.confirm(
+      `《${item.title}》已达到合格观看时长，确认完成课程并生成合格证？`,
+      '完成学习',
+      { type: 'success', confirmButtonText: '确认完成', cancelButtonText: '取消' },
+    )
+  } catch {
+    return
+  }
+  completingId.value = item.id
+  try {
+    const res = await completeLearning(item.id)
+    if (res.code !== 200 || !res.data) throw new Error(res.message || '完成学习失败')
+    ElMessage.success(res.data.creditChange ? '已完成学习并发放奖励秩点' : '已完成学习并生成证书')
+    await loadResources()
+  } catch (e) {
+    ElMessage.error(e instanceof Error ? e.message : '完成学习失败')
+  } finally {
+    completingId.value = null
+  }
 }
 
 function selectTag(tag: string) {
@@ -124,18 +168,22 @@ onMounted(async () => {
       </section>
 
       <section class="filters">
-        <el-input
-          v-model="keyword"
-          placeholder="搜索课程、技能或机构"
-          clearable
-          @keyup.enter="loadResources"
-          @clear="loadResources"
-        >
-          <template #prefix>
-            <el-icon><Search /></el-icon>
-          </template>
-        </el-input>
-        <el-button type="primary" :icon="Search" @click="loadResources">搜索</el-button>
+        <div class="glass-search">
+          <el-input
+            v-model="keyword"
+            placeholder="搜索课程、技能或机构"
+            clearable
+            @keyup.enter="loadResources"
+            @clear="loadResources"
+          >
+            <template #prefix>
+              <el-icon><Search /></el-icon>
+            </template>
+          </el-input>
+          <el-button class="glass-search__btn" type="primary" :icon="Search" @click="loadResources">
+            搜索
+          </el-button>
+        </div>
       </section>
 
       <div class="tag-row">
@@ -210,25 +258,33 @@ onMounted(async () => {
                 <strong>{{ formatCredit(item.creditReward) }} 秩点</strong>
               </div>
               <div class="actions">
-                <el-button
-                  v-if="!item.certNo"
-                  :icon="Collection"
-                  @click="openCourse(item)"
-                >
+                <el-button type="primary" :icon="VideoPlay" @click="openCourse(item)">
                   <template v-if="item.paid && !item.purchased">
                     购买解锁 · {{ formatCredit(item.priceCredit) }} 秩点
                   </template>
+                  <template v-else-if="item.progress">
+                    继续学习
+                  </template>
                   <template v-else>
-                    {{ item.progress ? '继续学习' : '开始学习' }}
+                    进入学习页
                   </template>
                 </el-button>
                 <el-button
-                  type="primary"
-                  :disabled="!!item.certNo || Number(item.progress || 0) < 80"
+                  v-if="item.certNo"
+                  type="success"
                   :icon="Check"
-                  @click="openCourse(item)"
+                  disabled
                 >
-                  {{ item.certNo ? '已完成' : '进入学习页' }}
+                  已完成
+                </el-button>
+                <el-button
+                  v-else
+                  :icon="Collection"
+                  :loading="completingId === item.id"
+                  :disabled="!canComplete(item)"
+                  @click="handleComplete(item)"
+                >
+                  {{ canComplete(item) ? '完成领证' : '观看满 80% 可领证' }}
                 </el-button>
               </div>
             </div>
@@ -242,6 +298,7 @@ onMounted(async () => {
 <style scoped>
 .resources-page {
   padding: 32px 16px 56px;
+  background: transparent;
 }
 
 .section-inner {
@@ -260,7 +317,7 @@ onMounted(async () => {
 .eyebrow {
   font-size: 12px;
   letter-spacing: 0;
-  color: var(--color-primary);
+  color: #67e8f9;
   font-weight: 700;
   text-transform: uppercase;
 }
@@ -269,11 +326,12 @@ h1 {
   margin: 6px 0 8px;
   font-size: 30px;
   line-height: 1.2;
-  color: var(--color-text);
+  color: #f5f8ff;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
 }
 
 .subtitle {
-  color: var(--color-text-secondary);
+  color: rgba(232, 240, 255, 0.78);
   line-height: 1.7;
   max-width: 620px;
 }
@@ -287,8 +345,9 @@ h1 {
   min-width: 96px;
   padding: 12px 14px;
   border-radius: 8px;
-  background: var(--color-white);
-  border: 1px solid var(--color-border);
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(8px);
 }
 
 .summary-strip strong {
@@ -303,10 +362,11 @@ h1 {
 }
 
 .filters {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 10px;
   margin-bottom: 14px;
+}
+
+.filters .glass-search {
+  width: min(100%, 640px);
 }
 
 .tag-row {
@@ -330,13 +390,14 @@ h1 {
 }
 
 .resource-card {
-  background: var(--color-white);
-  border: 1px solid var(--color-border);
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 8px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   min-height: 420px;
+  backdrop-filter: blur(8px);
 }
 
 .cover {

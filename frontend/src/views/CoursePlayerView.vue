@@ -664,7 +664,7 @@ onMounted(() => {
 <style scoped>
 .course-player-page {
   padding: 24px 16px 56px;
-  background: linear-gradient(180deg, #f3f8ff 0%, #f7f8fa 220px, #f7f8fa 100%);
+  background: transparent;
   min-height: calc(100vh - 120px);
 }
 
@@ -704,13 +704,15 @@ onMounted(() => {
   margin: 0 0 10px;
   font-size: 28px;
   line-height: 1.3;
+  color: #f5f8ff;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
 }
 
 .header-meta {
   display: flex;
   flex-wrap: wrap;
   gap: 14px;
-  color: var(--color-text-muted);
+  color: rgba(232, 240, 255, 0.72);
   font-size: 13px;
 }
 
@@ -735,7 +737,7 @@ onMounted(() => {
 }
 
 .video-attribution {
-  color: var(--color-text-muted);
+  color: rgba(232, 240, 255, 0.65);
   font-size: 12px;
 }
 
@@ -745,10 +747,11 @@ onMounted(() => {
 }
 
 .interaction-card {
-  background: #fff;
-  border: 1px solid var(--color-border);
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 14px;
   padding: 8px 18px 18px;
+  backdrop-filter: blur(10px);
 }
 
 .intro-panel p {
@@ -792,9 +795,10 @@ onMounted(() => {
   gap: 14px;
   padding: 18px;
   border-radius: 14px;
-  background: #fff;
-  border: 1px solid var(--color-border);
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+  backdrop-filter: blur(10px);
 }
 
 .sidebar-title {

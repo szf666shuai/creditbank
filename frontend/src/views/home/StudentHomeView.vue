@@ -5,7 +5,7 @@ import { useAuthStore } from '@/stores/auth'
 import HomeBannerCarousel from '@/components/home/HomeBannerCarousel.vue'
 import StudentLearningStrip from '@/components/home/StudentLearningStrip.vue'
 import StudentTodoStrip from '@/components/home/StudentTodoStrip.vue'
-import StudentDiscoverySections from '@/components/home/StudentDiscoverySections.vue'
+import HomeContentSections from '@/components/home/HomeContentSections.vue'
 import { BRAND_NAME, BRAND_SLOGAN } from '@/config/brand'
 
 const router = useRouter()
@@ -49,9 +49,9 @@ onMounted(async () => {
           <StudentLearningStrip />
           <StudentTodoStrip />
         </section>
-
-        <StudentDiscoverySections />
       </div>
+
+      <HomeContentSections />
     </div>
   </div>
 </template>

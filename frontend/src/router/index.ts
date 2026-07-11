@@ -77,7 +77,7 @@ const router = createRouter({
         { path: 'credit', name: 'credit', component: CreditMallView },
         { path: 'credit/orders', name: 'mall-orders', component: MallOrdersView, meta: { ...authRoute } },
         { path: 'credit/products/:productId', name: 'mall-product-detail', component: MallProductDetailView },
-        { path: 'resources', name: 'resources', component: LearningResourcesView, meta: studentRoute },
+        { path: 'resources', name: 'resources', component: LearningResourcesView },
         { path: 'resources/:courseId', name: 'course-player', component: CoursePlayerView, meta: studentRoute },
         { path: 'archive', name: 'archive', component: LearningArchiveView, meta: studentRoute },
         { path: 'achievement', ...placeholder('学习成果') },
