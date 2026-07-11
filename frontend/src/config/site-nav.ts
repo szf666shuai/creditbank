@@ -43,23 +43,28 @@ export const siteNav: NavItem[] = [
   {
     key: 'forum',
     label: '论坛',
+    path: '/forum',
     children: [
-      // 论坛负责人补充
+      { label: '校园频道', path: '/forum?board=campus' },
+      { label: '校园集市', path: '/forum?board=market' },
+      { label: '求职经验', path: '/forum?board=jobs' },
+      { label: '政策解读', path: '/forum?board=policy' },
     ],
   },
   {
     key: 'news',
     label: '资讯中心',
+    path: '/news',
     children: [
-      // 资讯负责人补充
+      { label: '招聘信息', path: '/news?type=job' },
+      { label: '活动信息', path: '/news?type=activity' },
+      { label: '政策资讯', path: '/news?type=policy' },
     ],
   },
   {
     key: 'enterprise',
     label: '企业中心',
-    children: [
-      // 企业中心负责人补充
-    ],
+    children: [{ label: '加盟企业', path: '/enterprise' }],
   },
 ]
 
@@ -67,18 +72,26 @@ export const siteNav: NavItem[] = [
 export const profileNavByRole: Record<number, NavChild[]> = {
   /** 学员 */
   0: [
-    { label: '学习档案', path: '/archive' },
-    { label: '积分商城', path: '/credit' },
+    { label: '个人中心', path: '/profile' },
+    { label: '我的简历', path: '/profile/resume' },
+    { label: '学习档案', path: '/profile/learning' },
+    { label: '学分流水', path: '/profile/credit' },
+    { label: '诚信评定', path: '/profile/integrity' },
+    { label: '消息中心', path: '/profile/messages' },
   ],
   /** 企业用户 */
   1: [
-    { label: '企业中心', path: '/enterprise' },
-    { label: '活动报名', path: '/activity' },
-    { label: '招聘求职', path: '/job' },
+    { label: '账号概览', path: '/profile' },
+    { label: '企业工作台', path: '/profile/enterprise' },
+    { label: '加盟企业', path: '/enterprise' },
+    { label: '消息中心', path: '/profile/messages' },
   ],
   /** 管理员 */
   2: [
-    { label: '机构加盟', path: '/organization' },
+    { label: '管理概览', path: '/profile/admin' },
+    { label: '机构加盟', path: '/profile/admin/organizations' },
+    { label: '用户管理', path: '/profile/admin/users' },
+    { label: '消息中心', path: '/profile/messages' },
   ],
 }
 

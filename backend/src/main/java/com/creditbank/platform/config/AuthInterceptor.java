@@ -23,7 +23,7 @@ public class AuthInterceptor implements HandlerInterceptor {
 
         String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            if (isOptionalAuthenticationRequest(request)) {
+            if (isPublicOrOptionalRequest(request)) {
                 return true;
             }
             throw new BusinessException(401, "未登录或登录已过期");
@@ -39,14 +39,19 @@ public class AuthInterceptor implements HandlerInterceptor {
         }
     }
 
-    private boolean isOptionalAuthenticationRequest(HttpServletRequest request) {
-        return "GET".equalsIgnoreCase(request.getMethod())
-                && "/api/learning/resources".equals(request.getRequestURI());
-    }
-
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response,
                                 Object handler, Exception ex) {
         UserContext.clear();
+    }
+
+    private boolean isPublicOrOptionalRequest(HttpServletRequest request) {
+        if (!"GET".equalsIgnoreCase(request.getMethod())) {
+            return false;
+        }
+        String path = request.getRequestURI();
+        return "/api/learning/resources".equals(path)
+                || path.startsWith("/api/forum/")
+                || path.startsWith("/api/information/");
     }
 }
