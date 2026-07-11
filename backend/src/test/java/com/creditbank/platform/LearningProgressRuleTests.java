@@ -10,6 +10,7 @@ import com.creditbank.platform.mapper.LearningArchiveMapper;
 import com.creditbank.platform.mapper.LearningCertificateMapper;
 import com.creditbank.platform.mapper.SysTagMapper;
 import com.creditbank.platform.mapper.UserCourseMapper;
+import com.creditbank.platform.module.profile.service.ProfileLearningStatsService;
 import com.creditbank.platform.service.CreditService;
 import com.creditbank.platform.service.LearningService;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,6 +23,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,6 +46,8 @@ class LearningProgressRuleTests {
     private LearningAchievementMapper achievementMapper;
     @Mock
     private CreditService creditService;
+    @Mock
+    private ProfileLearningStatsService profileLearningStatsService;
 
     @InjectMocks
     private LearningService learningService;
@@ -82,6 +89,7 @@ class LearningProgressRuleTests {
         assertEquals(30, result.getMaxWatchedPositionSeconds());
         assertEquals(30, result.getProgress());
         assertEquals(30, result.getLastPositionSeconds());
+        verify(profileLearningStatsService).recordStudySeconds(eq(2L), eq(30));
     }
 
     @Test
@@ -99,6 +107,7 @@ class LearningProgressRuleTests {
         assertEquals(50, result.getWatchedSeconds());
         assertEquals(30, result.getMaxWatchedPositionSeconds());
         assertEquals(30, result.getProgress());
+        verify(profileLearningStatsService).recordStudySeconds(eq(2L), eq(20));
     }
 
     @Test
@@ -116,6 +125,7 @@ class LearningProgressRuleTests {
         assertEquals(40, result.getMaxWatchedPositionSeconds());
         assertEquals(40, result.getProgress());
         assertEquals(40, result.getLastPositionSeconds());
+        verify(profileLearningStatsService).recordStudySeconds(eq(2L), eq(10));
     }
 
     @Test
@@ -131,5 +141,7 @@ class LearningProgressRuleTests {
 
         assertEquals(400, exception.getCode());
         assertEquals("课程观看进度需达到 80% 才能颁发合格证，当前为 79%", exception.getMessage());
+        verify(profileLearningStatsService, never()).recordCourseCompleted(any(), any());
+        verify(profileLearningStatsService, never()).recordStudySeconds(any(), anyInt());
     }
 }

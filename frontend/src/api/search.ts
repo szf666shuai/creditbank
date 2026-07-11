@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 export interface SearchItem {
   type: string
-  typeName: string
+  typeName: string | null
   id: number
   title: string
   summary?: string

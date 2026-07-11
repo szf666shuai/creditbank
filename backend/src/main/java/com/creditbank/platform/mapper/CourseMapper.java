@@ -36,7 +36,7 @@ public interface CourseMapper extends BaseMapper<Course> {
             GROUP BY c.id, c.title, c.description, c.cover_url, c.video_url,
                      c.video_duration_seconds, c.price_credit, c.price_money,
                      c.duration_hours, c.credit_reward, o.name, c.create_time
-            ORDER BY c.create_time DESC
+            ORDER BY c.create_time DESC, c.id DESC
             """)
     List<LearningResourceVO> listResources(@Param("keyword") String keyword, @Param("tag") String tag);
 }

@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { ArrowDown, HomeFilled, Search } from '@element-plus/icons-vue'
+import { computed, onMounted } from 'vue'
+import { ArrowDown, ChatDotRound, HomeFilled, Search } from '@element-plus/icons-vue'
 import { useLayout } from '@/composables/useLayout'
 import { useHeaderScroll } from '@/composables/useHeaderScroll'
 import { useSearchSuggest } from '@/composables/useSearchSuggest'
 import { searchCategories } from '@/config/search-categories'
 import type { SearchItem } from '@/api/search'
+import { useMessageStore } from '@/stores/message'
 
 const {
   siteNav,
@@ -70,6 +72,15 @@ function onSearchBlur() {
   // 延迟关闭，保证点击联想项能触发
   window.setTimeout(() => hideSuggest(), 150)
 }
+
+const messageStore = useMessageStore()
+const unreadCount = computed(() => messageStore.unreadCount)
+
+onMounted(() => {
+  if (isLoggedIn.value) {
+    messageStore.refreshUnreadCount()
+  }
+})
 </script>
 
 <template>
@@ -109,7 +120,7 @@ function onSearchBlur() {
             :class="{ active: isNavActive(item) }"
             title="首页"
           >
-            <el-icon :size="18"><HomeFilled /></el-icon>
+            <el-icon :size="20"><HomeFilled /></el-icon>
           </router-link>
 
           <!-- 带下拉的菜单 -->
@@ -206,21 +217,33 @@ function onSearchBlur() {
           <router-link to="/register" class="btn-register">注册</router-link>
         </div>
 
-        <!-- 已登录：个人中心下拉 -->
-        <el-dropdown
-          v-else
-          trigger="hover"
-          placement="bottom-end"
-        >
-          <span class="nav-item profile-trigger">
-            {{ displayName }}
-            <span class="role-badge">{{ userRoleName }}</span>
-            <el-icon class="nav-arrow"><ArrowDown /></el-icon>
-          </span>
+        <!-- 已登录：消息 + 个人中心 -->
+        <template v-else>
+          <router-link to="/profile/messages" class="message-entry" title="消息中心">
+            <el-badge :value="unreadCount" :hidden="unreadCount <= 0" :max="99">
+              <el-icon :size="20"><ChatDotRound /></el-icon>
+            </el-badge>
+          </router-link>
+
+          <el-dropdown
+            trigger="hover"
+            placement="bottom-end"
+          >
+          <button
+            type="button"
+            class="profile-avatar"
+            :title="`${displayName}（${userRoleName}）`"
+            aria-label="个人中心"
+          >
+            {{ displayName.charAt(0) || '用' }}
+          </button>
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item @click="navigate('/profile')">
-                个人中心
+              <el-dropdown-item disabled class="profile-meta-item">
+                <div class="profile-meta">
+                  <strong>{{ displayName }}</strong>
+                  <span>{{ userRoleName }}</span>
+                </div>
               </el-dropdown-item>
               <el-dropdown-item
                 v-for="child in profileNav"
@@ -235,6 +258,7 @@ function onSearchBlur() {
             </el-dropdown-menu>
           </template>
         </el-dropdown>
+        </template>
       </div>
     </div>
   </header>
@@ -267,20 +291,22 @@ function onSearchBlur() {
 }
 
 .app-header.is-transparent .nav-item {
-  color: rgba(255, 255, 255, 0.95);
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+  color: #fff;
+  font-weight: 650;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
 }
 
 .app-header.is-transparent .nav-item:hover,
 .app-header.is-transparent .nav-dropdown:hover {
   color: #fff;
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.14);
 }
 
 .app-header.is-transparent .nav-item.active {
   color: #fff;
   background: rgba(255, 255, 255, 0.22);
   border-radius: 20px;
+  box-shadow: inset 0 -2px 0 #fff;
 }
 
 .app-header.is-transparent .search-box {
@@ -310,45 +336,40 @@ function onSearchBlur() {
   background: rgba(255, 255, 255, 0.4);
 }
 
-.app-header.is-transparent .profile-trigger {
+.app-header.is-transparent .profile-avatar {
   color: #fff;
-  border-color: rgba(255, 255, 255, 0.55);
-  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.18);
 }
 
-.app-header.is-transparent .profile-trigger:hover {
-  background: rgba(255, 255, 255, 0.22);
-}
-
-.app-header.is-transparent .role-badge {
-  background: rgba(255, 255, 255, 0.22);
-  color: #fff;
+.app-header.is-transparent .profile-avatar:hover {
+  background: rgba(255, 255, 255, 0.28);
 }
 
 .header-inner {
   display: flex;
   align-items: center;
-  max-width: var(--content-max-width);
+  max-width: min(1440px, 100%);
   height: var(--header-height);
   margin: 0 auto;
-  padding: 0 16px;
-  gap: 20px;
+  padding: 0 20px;
+  gap: 12px;
 }
 
 .logo {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   flex-shrink: 0;
   text-decoration: none;
   background: var(--color-primary);
-  padding: 8px 14px;
+  padding: 6px 12px;
   border-radius: 4px;
 }
 
 .logo-icon {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   flex-shrink: 0;
 }
 
@@ -364,7 +385,7 @@ function onSearchBlur() {
 }
 
 .logo-title {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
   color: var(--color-white);
   letter-spacing: 1px;
@@ -378,21 +399,34 @@ function onSearchBlur() {
 .main-nav {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 4px;
   flex: 1;
   min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.main-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.main-nav :deep(.el-dropdown) {
+  flex-shrink: 0;
 }
 
 .nav-item {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 6px 14px;
-  font-size: 14px;
-  color: var(--color-text);
+  padding: 8px 16px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1e293b;
   text-decoration: none;
   white-space: nowrap;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
   transition: color 0.2s, background 0.2s;
   outline: none;
@@ -400,16 +434,22 @@ function onSearchBlur() {
 
 .nav-item:hover,
 .nav-dropdown:hover {
-  color: var(--color-primary);
+  color: #0b5cab;
+  background: rgba(11, 92, 171, 0.06);
 }
 
 .nav-item.active {
-  color: var(--color-primary);
-  font-weight: 600;
+  color: #0b5cab;
+  font-weight: 700;
+  background: rgba(11, 92, 171, 0.1);
 }
 
 .nav-home {
-  padding: 6px 10px;
+  padding: 8px 12px;
+}
+
+.nav-home :deep(.el-icon) {
+  font-size: 18px;
 }
 
 .nav-arrow {
@@ -424,8 +464,11 @@ function onSearchBlur() {
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   flex-shrink: 0;
+  margin-left: auto;
+  position: relative;
+  z-index: 2;
 }
 
 .search-box {
@@ -435,7 +478,8 @@ function onSearchBlur() {
   border-radius: 20px;
   padding: 0 4px 0 2px;
   height: 34px;
-  width: 280px;
+  width: 260px;
+  flex-shrink: 0;
 }
 
 .search-category {
@@ -605,25 +649,87 @@ function onSearchBlur() {
   background: var(--color-primary-light);
 }
 
-.profile-trigger {
-  padding: 6px 16px;
-  border: 1px solid var(--color-primary);
-  border-radius: 20px;
+.profile-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid var(--color-primary);
+  background: var(--color-primary-light);
   color: var(--color-primary);
-  font-weight: 500;
+  font-size: 15px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 0;
+  line-height: 1;
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
 }
 
-.role-badge {
-  font-size: 11px;
-  padding: 1px 6px;
-  background: var(--color-primary-light);
-  border-radius: 10px;
-  color: var(--color-primary);
+.profile-avatar:hover {
+  background: #d6ebfc;
+  box-shadow: 0 0 0 3px rgba(32, 148, 243, 0.18);
+}
+
+.profile-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  line-height: 1.3;
+  padding: 2px 0;
+}
+
+.profile-meta strong {
+  font-size: 13px;
+  color: var(--color-text);
+}
+
+.profile-meta span {
+  font-size: 12px;
+  color: var(--color-text-muted);
   font-weight: 400;
 }
 
-.profile-trigger:hover {
+.profile-meta-item {
+  cursor: default;
+}
+
+.profile-meta-item:hover {
+  background: transparent !important;
+}
+
+.message-entry {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  transition: background 0.2s, color 0.2s;
+  flex-shrink: 0;
+}
+
+.message-entry:hover {
   background: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+@media (max-width: 1280px) {
+  .logo-sub {
+    display: none;
+  }
+
+  .search-box {
+    width: 220px;
+  }
+
+  .search-category {
+    width: 76px;
+  }
 }
 
 @media (max-width: 1100px) {
@@ -632,11 +738,7 @@ function onSearchBlur() {
   }
 
   .search-box {
-    width: 210px;
-  }
-
-  .search-category {
-    width: 76px;
+    width: 200px;
   }
 }
 </style>

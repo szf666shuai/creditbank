@@ -204,17 +204,23 @@ onMounted(async () => {
           <h1>积分商城</h1>
           <p class="subtitle">商品按分类展示，支持实物、虚拟商品、课程资源和服务兑换，订单与支付记录会写入数据库。</p>
         </div>
-        <div class="mall-stats">
-          <div>
-            <el-icon><Goods /></el-icon>
-            <strong>{{ products.length }}</strong>
-            <span>在售商品</span>
+        <div class="mall-header-actions">
+          <div class="mall-stats">
+            <div>
+              <el-icon><Goods /></el-icon>
+              <strong>{{ products.length }}</strong>
+              <span>在售商品</span>
+            </div>
+            <div>
+              <el-icon><ShoppingCart /></el-icon>
+              <strong>{{ cartCount }}</strong>
+              <span>购物车</span>
+            </div>
           </div>
-          <div>
-            <el-icon><ShoppingCart /></el-icon>
-            <strong>{{ cartCount }}</strong>
-            <span>购物车</span>
-          </div>
+          <el-button type="primary" plain @click="router.push('/credit/orders')">
+            <el-icon><Tickets /></el-icon>
+            订单记录
+          </el-button>
         </div>
       </section>
 
@@ -336,70 +342,6 @@ onMounted(async () => {
         </aside>
       </div>
 
-      <section id="mall-orders" class="orders-section">
-        <div class="section-title">
-          <el-icon><Tickets /></el-icon>
-          <h2>订单记录</h2>
-        </div>
-        <el-empty v-if="authStore.isLoggedIn && !orders.length" description="暂无订单" />
-        <el-alert v-else-if="!authStore.isLoggedIn" type="info" show-icon :closable="false">
-          登录后可查看订单和支付记录
-        </el-alert>
-        <div v-else class="order-list">
-          <article v-for="order in orders" :key="order.id" class="order-card">
-            <div class="order-head">
-              <div>
-                <strong>{{ order.orderNo }}</strong>
-                <span>{{ order.createTime }}</span>
-              </div>
-              <el-tag :type="order.payStatus === 1 ? 'success' : 'warning'">
-                {{ order.payStatusName }}
-              </el-tag>
-            </div>
-            <div class="order-items">
-              <div v-for="item in order.items" :key="item.id" class="order-item-line">
-                <div>
-                  <span>{{ item.productName }} x {{ item.quantity }}</span>
-                  <button
-                    v-if="item.redemptionCode"
-                    type="button"
-                    class="redemption-code"
-                    title="点击复制兑换码"
-                    @click="copyRedemptionCode(item.redemptionCode)"
-                  >
-                    兑换码：{{ item.redemptionCode }}
-                  </button>
-                </div>
-                <div class="order-item-actions">
-                  <el-button size="small" @click="viewProductDetail(item.productId)">商品详情</el-button>
-                  <el-button
-                    v-if="order.payStatus === 1 && item.productType === 3"
-                    size="small"
-                    type="primary"
-                    plain
-                    @click="viewPurchasedCourse(item.refCourseId)"
-                  >
-                    查看课程
-                  </el-button>
-                </div>
-              </div>
-            </div>
-            <div class="order-foot">
-              <strong>{{ formatAmount(order.totalCredit) }} 学分</strong>
-              <el-button
-                v-if="order.payStatus === 0"
-                size="small"
-                type="primary"
-                :loading="orderLoading"
-                @click="pendingOrder = order; paymentResultNo = ''; paymentVisible = true"
-              >
-                去支付
-              </el-button>
-            </div>
-          </article>
-        </div>
-      </section>
-
       <el-dialog v-model="paymentVisible" title="订单支付" width="520px">
         <div v-if="pendingOrder" class="payment-sheet">
           <template v-if="paymentResultNo">
@@ -468,12 +410,17 @@ onMounted(async () => {
 
 <style scoped>
 .mall-page {
-  padding: 32px 16px 56px;
+  padding: 32px 20px 64px;
 }
 
 .section-inner {
   max-width: var(--content-max-width);
   margin: 0 auto;
+  background: #fff;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  padding: 28px;
 }
 
 .mall-header,
@@ -484,6 +431,13 @@ onMounted(async () => {
 .product-footer,
 .total-line {
   display: flex;
+}
+
+.mall-header-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
 }
 
 .product-actions,
@@ -499,7 +453,7 @@ onMounted(async () => {
   padding: 0;
   border: 0;
   background: transparent;
-  color: var(--color-primary);
+  color: #0b5cab;
   font: inherit;
   cursor: pointer;
 }
@@ -515,10 +469,12 @@ onMounted(async () => {
   gap: 24px;
   align-items: flex-end;
   margin-bottom: 22px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #eef2f7;
 }
 
 .eyebrow {
-  color: var(--color-primary);
+  color: #0b5cab;
   font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
@@ -527,12 +483,13 @@ onMounted(async () => {
 h1 {
   margin: 6px 0 8px;
   font-size: 30px;
-  color: var(--color-text);
+  color: #0f172a;
+  font-weight: 700;
 }
 
 .subtitle {
   max-width: 680px;
-  color: var(--color-text-secondary);
+  color: #64748b;
   line-height: 1.7;
 }
 

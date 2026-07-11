@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue'
-import { Search } from '@element-plus/icons-vue'
+import { computed, ref, watch, onMounted } from 'vue'
+import { OfficeBuilding, School, Reading, Search } from '@element-plus/icons-vue'
 import PageShell from '@/components/common/PageShell.vue'
 import {
   listJoinedOrgsApi,
@@ -18,11 +18,24 @@ const pageSize = ref(12)
 const keyword = ref('')
 const typeFilter = ref<number | undefined>(undefined)
 
-const typeIcons: Record<number, string> = {
-  1: '🏫',
-  2: '📚',
-  3: '🏢',
-  4: '🏛️',
+const typeRail = computed(() =>
+  ORG_TYPE_OPTIONS.map((item) => ({
+    label: item.label,
+    value: item.value,
+  })),
+)
+
+const typeAccent: Record<number, string> = {
+  1: '#2094f3',
+  2: '#52c41a',
+  3: '#722ed1',
+  4: '#fa8c16',
+}
+
+function typeIcon(type: number) {
+  if (type === 1) return School
+  if (type === 2) return Reading
+  return OfficeBuilding
 }
 
 async function fetchOrgs() {
@@ -46,14 +59,11 @@ async function fetchOrgs() {
   }
 }
 
-function handleSearch() {
-  page.value = 1
-  fetchOrgs()
+function selectType(value?: number) {
+  typeFilter.value = value
 }
 
-function handleReset() {
-  keyword.value = ''
-  typeFilter.value = undefined
+function handleSearch() {
   page.value = 1
   fetchOrgs()
 }
@@ -80,94 +90,103 @@ onMounted(fetchOrgs)
 <template>
   <div class="enterprise-list-wrap">
     <PageShell
-      title="加盟企业"
-      description="浏览已加盟平台的高校、培训机构与企业"
+      plain
+      title="加盟企业黄页"
+      description="按机构类型浏览高校、培训机构与企业，进入主页查看招聘、活动与资料"
       :loading="loading"
       :error="loadError"
       @retry="fetchOrgs"
     >
-      <div class="page-toolbar">
-        <el-input
-          v-model="keyword"
-          placeholder="搜索企业名称"
-          clearable
-          class="search-input"
-          @keyup.enter="handleSearch"
-          @clear="handleSearch"
-        >
-          <template #prefix>
-            <el-icon><Search /></el-icon>
-          </template>
-        </el-input>
+      <div class="directory-panel">
+        <div class="type-chips">
+          <button
+            v-for="item in typeRail"
+            :key="String(item.value ?? 'all')"
+            type="button"
+            class="type-chip"
+            :class="{ active: typeFilter === item.value }"
+            @click="selectType(item.value)"
+          >
+            {{ item.label }}
+          </button>
+        </div>
 
-        <el-select v-model="typeFilter" placeholder="机构类型" clearable class="type-select">
-          <el-option
-            v-for="item in ORG_TYPE_OPTIONS.filter((o) => o.value !== undefined)"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value"
+        <div class="page-toolbar">
+          <el-input
+            v-model="keyword"
+            placeholder="搜索机构名称"
+            clearable
+            class="search-input"
+            @keyup.enter="handleSearch"
+            @clear="handleSearch"
+          >
+            <template #prefix>
+              <el-icon><Search /></el-icon>
+            </template>
+          </el-input>
+          <el-button type="primary" @click="handleSearch">搜索</el-button>
+        </div>
+
+        <div class="card-grid">
+          <el-empty
+            v-if="!loading && orgList.length === 0"
+            class="page-empty"
+            :image-size="80"
+            description="暂无符合条件的加盟企业"
           />
-        </el-select>
 
-        <el-button type="primary" @click="handleSearch">搜索</el-button>
-        <el-button @click="handleReset">重置</el-button>
-      </div>
+          <router-link
+            v-for="org in orgList"
+            :key="org.id"
+            :to="`/enterprise/${org.id}`"
+            class="org-card"
+          >
+            <div class="org-stripe" :style="{ background: typeAccent[org.type] || '#2094f3' }" />
+            <div class="org-card-body">
+              <div class="org-card-header">
+                <div class="org-logo" :style="{ color: typeAccent[org.type] || '#2094f3' }">
+                  <img v-if="org.logo" :src="org.logo" :alt="org.name" />
+                  <el-icon v-else :size="26"><component :is="typeIcon(org.type)" /></el-icon>
+                </div>
+                <div class="org-meta">
+                  <h3>{{ org.name }}</h3>
+                  <el-tag size="small" effect="plain">{{ org.typeName }}</el-tag>
+                </div>
+              </div>
 
-      <div class="card-grid">
-        <el-empty
-          v-if="!loading && orgList.length === 0"
-          class="page-empty"
-          :image-size="80"
-          description="暂无符合条件的加盟企业"
-        />
+              <p class="org-intro">{{ org.intro || '暂无简介' }}</p>
 
-        <router-link
-          v-for="org in orgList"
-          :key="org.id"
-          :to="`/enterprise/${org.id}`"
-          class="org-card"
-        >
-          <div class="org-card-header">
-            <div class="org-logo">
-              <img v-if="org.logo" :src="org.logo" :alt="org.name" />
-              <span v-else class="org-logo-fallback">{{ typeIcons[org.type] || '🏢' }}</span>
+              <ul class="org-info">
+                <li v-if="org.contact">
+                  <span class="label">联系人</span>
+                  <span>{{ org.contact }}</span>
+                </li>
+                <li v-if="org.phone">
+                  <span class="label">电话</span>
+                  <span>{{ org.phone }}</span>
+                </li>
+                <li v-if="org.address">
+                  <span class="label">地址</span>
+                  <span>{{ org.address }}</span>
+                </li>
+              </ul>
+              <div class="org-cta">进入机构主页 →</div>
             </div>
-            <div class="org-meta">
-              <h3>{{ org.name }}</h3>
-              <el-tag size="small" type="info">{{ org.typeName }}</el-tag>
-            </div>
-          </div>
+          </router-link>
+        </div>
 
-          <p class="org-intro">{{ org.intro || '暂无简介' }}</p>
-
-          <ul class="org-info">
-            <li v-if="org.contact">
-              <span class="label">联系人</span>
-              <span>{{ org.contact }}</span>
-            </li>
-            <li v-if="org.phone">
-              <span class="label">电话</span>
-              <span>{{ org.phone }}</span>
-            </li>
-            <li v-if="org.address">
-              <span class="label">地址</span>
-              <span>{{ org.address }}</span>
-            </li>
-          </ul>
-        </router-link>
-      </div>
-
-      <div v-if="total > 0" class="page-pagination">
-        <el-pagination
-          v-model:current-page="page"
-          v-model:page-size="pageSize"
-          :total="total"
-          :page-sizes="[12, 24, 36]"
-          layout="total, sizes, prev, pager, next"
-          background
-          @current-change="handlePageChange"
-          @size-change="handleSizeChange"
-        />
+        <div v-if="total > 0" class="page-pagination">
+          <el-pagination
+            v-model:current-page="page"
+            v-model:page-size="pageSize"
+            :total="total"
+            :page-sizes="[12, 24, 36]"
+            layout="total, sizes, prev, pager, next"
+            background
+            @current-change="handlePageChange"
+            @size-change="handleSizeChange"
+          />
+        </div>
       </div>
     </PageShell>
   </div>
@@ -179,44 +198,94 @@ onMounted(fetchOrgs)
 }
 
 .enterprise-list-wrap :deep(.page-shell) {
-  max-width: var(--content-max-width);
+  max-width: min(1280px, 100%);
   margin: 0 auto;
 }
 
-.search-input {
-  width: 280px;
+.enterprise-list-wrap :deep(.page-header__main h1) {
+  color: #f5f8ff;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.35);
 }
 
-.type-select {
-  width: 160px;
+.enterprise-list-wrap :deep(.page-header__main p) {
+  color: rgba(245, 248, 255, 0.78);
+}
+
+.directory-panel {
+  background: rgba(255, 255, 255, 0.96);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+}
+
+.type-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.type-chip {
+  border: 1px solid var(--color-border);
+  background: #fff;
+  color: var(--color-text-secondary);
+  border-radius: 999px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.type-chip:hover,
+.type-chip.active {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+  font-weight: 600;
+}
+
+.search-input {
+  width: 300px;
 }
 
 .card-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 20px;
-  min-height: 200px;
+  gap: 16px;
+  min-height: 220px;
 }
 
 .org-card {
   display: block;
-  background: var(--color-white);
+  background: #fff;
   border: 1px solid var(--color-border);
-  border-radius: 12px;
-  padding: 20px;
-  transition: box-shadow 0.2s, transform 0.2s;
+  border-radius: 14px;
+  overflow: hidden;
   text-decoration: none;
   color: inherit;
+  transition: transform 0.2s, box-shadow 0.2s;
+  min-height: 250px;
 }
 
 .org-card:hover {
-  box-shadow: 0 8px 24px rgba(32, 148, 243, 0.12);
-  transform: translateY(-2px);
+  transform: translateY(-3px);
+  box-shadow: 0 14px 28px rgba(15, 23, 42, 0.12);
+}
+
+.org-stripe {
+  height: 6px;
+  width: 100%;
+}
+
+.org-card-body {
+  padding: 16px 18px 18px;
+  display: flex;
+  flex-direction: column;
+  min-height: 244px;
 }
 
 .org-card-header {
   display: flex;
-  gap: 14px;
+  gap: 12px;
   align-items: center;
   margin-bottom: 12px;
 }
@@ -239,34 +308,30 @@ onMounted(fetchOrgs)
   object-fit: cover;
 }
 
-.org-logo-fallback {
-  font-size: 24px;
-}
-
 .org-meta h3 {
   font-size: 16px;
   color: var(--color-text);
   margin-bottom: 6px;
+  font-weight: 650;
 }
 
 .org-intro {
   font-size: 13px;
-  line-height: 1.6;
+  line-height: 1.7;
   color: var(--color-text-secondary);
   margin-bottom: 14px;
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  min-height: 62px;
+  flex: 1;
 }
 
 .org-info {
   list-style: none;
-  padding: 0;
+  padding: 12px 0 0;
   margin: 0;
   border-top: 1px solid var(--color-border);
-  padding-top: 12px;
 }
 
 .org-info li {
@@ -277,13 +342,15 @@ onMounted(fetchOrgs)
   margin-bottom: 6px;
 }
 
-.org-info li:last-child {
-  margin-bottom: 0;
-}
-
 .org-info .label {
   color: var(--color-text-muted);
   min-width: 42px;
-  flex-shrink: 0;
+}
+
+.org-cta {
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--color-primary);
+  font-weight: 600;
 }
 </style>

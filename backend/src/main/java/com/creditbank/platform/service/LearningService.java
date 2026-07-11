@@ -25,6 +25,7 @@ import com.creditbank.platform.mapper.MallOrderItemMapper;
 import com.creditbank.platform.mapper.MallProductMapper;
 import com.creditbank.platform.mapper.SysTagMapper;
 import com.creditbank.platform.mapper.UserCourseMapper;
+import com.creditbank.platform.module.profile.service.ProfileLearningStatsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -61,6 +62,7 @@ public class LearningService {
     private final CreditService creditService;
     private final MallProductMapper mallProductMapper;
     private final MallOrderItemMapper mallOrderItemMapper;
+    private final ProfileLearningStatsService profileLearningStatsService;
 
     public List<LearningResourceVO> listResources(Long userId, String keyword, String tag) {
         List<LearningResourceVO> resources = courseMapper.listResources(trim(keyword), trim(tag));
@@ -168,7 +170,9 @@ public class LearningService {
                 ? 0
                 : record.getMaxWatchedPositionSeconds();
         int watchedDelta = Math.min(Math.max(request.getWatchedDeltaSeconds(), 0), 30);
+        int previousWatchedSeconds = watchedSeconds;
         watchedSeconds = Math.min(durationSeconds, watchedSeconds + watchedDelta);
+        int acceptedWatchedDelta = Math.max(0, watchedSeconds - previousWatchedSeconds);
         int currentPosition = Math.min(durationSeconds, Math.max(request.getCurrentTimeSeconds(), 0));
         int maximumAllowedPosition = Math.min(durationSeconds, maxWatchedPosition + watchedDelta);
         int acceptedPosition = Math.min(currentPosition, maximumAllowedPosition);
@@ -180,6 +184,9 @@ public class LearningService {
         record.setLastPositionSeconds(acceptedPosition);
         record.setProgress(progress);
         userCourseMapper.updateById(record);
+        if (acceptedWatchedDelta > 0) {
+            profileLearningStatsService.recordStudySeconds(userId, acceptedWatchedDelta);
+        }
         return record;
     }
 
@@ -215,6 +222,10 @@ public class LearningService {
             certificateMapper.insert(cert);
             insertAchievement(userId, course, cert);
             creditChange = grantCourseReward(userId, course);
+            BigDecimal earned = creditChange != null && creditChange.getAmount() != null
+                    ? creditChange.getAmount()
+                    : nz(course.getCreditReward());
+            profileLearningStatsService.recordCourseCompleted(userId, earned);
         }
         LearningArchive archive = ensureArchive(userId, course, cert);
         return LearningCompletionResult.builder()

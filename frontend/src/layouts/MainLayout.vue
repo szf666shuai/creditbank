@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router'
 import AppHeader from '@/components/layout/AppHeader.vue'
 import AppFooter from '@/components/layout/AppFooter.vue'
 import BackToTop from '@/components/layout/BackToTop.vue'
+import AiAssistantPet from '@/components/agent/AiAssistantPet.vue'
 import ParticleBackground from '@/components/effects/ParticleBackground.vue'
 
 const route = useRoute()
@@ -20,6 +21,7 @@ const isHomePage = computed(() => route.name === 'home')
       </main>
       <AppFooter />
       <BackToTop />
+      <AiAssistantPet />
     </div>
   </div>
 </template>

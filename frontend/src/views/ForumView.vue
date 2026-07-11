@@ -285,14 +285,15 @@ onMounted(async () => {
 <template>
   <div class="forum-wrap">
     <PageShell
+      plain
       title="论坛"
-      description="按板块交流学习、求职和校园集市信息，支持发帖、回复、点赞与举报"
+      description="学员自由发帖交流。官方招聘、活动与政策请前往资讯中心。"
       :loading="loading"
       :error="loadError"
       @retry="fetchPosts"
     >
       <template #actions>
-        <el-button type="primary" :icon="EditPen" @click="openPostDialog">发帖</el-button>
+        <el-button type="warning" :icon="EditPen" @click="openPostDialog">发帖</el-button>
       </template>
 
       <div class="forum-layout">
@@ -346,6 +347,7 @@ onMounted(async () => {
           />
 
           <article v-for="post in postList" :key="post.id" class="post-row" @click="openPost(post)">
+            <div class="post-avatar">{{ (post.authorName || '匿').charAt(0) }}</div>
             <div class="post-main">
               <div class="post-title-line">
                 <el-tag v-if="post.isTop" size="small" type="danger">置顶</el-tag>
@@ -353,7 +355,7 @@ onMounted(async () => {
               </div>
               <p>{{ post.content }}</p>
               <div class="post-meta">
-                <span>{{ post.boardName }}</span>
+                <span class="board-chip">{{ post.boardName }}</span>
                 <span>{{ post.authorName }}</span>
                 <span>{{ formatTime(post.createTime) }}</span>
               </div>
@@ -483,31 +485,43 @@ onMounted(async () => {
   margin: 0 auto;
 }
 
+.forum-wrap :deep(.page-header__main h1) {
+  color: #f5f8ff;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.35);
+}
+
+.forum-wrap :deep(.page-header__main p) {
+  color: rgba(245, 248, 255, 0.78);
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.3);
+}
+
 .forum-layout {
   display: grid;
-  grid-template-columns: 260px minmax(0, 1fr);
-  gap: 20px;
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: 16px;
 }
 
 .board-panel,
 .post-panel {
-  background: var(--color-white);
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 16px;
   padding: 16px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
 }
 
 .board-panel {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   align-self: start;
+  border-top: 4px solid #fa8c16;
 }
 
 .board-item {
-  border: 1px solid var(--color-border);
+  border: none;
   border-radius: 10px;
-  background: var(--color-white);
+  background: transparent;
   padding: 12px;
   text-align: left;
   cursor: pointer;
@@ -516,14 +530,19 @@ onMounted(async () => {
   gap: 4px 8px;
 }
 
+.board-item:hover,
 .board-item.active {
-  border-color: var(--color-primary);
-  background: var(--color-primary-light);
+  background: #fff7e8;
 }
 
 .board-item span,
 .board-item strong {
   color: var(--color-text);
+}
+
+.board-item.active span,
+.board-item.active strong {
+  color: #d46b08;
 }
 
 .board-item small {
@@ -537,46 +556,62 @@ onMounted(async () => {
 }
 
 .active-board {
-  color: var(--color-text-muted);
+  color: #d46b08;
   font-size: 13px;
+  font-weight: 600;
 }
 
 .post-row {
   display: flex;
-  justify-content: space-between;
-  gap: 18px;
-  border: 1px solid var(--color-border);
-  border-radius: 10px;
-  padding: 16px;
-  margin-bottom: 12px;
+  align-items: flex-start;
+  gap: 14px;
+  border: 1px solid #f0e6d8;
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 10px;
   cursor: pointer;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  background: #fffdf9;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 .post-row:hover {
-  border-color: var(--color-primary);
-  box-shadow: 0 8px 24px rgba(32, 148, 243, 0.1);
+  border-color: #fa8c16;
+  box-shadow: 0 8px 20px rgba(250, 140, 22, 0.12);
+}
+
+.post-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #fff7e8;
+  color: #d46b08;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  flex-shrink: 0;
 }
 
 .post-main {
   min-width: 0;
+  flex: 1;
 }
 
 .post-title-line {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .post-title-line h3 {
-  font-size: 17px;
+  font-size: 16px;
   color: var(--color-text);
 }
 
 .post-main p {
   color: var(--color-text-secondary);
-  line-height: 1.6;
+  line-height: 1.55;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -589,9 +624,16 @@ onMounted(async () => {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
-  margin-top: 10px;
+  margin-top: 8px;
   color: var(--color-text-muted);
   font-size: 12px;
+}
+
+.board-chip {
+  color: #d46b08;
+  background: #fff7e8;
+  padding: 1px 8px;
+  border-radius: 999px;
 }
 
 .post-actions,

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Check, Collection, Search } from '@element-plus/icons-vue'
@@ -373,14 +373,40 @@ function selectTag(tag: string) {
   loadResources()
 }
 
-onMounted(async () => {
-  await Promise.all([loadTags(), loadResources()])
-  const courseId = Number(route.query.courseId)
-  const purchasedCourse = resources.value.find((item) => item.id === courseId)
-  if (purchasedCourse) {
-    await handleWatch(purchasedCourse)
+async function applyQueryFilters() {
+  const tagFromQuery = typeof route.query.tag === 'string' ? route.query.tag.trim() : ''
+  if (tagFromQuery && tagFromQuery !== activeTag.value) {
+    activeTag.value = tagFromQuery
+    await loadResources()
   }
+  await openCourseFromQuery()
+}
+
+async function openCourseFromQuery() {
+  const courseId = Number(route.query.courseId)
+  if (!courseId) return
+  const target = resources.value.find((item) => item.id === courseId)
+  if (!target) return
+  if (!authStore.isLoggedIn) {
+    ElMessage.info(`已定位到课程「${target.title}」，登录后可观看`)
+    return
+  }
+  await handleWatch(target)
+}
+
+onMounted(async () => {
+  const tagFromQuery = typeof route.query.tag === 'string' ? route.query.tag.trim() : ''
+  if (tagFromQuery) activeTag.value = tagFromQuery
+  await Promise.all([loadTags(), loadResources()])
+  await openCourseFromQuery()
 })
+
+watch(
+  () => [route.query.courseId, route.query.tag],
+  async () => {
+    await applyQueryFilters()
+  },
+)
 </script>
 
 <template>

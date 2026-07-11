@@ -36,7 +36,9 @@ public class WebConfig implements WebMvcConfigurer {
                         "/api/learning/certificates/verify",
                         "/api/mall/categories",
                         "/api/mall/products",
-                        "/api/mall/products/**"
+                        "/api/mall/products/**",
+                        "/api/forum/**",
+                        "/api/information/**"
                 );
     }
 }

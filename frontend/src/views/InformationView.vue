@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Calendar, Document, OfficeBuilding, Search, Suitcase } from '@element-plus/icons-vue'
+import { OfficeBuilding, Search } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import PageShell from '@/components/common/PageShell.vue'
 import {
@@ -40,17 +40,17 @@ const typeConfig: Record<InformationType, { label: string; title: string; descri
   job: {
     label: '招聘信息',
     title: '招聘信息',
-    description: '企业发布的岗位机会，可在详情中投递简历',
+    description: '机构正式发布的岗位公告，可在详情中投递简历',
   },
   activity: {
     label: '活动信息',
     title: '活动信息',
-    description: '企业和机构发布的活动，可在详情中报名参加',
+    description: '机构正式发布的活动日程，可在详情中报名参加',
   },
   policy: {
     label: '政策资讯',
     title: '政策资讯',
-    description: '政策、公告和平台资讯，与招聘、活动分开浏览',
+    description: '平台与官方政策原文，与论坛讨论帖分开阅读',
   },
 }
 
@@ -172,8 +172,16 @@ function changeType() {
   fetchList()
 }
 
-function itemIcon(type: InformationType) {
-  return type === 'job' ? Suitcase : type === 'activity' ? Calendar : Document
+function dateParts(value?: string) {
+  const raw = value ? String(value) : ''
+  const date = raw.slice(0, 10)
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    return { monthDay: '--', year: '' }
+  }
+  return {
+    monthDay: date.slice(5),
+    year: date.slice(0, 4),
+  }
 }
 
 function applyTypeFromRoute() {
@@ -184,8 +192,30 @@ function applyTypeFromRoute() {
 }
 
 function syncTypeQuery() {
-  if (route.query.type === activeType.value) return
-  router.replace({ query: { ...route.query, type: activeType.value } })
+  const nextQuery: Record<string, string> = {
+    ...Object.fromEntries(
+      Object.entries(route.query)
+        .filter(([, v]) => typeof v === 'string')
+        .map(([k, v]) => [k, String(v)]),
+    ),
+    type: activeType.value,
+  }
+  if (route.query.type === activeType.value && !route.query.id) return
+  // 切换类型时去掉旧 id，避免串到错误详情
+  delete nextQuery.id
+  router.replace({ query: nextQuery })
+}
+
+async function openDetailFromRoute() {
+  const idRaw = route.query.id
+  const id = typeof idRaw === 'string' ? Number(idRaw) : NaN
+  if (!Number.isFinite(id) || id <= 0) return
+  await openDetail({
+    type: activeType.value,
+    id,
+    title: '',
+    status: 0,
+  })
 }
 
 watch(activeType, changeType)
@@ -203,10 +233,19 @@ watch(
   },
 )
 
+watch(
+  () => [route.query.type, route.query.id] as const,
+  async () => {
+    applyTypeFromRoute()
+    await openDetailFromRoute()
+  },
+)
+
 onMounted(async () => {
   await authStore.initAuth()
   applyTypeFromRoute()
   await fetchList()
+  await openDetailFromRoute()
 })
 </script>
 
@@ -219,6 +258,11 @@ onMounted(async () => {
       :error="loadError"
       @retry="fetchList"
     >
+      <div class="official-strip">
+        <span class="official-badge">官方发布</span>
+        <p>这里是机构与平台发布的正式信息；经验分享与讨论请前往「论坛」。</p>
+      </div>
+
       <el-tabs v-model="activeType" class="page-tabs info-tabs">
         <el-tab-pane
           v-for="(config, type) in typeConfig"
@@ -251,15 +295,22 @@ onMounted(async () => {
         description="暂无资讯"
       />
 
-      <div class="info-list">
-        <article v-for="item in list" :key="`${item.type}-${item.id}`" class="info-card" @click="openDetail(item)">
-          <div class="info-icon">
-            <el-icon><component :is="itemIcon(item.type)" /></el-icon>
+      <div class="info-list" :class="`info-list--${activeType}`">
+        <article
+          v-for="item in list"
+          :key="`${item.type}-${item.id}`"
+          class="info-card"
+          :class="`info-card--${item.type}`"
+          @click="openDetail(item)"
+        >
+          <div class="info-date">
+            <strong>{{ dateParts(item.startTime || item.publishTime || item.createTime).monthDay }}</strong>
+            <small>{{ dateParts(item.startTime || item.publishTime || item.createTime).year }}</small>
           </div>
           <div class="info-main">
             <div class="info-title-line">
               <h3>{{ item.title }}</h3>
-              <el-tag size="small" :type="item.type === 'policy' ? 'info' : 'success'">
+              <el-tag size="small" effect="plain" :type="item.type === 'policy' ? 'info' : 'success'">
                 {{ item.statusName || typeConfig[item.type].label }}
               </el-tag>
             </div>
@@ -271,7 +322,6 @@ onMounted(async () => {
               </span>
               <span v-if="item.location">{{ item.location }}</span>
               <span v-if="item.tag">{{ item.tag }}</span>
-              <span>{{ formatTime(item.startTime || item.publishTime || item.createTime) }}</span>
             </div>
           </div>
         </article>
@@ -399,6 +449,56 @@ onMounted(async () => {
   margin: 0 auto;
 }
 
+.information-wrap :deep(.page-card) {
+  border-radius: 16px;
+  overflow: hidden;
+  border: none;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+  padding-top: 0;
+}
+
+.information-wrap :deep(.page-header) {
+  margin: 0 -24px 0;
+  padding: 22px 24px 18px;
+  background: linear-gradient(135deg, #0f766e, #14b8a6);
+  border-bottom: none;
+}
+
+.information-wrap :deep(.page-header__main h1),
+.information-wrap :deep(.page-header__main p) {
+  color: #fff;
+}
+
+.information-wrap :deep(.page-header__main p) {
+  opacity: 0.9;
+}
+
+.official-strip {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 16px 0;
+  padding: 12px 14px;
+  background: #ecfdf8;
+  border: 1px solid #99f6e4;
+  border-radius: 10px;
+}
+
+.official-badge {
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 700;
+  color: #0f766e;
+  letter-spacing: 0.04em;
+}
+
+.official-strip p {
+  margin: 0;
+  font-size: 13px;
+  color: #0f766e;
+  line-height: 1.5;
+}
+
 .info-search {
   width: 320px;
 }
@@ -406,36 +506,48 @@ onMounted(async () => {
 .info-list {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 0;
+  border-top: 1px solid #ccfbf1;
 }
 
 .info-card {
   display: flex;
-  gap: 16px;
-  background: var(--color-white);
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
-  padding: 18px;
+  gap: 18px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid #e7f6f3;
+  border-radius: 0;
+  padding: 18px 4px;
   cursor: pointer;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition: background 0.15s;
 }
 
 .info-card:hover {
-  border-color: var(--color-primary);
-  box-shadow: 0 8px 24px rgba(32, 148, 243, 0.1);
+  background: #f0fdfa;
+  box-shadow: none;
 }
 
-.info-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 10px;
-  background: var(--color-primary-light);
-  color: var(--color-primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.info-date {
+  width: 58px;
   flex-shrink: 0;
-  font-size: 20px;
+  text-align: center;
+  padding: 6px 0;
+  border-radius: 8px;
+  background: #ecfdf8;
+}
+
+.info-date strong {
+  display: block;
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f766e;
+}
+
+.info-date small {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: #5eead4;
 }
 
 .info-main {
@@ -452,7 +564,8 @@ onMounted(async () => {
 
 .info-title-line h3 {
   color: var(--color-text);
-  font-size: 17px;
+  font-size: 16px;
+  font-weight: 600;
 }
 
 .info-main p {
@@ -536,7 +649,7 @@ onMounted(async () => {
 }
 
 .policy-content p {
-  color: var(--color-text);
+  white-space: pre-wrap;
 }
 
 @media (max-width: 768px) {

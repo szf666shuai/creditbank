@@ -49,7 +49,7 @@ export const homeBannerSlides: BannerSlide[] = [
     type: 'image',
     image: '/images/banner/slide-enterprise.png',
     alt: '多家企业机构加盟，打破求职壁垒',
-    link: '/job',
+    link: '/news?type=job',
   },
 ]
 

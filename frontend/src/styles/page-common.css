@@ -1,7 +1,7 @@
 /* 个人中心 / 企业中心统一页面样式 */
 
 .page-shell {
-  padding: 8px 0 24px;
+  padding: 8px 0 16px;
   min-height: 320px;
 }
 
@@ -51,6 +51,12 @@
 
 .page-body {
   min-height: 120px;
+  overflow-x: auto;
+}
+
+.page-table-wrap {
+  width: 100%;
+  overflow-x: auto;
 }
 
 .page-toolbar {
@@ -231,6 +237,16 @@
 
 .page-link:hover {
   text-decoration: underline;
+}
+
+@media (max-width: 1100px) {
+  .page-summary-row {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .page-stat-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  }
 }
 
 @media (max-width: 768px) {

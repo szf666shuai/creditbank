@@ -13,8 +13,8 @@ const footerLinks = {
     title: '交流互动',
     items: [
       { label: '学习论坛', path: '/forum' },
-      { label: '活动报名', path: '/activity' },
-      { label: '招聘求职', path: '/job' },
+      { label: '活动报名', path: '/news?type=activity' },
+      { label: '招聘求职', path: '/news?type=job' },
       { label: '诚信评定', path: '/integrity' },
     ],
   },

@@ -7,11 +7,8 @@ export interface NavChild {
 export interface NavItem {
   key: string
   label: string
-  /** 无下拉时直接跳转（如首页） */
   path?: string
-  /** 是否为首页图标按钮 */
   icon?: boolean
-  /** 下拉子页面，留空数组表示待组员补充 */
   children: NavChild[]
 }
 
@@ -28,8 +25,8 @@ export const siteNav: NavItem[] = [
     key: 'credit',
     label: '积分商城',
     children: [
-      { label: '商品兑换', path: '/credit#mall-products' },
-      { label: '订单记录', path: '/credit#mall-orders' },
+      { label: '商品兑换', path: '/credit' },
+      { label: '订单记录', path: '/credit/orders' },
     ],
   },
   {
@@ -48,7 +45,7 @@ export const siteNav: NavItem[] = [
       { label: '校园频道', path: '/forum?board=campus' },
       { label: '校园集市', path: '/forum?board=market' },
       { label: '求职经验', path: '/forum?board=jobs' },
-      { label: '政策解读', path: '/forum?board=policy' },
+      { label: '政策讨论', path: '/forum?board=policy' },
     ],
   },
   {
@@ -64,7 +61,7 @@ export const siteNav: NavItem[] = [
   {
     key: 'enterprise',
     label: '企业中心',
-    children: [{ label: '加盟企业', path: '/enterprise' }],
+    children: [{ label: '加盟企业黄页', path: '/enterprise' }],
   },
 ]
 
@@ -95,5 +92,5 @@ export const profileNavByRole: Record<number, NavChild[]> = {
   ],
 }
 
-/** @deprecated 使用 profileNavByRole，保留空数组兼容旧引用 */
+/** @deprecated 使用 profileNavByRole */
 export const profileNav: NavChild[] = []

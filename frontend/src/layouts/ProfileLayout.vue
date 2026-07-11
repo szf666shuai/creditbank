@@ -75,15 +75,15 @@ onMounted(() => {
 
 <style scoped>
 .profile-layout {
-  padding: 24px 16px 48px;
+  padding: 16px 16px 40px;
   min-height: calc(100vh - var(--header-height) - 120px);
 }
 
 .profile-container {
-  max-width: var(--content-max-width);
+  max-width: min(1280px, 100%);
   margin: 0 auto;
   display: flex;
-  gap: 24px;
+  gap: 20px;
   align-items: flex-start;
 }
 
@@ -120,6 +120,11 @@ onMounted(() => {
   flex-shrink: 0;
 }
 
+.sidebar-meta {
+  min-width: 0;
+  flex: 1;
+}
+
 .sidebar-name {
   font-size: 14px;
   font-weight: 600;
@@ -128,7 +133,6 @@ onMounted(() => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 130px;
 }
 
 .sidebar-nav {
@@ -194,11 +198,21 @@ onMounted(() => {
   .profile-sidebar {
     width: 100%;
     position: static;
+    padding: 16px 12px;
   }
 
   .sidebar-nav {
     flex-direction: row;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 6px;
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .nav-item {
+    flex-shrink: 0;
+    white-space: nowrap;
   }
 
   .nav-divider {
