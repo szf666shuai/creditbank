@@ -36,7 +36,7 @@ export const homeBannerSlides: BannerSlide[] = [
     id: 'credit-mall',
     type: 'image',
     image: '/images/banner/slide-credit-mall.png',
-    alt: '秩点商城，学习积分换好礼',
+    alt: '秩点商城，学习秩点换好礼',
     link: '/credit',
   },
   {

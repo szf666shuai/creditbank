@@ -176,7 +176,7 @@ watch(
           返回简历列表
         </el-button>
         <div class="header-actions">
-          <el-button type="primary" plain @click="openAiDialog">✨ AI 生成</el-button>
+          <el-button type="primary" plain @click="openAiDialog">AI 生成</el-button>
           <el-button type="primary" :loading="saving" @click="handleSave">保存</el-button>
         </div>
       </div>

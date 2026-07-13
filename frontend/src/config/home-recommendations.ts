@@ -15,7 +15,7 @@ export interface IdentityRecommend {
 export const identityRecommends: IdentityRecommend[] = [
   {
     title: '在校学员',
-    icon: '🎓',
+    icon: 'school',
     color: '#2094f3',
     tags: [
       { label: '积分查询', path: '/credit' },
@@ -27,8 +27,8 @@ export const identityRecommends: IdentityRecommend[] = [
   },
   {
     title: '在职学员',
-    icon: '💼',
-    color: '#722ed1',
+    icon: 'job',
+    color: '#1890ff',
     tags: [
       { label: '微专业', path: '/resources' },
       { label: '技能提升', path: '/resources' },
@@ -39,7 +39,7 @@ export const identityRecommends: IdentityRecommend[] = [
   },
   {
     title: '加盟机构',
-    icon: '🏫',
+    icon: 'enterprise',
     color: '#13c2c2',
     tags: [
       { label: '机构入驻', path: '/register' },
@@ -51,8 +51,8 @@ export const identityRecommends: IdentityRecommend[] = [
   },
   {
     title: '社会公众',
-    icon: '🌐',
-    color: '#fa8c16',
+    icon: 'view',
+    color: '#0ea5e9',
     tags: [
       { label: '公开课程', path: '/resources' },
       { label: '学习论坛', path: '/forum' },

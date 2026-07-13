@@ -120,51 +120,53 @@ onMounted(fetchData)
       </el-form-item>
     </el-form>
 
-    <el-table :data="records" border stripe>
-      <el-table-column prop="name" label="商品名称" min-width="150" />
-      <el-table-column prop="orgName" label="发布企业" width="140" />
-      <el-table-column prop="productTypeName" label="类型" width="110" />
-      <el-table-column label="秩点价" width="90">
-        <template #default="{ row }">{{ Number(row.priceCredit || 0).toFixed(0) }}</template>
-      </el-table-column>
-      <el-table-column prop="stock" label="库存" width="80" />
-      <el-table-column label="审核状态" width="110">
-        <template #default="{ row }">
-          <el-tag :type="approvalTagType(row.approvalStatus)" size="small">
-            {{ row.approvalStatusName }}
-          </el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column prop="reviewRemark" label="审核备注" min-width="140" show-overflow-tooltip />
-      <el-table-column label="提交时间" width="160">
-        <template #default="{ row }">{{ formatTime(row.createTime) }}</template>
-      </el-table-column>
-      <el-table-column label="操作" width="150" fixed="right">
-        <template #default="{ row }">
-          <template v-if="row.approvalStatus === 0">
-            <el-button
-              link
-              type="success"
-              :loading="actingId === row.id"
-              @click="handleReview(row, 1, '通过审核')"
-            >
-              通过
-            </el-button>
-            <el-button
-              link
-              type="danger"
-              :loading="actingId === row.id"
-              @click="handleReview(row, 2, '驳回')"
-            >
-              驳回
-            </el-button>
+    <div class="page-table-wrap">
+      <el-table :data="records" border stripe class="profile-data-table">
+        <el-table-column prop="name" label="商品名称" min-width="150" show-overflow-tooltip />
+        <el-table-column prop="orgName" label="发布企业" min-width="140" show-overflow-tooltip />
+        <el-table-column prop="productTypeName" label="类型" width="110" />
+        <el-table-column label="秩点价" width="90" align="right">
+          <template #default="{ row }">{{ Number(row.priceCredit || 0).toFixed(0) }}</template>
+        </el-table-column>
+        <el-table-column prop="stock" label="库存" width="80" align="center" />
+        <el-table-column label="审核状态" width="110" align="center">
+          <template #default="{ row }">
+            <el-tag :type="approvalTagType(row.approvalStatus)" size="small">
+              {{ row.approvalStatusName }}
+            </el-tag>
           </template>
-          <span v-else class="page-text-muted">已处理</span>
-        </template>
-      </el-table-column>
-    </el-table>
+        </el-table-column>
+        <el-table-column prop="reviewRemark" label="审核备注" min-width="140" show-overflow-tooltip />
+        <el-table-column label="提交时间" width="170" show-overflow-tooltip>
+          <template #default="{ row }">{{ formatTime(row.createTime) }}</template>
+        </el-table-column>
+        <el-table-column label="操作" width="180" align="center">
+          <template #default="{ row }">
+            <div v-if="row.approvalStatus === 0" class="page-table-actions">
+              <el-button
+                link
+                type="success"
+                :loading="actingId === row.id"
+                @click="handleReview(row, 1, '通过审核')"
+              >
+                通过
+              </el-button>
+              <el-button
+                link
+                type="danger"
+                :loading="actingId === row.id"
+                @click="handleReview(row, 2, '驳回')"
+              >
+                驳回
+              </el-button>
+            </div>
+            <span v-else class="page-text-muted">已处理</span>
+          </template>
+        </el-table-column>
+      </el-table>
+    </div>
 
-    <div class="pager">
+    <div class="page-pagination">
       <el-pagination
         v-model:current-page="page"
         v-model:page-size="pageSize"
@@ -180,11 +182,5 @@ onMounted(fetchData)
 <style scoped>
 .filter-form {
   margin-bottom: 16px;
-}
-
-.pager {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 16px;
 }
 </style>

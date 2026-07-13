@@ -35,6 +35,10 @@ public class AuthInterceptor implements HandlerInterceptor {
             UserContext.setUserId(userId);
             return true;
         } catch (Exception e) {
+            // 公开/可选登录接口：token 失效时按游客继续，避免浏览详情也被挡住
+            if (isPublicOrOptionalRequest(request)) {
+                return true;
+            }
             throw new BusinessException(401, "未登录或登录已过期");
         }
     }

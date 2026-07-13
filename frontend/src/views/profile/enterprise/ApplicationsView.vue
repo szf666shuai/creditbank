@@ -199,11 +199,12 @@ onMounted(fetchApplications)
           <el-tag :type="statusTagType(row.status)" size="small">{{ row.statusName }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="投递时间" width="160">
+      <el-table-column label="投递时间" width="170" show-overflow-tooltip>
         <template #default="{ row }">{{ formatTime(row.createTime) }}</template>
       </el-table-column>
-      <el-table-column label="操作" width="280" fixed="right" align="center">
+      <el-table-column label="操作" width="280" align="center">
         <template #default="{ row }">
+          <div class="page-table-actions">
           <template v-if="row.status === 3 || row.status === 4">
             <el-tag :type="statusTagType(row.status)" size="small">{{ row.statusName }}</el-tag>
           </template>
@@ -239,6 +240,7 @@ onMounted(fetchApplications)
             </el-button>
             <el-button link type="primary" @click="openInvite(row)">自定义</el-button>
           </template>
+          </div>
         </template>
       </el-table-column>
     </el-table>

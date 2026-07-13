@@ -142,18 +142,20 @@ onMounted(fetchResumes)
 }
 
 .resume-card {
-  border: 1px solid var(--color-border);
+  border: 1px solid rgba(125, 211, 252, 0.16);
   border-radius: 12px;
   padding: 18px;
-  background: var(--color-white);
+  background: rgba(8, 20, 40, 0.38);
   text-align: left;
   cursor: pointer;
   transition: border-color 0.2s, box-shadow 0.2s;
+  color: #e2e8f0;
+  backdrop-filter: blur(8px);
 }
 
 .resume-card:hover {
-  border-color: var(--color-primary);
-  box-shadow: 0 4px 16px rgba(32, 148, 243, 0.08);
+  border-color: rgba(56, 189, 248, 0.45);
+  box-shadow: 0 8px 20px rgba(14, 165, 233, 0.12);
 }
 
 .add-card {
@@ -163,7 +165,7 @@ onMounted(fetchResumes)
   justify-content: center;
   min-height: 180px;
   border-style: dashed;
-  background: #fafafa;
+  background: rgba(8, 20, 40, 0.25);
 }
 
 .add-card:hover {

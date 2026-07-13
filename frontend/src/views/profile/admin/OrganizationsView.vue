@@ -134,36 +134,40 @@ onMounted(() => {
       <el-button @click="handleReset">重置</el-button>
     </div>
 
-    <el-table :data="records" border stripe>
-      <el-table-column prop="name" label="机构名称" min-width="160" show-overflow-tooltip />
-      <el-table-column prop="code" label="编码" width="140" show-overflow-tooltip />
-      <el-table-column prop="typeName" label="类型" width="100" />
-      <el-table-column prop="contact" label="联系人" width="100" show-overflow-tooltip />
-      <el-table-column prop="phone" label="电话" width="120" show-overflow-tooltip />
-      <el-table-column label="加盟状态" width="100" align="center">
-        <template #default="{ row }">
-          <el-tag :type="joinTagType(row.joinStatus)" size="small">{{ row.joinStatusName }}</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column label="机构状态" width="90" align="center">
-        <template #default="{ row }">
-          <el-tag :type="row.status === 1 ? 'success' : 'info'" size="small">{{ row.statusName }}</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column label="申请时间" width="170">
-        <template #default="{ row }">{{ formatTime(row.createTime) }}</template>
-      </el-table-column>
-      <el-table-column label="操作" width="220" fixed="right">
-        <template #default="{ row }">
-          <template v-if="row.joinStatus === 0">
-            <el-button type="success" link :loading="actingId === row.id" @click="handleJoinStatus(row, 1, '已加盟')">通过</el-button>
-            <el-button type="danger" link :loading="actingId === row.id" @click="handleJoinStatus(row, 2, '已退出')">驳回</el-button>
+    <div class="page-table-wrap">
+      <el-table :data="records" border stripe class="profile-data-table">
+        <el-table-column prop="name" label="机构名称" min-width="160" show-overflow-tooltip />
+        <el-table-column prop="code" label="编码" min-width="140" show-overflow-tooltip />
+        <el-table-column prop="typeName" label="类型" width="100" />
+        <el-table-column prop="contact" label="联系人" width="100" show-overflow-tooltip />
+        <el-table-column prop="phone" label="电话" width="120" show-overflow-tooltip />
+        <el-table-column label="加盟状态" width="100" align="center">
+          <template #default="{ row }">
+            <el-tag :type="joinTagType(row.joinStatus)" size="small">{{ row.joinStatusName }}</el-tag>
           </template>
-          <el-button v-if="row.status === 1" type="warning" link :loading="actingId === row.id" @click="handleToggleStatus(row)">停用</el-button>
-          <el-button v-else type="primary" link :loading="actingId === row.id" @click="handleToggleStatus(row)">启用</el-button>
-        </template>
-      </el-table-column>
-    </el-table>
+        </el-table-column>
+        <el-table-column label="机构状态" width="90" align="center">
+          <template #default="{ row }">
+            <el-tag :type="row.status === 1 ? 'success' : 'info'" size="small">{{ row.statusName }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="申请时间" width="170" show-overflow-tooltip>
+          <template #default="{ row }">{{ formatTime(row.createTime) }}</template>
+        </el-table-column>
+        <el-table-column label="操作" width="240" align="center">
+          <template #default="{ row }">
+            <div class="page-table-actions">
+              <template v-if="row.joinStatus === 0">
+                <el-button type="success" link :loading="actingId === row.id" @click="handleJoinStatus(row, 1, '已加盟')">通过</el-button>
+                <el-button type="danger" link :loading="actingId === row.id" @click="handleJoinStatus(row, 2, '已退出')">驳回</el-button>
+              </template>
+              <el-button v-if="row.status === 1" type="warning" link :loading="actingId === row.id" @click="handleToggleStatus(row)">停用</el-button>
+              <el-button v-else type="primary" link :loading="actingId === row.id" @click="handleToggleStatus(row)">启用</el-button>
+            </div>
+          </template>
+        </el-table-column>
+      </el-table>
+    </div>
 
     <el-empty v-if="!loading && records.length === 0" class="page-empty" :image-size="80" description="暂无机构数据" />
 

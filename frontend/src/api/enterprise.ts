@@ -155,6 +155,9 @@ export interface ActivityRegisterResult {
 
 export interface ApplyJobPayload {
   coverMessage?: string
+  resumeId?: number
+  /** 为 false 时不附带简历 */
+  attachResume?: boolean
 }
 
 export interface OrgListQuery {

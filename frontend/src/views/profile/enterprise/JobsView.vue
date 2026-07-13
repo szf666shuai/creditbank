@@ -13,6 +13,7 @@ import {
   type SkillTag,
 } from '@/api/enterprise-jobs'
 import { getErrorMessage, unwrapApi } from '@/utils/api'
+import '@/styles/enterprise-form-dialog.css'
 
 const loading = ref(false)
 const loadError = ref<string | null>(null)
@@ -169,7 +170,7 @@ onMounted(async () => {
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="操作" width="200" fixed="right">
+      <el-table-column label="操作" width="200">
         <template #default="{ row }">
           <el-button link type="primary" @click="openEdit(row)">编辑</el-button>
           <el-button v-if="row.status === 1" link type="warning" @click="handleOffline(row)">
@@ -191,14 +192,22 @@ onMounted(async () => {
       v-model="dialogVisible"
       :title="editingId ? '编辑职位' : '发布职位'"
       width="640px"
+      class="enterprise-form-dialog"
       destroy-on-close
+      align-center
     >
       <el-form label-width="88px">
         <el-form-item label="职位名称" required>
           <el-input v-model="form.title" placeholder="如：Java 开发工程师" />
         </el-form-item>
         <el-form-item label="技能标签">
-          <el-select v-model="form.tagIds" multiple placeholder="选择技能标签" style="width: 100%">
+          <el-select
+            v-model="form.tagIds"
+            multiple
+            placeholder="选择技能标签"
+            style="width: 100%"
+            popper-class="enterprise-select-dropdown"
+          >
             <el-option v-for="tag in skillTags" :key="tag.id" :label="tag.name" :value="tag.id" />
           </el-select>
         </el-form-item>

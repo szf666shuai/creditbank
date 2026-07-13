@@ -1,0 +1,91 @@
+/* 企业端发布/编辑弹窗：暗色玻璃风，避免白底+浅色字看不清 */
+
+.enterprise-form-dialog.el-dialog {
+  background:
+    radial-gradient(ellipse at 12% 0%, rgba(56, 189, 248, 0.18), transparent 42%),
+    rgba(8, 18, 36, 0.96);
+  border: 1px solid rgba(125, 211, 252, 0.28);
+  border-radius: 16px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(16px);
+}
+
+.enterprise-form-dialog .el-dialog__header {
+  margin-right: 0;
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid rgba(147, 197, 253, 0.14);
+}
+
+.enterprise-form-dialog .el-dialog__title {
+  color: #e0f2fe;
+}
+
+.enterprise-form-dialog .el-dialog__headerbtn .el-dialog__close {
+  color: rgba(186, 230, 253, 0.78);
+}
+
+.enterprise-form-dialog .el-dialog__body {
+  padding: 16px 20px 8px;
+  color: #e2e8f0;
+  max-height: min(70vh, 640px);
+  overflow-y: auto;
+}
+
+.enterprise-form-dialog .el-dialog__footer {
+  padding: 12px 20px 18px;
+  border-top: 1px solid rgba(147, 197, 253, 0.14);
+}
+
+.enterprise-form-dialog .el-form-item__label {
+  color: rgba(186, 230, 253, 0.88) !important;
+}
+
+.enterprise-form-dialog .el-input__wrapper,
+.enterprise-form-dialog .el-textarea__inner,
+.enterprise-form-dialog .el-select__wrapper,
+.enterprise-form-dialog .el-input-number {
+  background: rgba(8, 20, 40, 0.55) !important;
+  box-shadow: 0 0 0 1px rgba(125, 211, 252, 0.28) inset !important;
+  border-radius: 10px;
+}
+
+.enterprise-form-dialog .el-input__inner,
+.enterprise-form-dialog .el-textarea__inner,
+.enterprise-form-dialog .el-select__placeholder,
+.enterprise-form-dialog .el-select__selected-item {
+  color: #e0f2fe !important;
+}
+
+.enterprise-form-dialog .el-input__inner::placeholder,
+.enterprise-form-dialog .el-textarea__inner::placeholder {
+  color: rgba(147, 197, 253, 0.45) !important;
+}
+
+.enterprise-form-dialog .el-textarea__inner {
+  box-shadow: none !important;
+  border: 1px solid rgba(125, 211, 252, 0.28);
+}
+
+.enterprise-select-dropdown.el-select__popper,
+.enterprise-select-dropdown {
+  background: rgba(8, 18, 36, 0.96) !important;
+  border: 1px solid rgba(125, 211, 252, 0.28) !important;
+}
+
+.enterprise-select-dropdown .el-select-dropdown__item {
+  color: rgba(226, 232, 240, 0.9);
+}
+
+.enterprise-select-dropdown .el-select-dropdown__item.is-hovering,
+.enterprise-select-dropdown .el-select-dropdown__item:hover {
+  background: rgba(56, 189, 248, 0.16);
+  color: #e0f2fe;
+}
+
+.enterprise-form-dialog .el-radio {
+  color: rgba(226, 232, 240, 0.92);
+}
+
+.enterprise-form-dialog .el-radio__input.is-checked + .el-radio__label {
+  color: #7dd3fc;
+}

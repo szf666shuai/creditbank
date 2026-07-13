@@ -106,6 +106,23 @@ public class AuthSupport {
         }
     }
 
+    public SysUser requireStudentOrAdmin() {
+        SysUser user = requireLoginUser();
+        if (user.getRole() != null
+                && (user.getRole() == UserRole.STUDENT || user.getRole() == UserRole.ADMIN)) {
+            return user;
+        }
+        throw new BusinessException(403, "仅学员或管理员可浏览学习资源");
+    }
+
+    public boolean isAdmin(Long userId) {
+        if (userId == null) {
+            return false;
+        }
+        SysUser user = userMapper.selectById(userId);
+        return user != null && user.getRole() == UserRole.ADMIN;
+    }
+
     public SysUser requireAdmin() {
         SysUser user = requireLoginUser();
         if (user.getRole() == null || user.getRole() != UserRole.ADMIN) {

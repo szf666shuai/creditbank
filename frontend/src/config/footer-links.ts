@@ -33,6 +33,8 @@ export function getFooterLinksForRole(options: {
   if (role === ROLE_ADMIN) {
     return [
       { label: '管理概览', path: '/profile/admin' },
+      { label: '课程资源', path: '/resources' },
+      { label: '秩点商城', path: '/credit' },
       { label: '机构审核', path: '/profile/admin/organizations' },
       { label: '商品审核', path: '/profile/admin/products' },
       { label: '用户管理', path: '/profile/admin/users' },

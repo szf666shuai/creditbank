@@ -28,6 +28,7 @@ import com.creditbank.platform.mapper.MallProductMapper;
 import com.creditbank.platform.mapper.SysTagMapper;
 import com.creditbank.platform.mapper.UserCourseMapper;
 import com.creditbank.platform.module.profile.service.ProfileLearningStatsService;
+import com.creditbank.platform.security.AuthSupport;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -66,6 +67,7 @@ public class LearningService {
     private final MallOrderItemMapper mallOrderItemMapper;
     private final ProfileLearningStatsService profileLearningStatsService;
     private final LearningEngagementService learningEngagementService;
+    private final AuthSupport authSupport;
 
     public List<LearningResourceVO> listResources(Long userId, String keyword, String tag) {
         List<LearningResourceVO> resources = courseMapper.listResources(trim(keyword), trim(tag));
@@ -143,6 +145,10 @@ public class LearningService {
     }
 
     public void assertCourseAccess(Long userId, Long courseId) {
+        if (authSupport.isAdmin(userId)) {
+            requireCourse(courseId);
+            return;
+        }
         LearningResourceVO resource = listResources(userId, null, null).stream()
                 .filter(item -> item.getId().equals(courseId))
                 .findFirst()

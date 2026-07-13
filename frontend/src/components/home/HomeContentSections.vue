@@ -5,6 +5,7 @@ import type { HomeData } from '@/api/home'
 import type { SearchItem } from '@/api/search'
 import { homeFallbackData, normalizeHomeData } from '@/config/home-fallback'
 import HomeSectionHeader from '@/components/home/HomeSectionHeader.vue'
+import UiIcon from '@/components/ui/UiIcon.vue'
 
 const loading = ref(true)
 const homeData = ref<HomeData | null>(null)
@@ -27,13 +28,6 @@ const modulePaths: Record<string, string> = {
   partner: '/enterprise',
 }
 
-const coverIcons: Record<string, string> = {
-  course: '📚',
-  credit: '🎁',
-  activity: '📅',
-  partner: '🏢',
-}
-
 function showCoverImage(url?: string) {
   if (!url) return false
   return !/\.(pdf|zip|doc|docx|ppt|pptx|xlsx)(\?.*)?$/i.test(url)
@@ -45,7 +39,7 @@ function itemPath(item: SearchItem) {
     case 'credit':
       return `/credit/products/${item.id}`
     case 'course':
-      return { path: '/resources', query: { courseId: String(item.id) } }
+      return item.id > 0 ? `/resources/${item.id}` : '/resources'
     case 'partner':
       return `/enterprise/${item.id}`
     case 'activity':
@@ -112,6 +106,10 @@ const displayJobs = computed(() =>
   padRows(homeData.value?.jobs ?? [], JOB_SLOT_COUNT, 'job', '更多招聘岗位即将发布', -200),
 )
 
+const featuredCourse = computed(() => homeData.value?.courses?.[0] ?? null)
+const courseList = computed(() => (homeData.value?.courses ?? []).slice(1, 5))
+const productShelf = computed(() => (homeData.value?.hotProducts ?? []).slice(0, 6))
+
 function newsSubText(item: DisplayRow) {
   if (item.isPlaceholder) return item.extra ?? ''
   const date = formatDate(item.createTime)
@@ -158,66 +156,100 @@ onMounted(loadHomeData)
             <el-button link type="primary" @click="loadHomeData">重新加载</el-button>
           </template>
         </el-alert>
-        <!-- 热门课程（与学习资源同源） -->
+        <!-- 热门课程：大图精选 + 侧栏列表 -->
         <section class="home-block">
-          <HomeSectionHeader title="热门课程" icon="📚" more-to="/resources" />
+          <HomeSectionHeader title="热门课程" icon="course" more-to="/resources" />
           <el-empty v-if="!homeData.courses.length" description="暂无课程" :image-size="64" />
-          <div v-else class="card-grid card-grid--4 card-grid--media">
+          <div v-else class="course-showcase">
             <router-link
-              v-for="item in homeData.courses"
-              :key="`course-${item.id}`"
-              :to="itemPath(item)"
-              class="grid-card"
+              v-if="featuredCourse"
+              :to="itemPath(featuredCourse)"
+              class="course-feature"
             >
-              <div class="grid-cover">
+              <div class="course-feature__cover">
                 <img
-                  v-if="showCoverImage(item.coverUrl)"
-                  :src="item.coverUrl"
-                  :alt="item.title"
+                  v-if="showCoverImage(featuredCourse.coverUrl)"
+                  :src="featuredCourse.coverUrl"
+                  :alt="featuredCourse.title"
                   loading="lazy"
                 />
-                <div v-else class="cover-placeholder">
-                  <span>{{ coverIcons.course }}</span>
+                <div v-else class="cover-placeholder course-placeholder">
+                  <UiIcon name="course" :size="36" />
+                </div>
+                <span class="play-badge" aria-hidden="true">▶</span>
+              </div>
+              <div class="course-feature__body">
+                <span class="course-kicker">本周精选</span>
+                <h3>{{ featuredCourse.title }}</h3>
+                <p v-if="featuredCourse.summary">{{ truncate(featuredCourse.summary, 90) }}</p>
+                <div class="course-feature__meta">
+                  <span v-if="featuredCourse.extra">{{ featuredCourse.extra }}</span>
+                  <em>进入学习</em>
                 </div>
               </div>
-              <h3 class="grid-title">{{ item.title }}</h3>
-              <p v-if="item.summary" class="grid-summary">{{ truncate(item.summary, 42) }}</p>
-              <p v-if="item.extra" class="grid-meta">{{ item.extra }}</p>
             </router-link>
+
+            <div class="course-rail">
+              <router-link
+                v-for="(item, index) in courseList"
+                :key="`course-${item.id}`"
+                :to="itemPath(item)"
+                class="course-rail-item"
+              >
+                <span class="course-rail-index">{{ String(index + 2).padStart(2, '0') }}</span>
+                <div class="course-rail-thumb">
+                  <img
+                    v-if="showCoverImage(item.coverUrl)"
+                    :src="item.coverUrl"
+                    :alt="item.title"
+                    loading="lazy"
+                  />
+                  <UiIcon v-else name="course" :size="20" />
+                </div>
+                <div class="course-rail-copy">
+                  <h4>{{ item.title }}</h4>
+                  <p>{{ item.extra || truncate(item.summary, 28) }}</p>
+                </div>
+              </router-link>
+            </div>
           </div>
         </section>
 
-        <!-- 热卖商品 -->
+        <!-- 热卖商品：价签货架 -->
         <section class="home-block">
-          <HomeSectionHeader title="热卖商品" icon="🔥" more-to="/credit" />
+          <HomeSectionHeader title="热卖商品" icon="hot" more-to="/credit" />
           <el-empty v-if="!homeData.hotProducts.length" description="暂无商品" :image-size="64" />
-          <div v-else class="card-grid card-grid--4 card-grid--media">
+          <div v-else class="product-shelf">
             <router-link
-              v-for="item in homeData.hotProducts"
+              v-for="(item, index) in productShelf"
               :key="`product-${item.id}`"
               :to="itemPath(item)"
-              class="grid-card"
+              class="product-tile"
             >
-              <div class="grid-cover">
+              <span class="product-rank" :class="{ hot: index < 3 }">{{ index + 1 }}</span>
+              <div class="product-tile__cover">
                 <img
                   v-if="showCoverImage(item.coverUrl)"
                   :src="item.coverUrl"
                   :alt="item.title"
                   loading="lazy"
                 />
-                <div v-else class="cover-placeholder">
-                  <span>{{ coverIcons.credit }}</span>
+                <div v-else class="cover-placeholder product-placeholder">
+                  <UiIcon name="gift" :size="28" />
                 </div>
               </div>
-              <h3 class="grid-title">{{ item.title }}</h3>
-              <p v-if="item.extra" class="grid-meta highlight">{{ item.extra }}</p>
+              <h3>{{ item.title }}</h3>
+              <div class="product-tile__price">
+                <strong>{{ item.extra || '秩点兑换' }}</strong>
+                <span>去兑换</span>
+              </div>
             </router-link>
           </div>
         </section>
 
         <!-- 热门活动 -->
         <section class="home-block">
-          <HomeSectionHeader title="热门活动" icon="📅" more-to="/news?type=activity" />
+          <HomeSectionHeader title="热门活动" icon="activity" more-to="/news?type=activity" />
           <el-empty v-if="!homeData.hotActivities.length" description="暂无活动" :image-size="64" />
           <div v-else class="card-grid card-grid--3">
             <router-link
@@ -226,7 +258,7 @@ onMounted(loadHomeData)
               :to="itemPath(item)"
               class="activity-card"
             >
-              <div class="activity-icon">{{ coverIcons.activity }}</div>
+              <div class="activity-icon"><UiIcon name="activity" :size="28" /></div>
               <div class="activity-body">
                 <h3 class="activity-title">{{ item.title }}</h3>
                 <p v-if="item.extra" class="activity-meta">{{ item.extra }}</p>
@@ -238,7 +270,7 @@ onMounted(loadHomeData)
 
         <!-- 微专业（按学习资源技能标签聚合） -->
         <section class="home-block">
-          <HomeSectionHeader title="微专业" icon="🎓" more-to="/resources" />
+          <HomeSectionHeader title="微专业" icon="school" more-to="/resources" />
           <el-empty v-if="!homeData.microMajors.length" description="暂无微专业" :image-size="64" />
           <div v-else class="card-grid card-grid--3">
             <router-link
@@ -255,7 +287,7 @@ onMounted(loadHomeData)
                   loading="lazy"
                 />
                 <div v-else class="cover-placeholder">
-                  <span>🎓</span>
+                  <UiIcon name="school" :size="36" />
                 </div>
               </div>
               <div class="micro-body">
@@ -271,7 +303,7 @@ onMounted(loadHomeData)
         <!-- 最新热点 + 招聘信息 -->
         <div class="dual-row dual-row--ghost">
           <section class="dual-panel">
-            <HomeSectionHeader title="最新热点" icon="📰" more-to="/news?type=policy" />
+            <HomeSectionHeader title="最新热点" icon="news" more-to="/news?type=policy" />
             <ul class="split-list">
               <li v-for="item in displayNews" :key="`news-${item.id}`">
                 <router-link
@@ -297,7 +329,7 @@ onMounted(loadHomeData)
           </section>
 
           <section class="dual-panel">
-            <HomeSectionHeader title="招聘信息" icon="💼" more-to="/news?type=job" />
+            <HomeSectionHeader title="招聘信息" icon="job" more-to="/news?type=job" />
             <ul class="split-list">
               <li v-for="item in displayJobs" :key="`job-${item.id}`">
                 <router-link
@@ -325,7 +357,7 @@ onMounted(loadHomeData)
 
         <!-- 大家都在聊 -->
         <section class="home-block">
-          <HomeSectionHeader title="大家都在聊" icon="💬" more-to="/forum" />
+          <HomeSectionHeader title="大家都在聊" icon="forum" more-to="/forum" />
           <el-empty v-if="!homeData.forumPosts.length" description="暂无帖子" :image-size="64" />
           <div v-else class="forum-list">
             <router-link
@@ -346,7 +378,7 @@ onMounted(loadHomeData)
 
         <!-- 合作单位 -->
         <section class="home-block">
-          <HomeSectionHeader title="合作单位" icon="🤝" more-to="/enterprise" />
+          <HomeSectionHeader title="合作单位" icon="enterprise" more-to="/enterprise" />
           <el-empty v-if="!homeData.partners.length" description="暂无合作单位" :image-size="64" />
           <div v-else class="partner-grid">
             <router-link
@@ -406,6 +438,284 @@ onMounted(loadHomeData)
 
 .home-block {
   margin-bottom: 36px;
+}
+
+/* —— 热门课程：大图精选 + 列表 —— */
+.course-showcase {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.9fr);
+  gap: 16px;
+  align-items: stretch;
+}
+
+.course-feature {
+  display: grid;
+  grid-template-rows: minmax(200px, 1fr) auto;
+  border-radius: 18px;
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  background: rgba(8, 30, 48, 0.55);
+  border: 1px solid rgba(103, 232, 249, 0.22);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.22);
+  transition: transform 0.18s, border-color 0.18s;
+}
+
+.course-feature:hover {
+  transform: translateY(-2px);
+  border-color: rgba(103, 232, 249, 0.45);
+}
+
+.course-feature__cover {
+  position: relative;
+  min-height: 220px;
+  background: #0b1527;
+}
+
+.course-feature__cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.play-badge {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(8, 145, 178, 0.88);
+  color: #ecfeff;
+  font-size: 18px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+  border: 2px solid rgba(255, 255, 255, 0.35);
+}
+
+.course-feature__body {
+  padding: 18px 20px 20px;
+  color: #e8f8ff;
+}
+
+.course-kicker {
+  display: inline-block;
+  margin-bottom: 8px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  background: rgba(34, 211, 238, 0.18);
+  border: 1px solid rgba(103, 232, 249, 0.35);
+  color: #67e8f9;
+}
+
+.course-feature__body h3 {
+  margin: 0 0 8px;
+  font-size: 22px;
+  line-height: 1.35;
+}
+
+.course-feature__body p {
+  margin: 0;
+  line-height: 1.65;
+  color: rgba(232, 248, 255, 0.72);
+  font-size: 14px;
+}
+
+.course-feature__meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  margin-top: 14px;
+  font-size: 13px;
+  color: rgba(186, 230, 253, 0.8);
+}
+
+.course-feature__meta em {
+  font-style: normal;
+  color: #67e8f9;
+  font-weight: 600;
+}
+
+.course-rail {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.course-rail-item {
+  display: grid;
+  grid-template-columns: 28px 72px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 14px;
+  text-decoration: none;
+  color: inherit;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(10px);
+  transition: background 0.15s, transform 0.15s;
+}
+
+.course-rail-item:hover {
+  background: rgba(34, 211, 238, 0.12);
+  transform: translateX(2px);
+}
+
+.course-rail-index {
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(103, 232, 249, 0.7);
+  font-variant-numeric: tabular-nums;
+}
+
+.course-rail-thumb {
+  width: 72px;
+  height: 48px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(8, 30, 48, 0.8);
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+}
+
+.course-rail-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.course-rail-copy {
+  min-width: 0;
+}
+
+.course-rail-copy h4 {
+  margin: 0 0 4px;
+  font-size: 14px;
+  color: #f0f9ff;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.course-rail-copy p {
+  margin: 0;
+  font-size: 12px;
+  color: rgba(186, 230, 253, 0.65);
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.course-placeholder {
+  background: linear-gradient(135deg, #0c4a6e, #0891b2) !important;
+}
+
+/* —— 热卖商品：价签货架 —— */
+.product-shelf {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.product-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  border-radius: 14px;
+  text-decoration: none;
+  color: inherit;
+  background: linear-gradient(180deg, rgba(255, 247, 237, 0.14), rgba(255, 255, 255, 0.08));
+  border: 1px solid rgba(251, 191, 36, 0.22);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.16);
+  backdrop-filter: blur(10px);
+  transition: transform 0.15s, border-color 0.15s;
+}
+
+.product-tile:hover {
+  transform: translateY(-3px);
+  border-color: rgba(251, 191, 36, 0.5);
+}
+
+.product-rank {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 1;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255, 247, 237, 0.8);
+  background: rgba(15, 23, 42, 0.55);
+}
+
+.product-rank.hot {
+  color: #431407;
+  background: linear-gradient(135deg, #fcd34d, #f59e0b);
+}
+
+.product-tile__cover {
+  aspect-ratio: 1;
+  border-radius: 10px;
+  overflow: hidden;
+  background: rgba(15, 23, 42, 0.45);
+  margin-bottom: 10px;
+}
+
+.product-tile__cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.product-placeholder {
+  background: linear-gradient(135deg, #78350f, #f59e0b) !important;
+}
+
+.product-tile h3 {
+  margin: 0 0 10px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #fff7ed;
+  min-height: 36px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.product-tile__price {
+  margin-top: auto;
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  align-items: baseline;
+}
+
+.product-tile__price strong {
+  font-size: 13px;
+  color: #fbbf24;
+  font-weight: 700;
+}
+
+.product-tile__price span {
+  font-size: 11px;
+  color: rgba(253, 230, 138, 0.75);
 }
 
 .card-grid {
@@ -868,15 +1178,27 @@ onMounted(loadHomeData)
     grid-template-columns: repeat(3, 1fr);
   }
 
+  .product-shelf {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
   .partner-grid {
     grid-template-columns: repeat(4, 1fr);
   }
 }
 
 @media (max-width: 768px) {
+  .course-showcase {
+    grid-template-columns: 1fr;
+  }
+
   .card-grid--4,
   .card-grid--3 {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .product-shelf {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .dual-row {
@@ -901,6 +1223,10 @@ onMounted(loadHomeData)
   .card-grid--4,
   .card-grid--3 {
     grid-template-columns: 1fr;
+  }
+
+  .product-shelf {
+    grid-template-columns: 1fr 1fr;
   }
 
   .partner-grid {

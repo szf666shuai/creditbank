@@ -47,7 +47,9 @@ export function isAdminOnlyPath(path: string): boolean {
 }
 
 export function canAccessPath(role: number, path: string): boolean {
-  if (isStudentLearningPath(path)) return role === ROLE_STUDENT
+  if (isStudentLearningPath(path)) {
+    return role === ROLE_STUDENT || role === ROLE_ADMIN
+  }
   if (isStudentOnlyPath(path)) return role === ROLE_STUDENT
   if (isEnterpriseOnlyPath(path)) return role === ROLE_ENTERPRISE
   if (isAdminOnlyPath(path)) return role === ROLE_ADMIN

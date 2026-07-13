@@ -116,7 +116,7 @@ onMounted(fetchApplications)
         <el-table-column label="投递时间" width="160">
           <template #default="{ row }">{{ formatTime(row.createTime) }}</template>
         </el-table-column>
-        <el-table-column label="操作" width="140" fixed="right">
+        <el-table-column label="操作" width="140">
           <template #default="{ row }">
             <el-button
               link

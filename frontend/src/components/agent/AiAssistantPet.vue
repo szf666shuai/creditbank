@@ -409,7 +409,9 @@ onUnmounted(() => {
                   </li>
                 </ol>
               </div>
-              <p class="ai-profile-foot">也可在「个人中心」查看完整画像</p>
+              <p class="ai-profile-foot">
+                也可在「个人中心 → 学习画像」查看完整画像
+              </p>
             </div>
           </div>
         </div>

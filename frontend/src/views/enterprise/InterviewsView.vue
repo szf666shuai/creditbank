@@ -55,33 +55,35 @@ onMounted(fetchInvitations)
         </el-button>
       </template>
 
-      <el-table :data="invitations" border stripe>
-        <el-table-column prop="jobTitle" label="职位" min-width="140" />
-        <el-table-column prop="toUserName" label="受邀学员" width="120" />
-        <el-table-column label="面试时间" width="160">
-          <template #default="{ row }">{{ formatTime(row.inviteTime) }}</template>
-        </el-table-column>
-        <el-table-column prop="location" label="地点/方式" min-width="140" show-overflow-tooltip />
-        <el-table-column label="面试方式" width="100">
-          <template #default="{ row }">{{ row.interviewModeName || '现场面试' }}</template>
-        </el-table-column>
-        <el-table-column label="状态" width="100">
-          <template #default="{ row }">
-            <el-tag :type="statusTagType(row.status)" size="small">{{ row.statusName }}</el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column label="发送时间" width="160">
-          <template #default="{ row }">{{ formatTime(row.createTime) }}</template>
-        </el-table-column>
-        <el-table-column label="操作" width="120" fixed="right">
-          <template #default="{ row }">
-            <el-button v-if="canJoinVideo(row)" link type="primary" @click="enterVideoRoom(row)">
-              进入面试
-            </el-button>
-            <span v-else class="page-text-muted">-</span>
-          </template>
-        </el-table-column>
-      </el-table>
+      <div class="page-table-wrap">
+        <el-table :data="invitations" border stripe class="profile-data-table">
+          <el-table-column prop="jobTitle" label="职位" min-width="140" show-overflow-tooltip />
+          <el-table-column prop="toUserName" label="受邀学员" width="120" />
+          <el-table-column label="面试时间" width="170" show-overflow-tooltip>
+            <template #default="{ row }">{{ formatTime(row.inviteTime) }}</template>
+          </el-table-column>
+          <el-table-column prop="location" label="地点/方式" min-width="140" show-overflow-tooltip />
+          <el-table-column label="面试方式" width="100" />
+          <el-table-column label="状态" width="100" align="center">
+            <template #default="{ row }">
+              <el-tag :type="statusTagType(row.status)" size="small">{{ row.statusName }}</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column label="发送时间" width="170" show-overflow-tooltip>
+            <template #default="{ row }">{{ formatTime(row.createTime) }}</template>
+          </el-table-column>
+          <el-table-column label="操作" width="140" align="center">
+            <template #default="{ row }">
+              <div class="page-table-actions">
+                <el-button v-if="canJoinVideo(row)" link type="primary" @click="enterVideoRoom(row)">
+                  进入面试
+                </el-button>
+                <span v-else class="page-text-muted">-</span>
+              </div>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
 
       <el-empty
         v-if="!loading && invitations.length === 0"

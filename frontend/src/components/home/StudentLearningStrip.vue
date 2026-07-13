@@ -5,6 +5,7 @@ import { useAuthStore } from '@/stores/auth'
 import { getProfileDashboardApi } from '@/api/profile-dashboard'
 import { fetchLearningResources, type LearningResource } from '@/api/learning'
 import { getErrorMessage, unwrapApi } from '@/utils/api'
+import UiIcon from '@/components/ui/UiIcon.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -93,7 +94,7 @@ onMounted(loadData)
       >
         <div class="course-cover">
           <img v-if="course.coverUrl" :src="course.coverUrl" :alt="course.title" loading="lazy" />
-          <span v-else class="cover-fallback">📚</span>
+          <UiIcon v-else class="cover-fallback" name="course" :size="32" />
         </div>
         <div class="course-body">
           <h3>{{ course.title }}</h3>

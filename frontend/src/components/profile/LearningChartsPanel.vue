@@ -77,25 +77,32 @@ function renderCharts() {
   const coursesCompleted = stats.value.map((item) => item.coursesCompleted ?? 0)
   const creditEarned = stats.value.map((item) => Number(item.creditEarned ?? 0))
 
+  const axisLabel = { color: '#94a3b8' }
+  const axisLine = { lineStyle: { color: 'rgba(125, 211, 252, 0.25)' } }
+  const splitLine = { lineStyle: { color: 'rgba(125, 211, 252, 0.12)' } }
+
   lineChart.setOption({
-    title: { text: '学习时长趋势', left: 'center', textStyle: { fontSize: 14, fontWeight: 600 } },
+    title: { text: '学习时长趋势', left: 'center', textStyle: { fontSize: 14, fontWeight: 600, color: '#e0f2fe' } },
     tooltip: { trigger: 'axis' },
     grid: { left: 48, right: 24, top: 48, bottom: 32 },
-    xAxis: { type: 'category', data: dates, boundaryGap: false },
-    yAxis: { type: 'value', name: '分钟' },
-    series: [{ name: '学习时长', type: 'line', smooth: true, data: studyMinutes, areaStyle: { opacity: 0.15 }, itemStyle: { color: '#2094f3' } }],
+    xAxis: { type: 'category', data: dates, boundaryGap: false, axisLabel, axisLine },
+    yAxis: { type: 'value', name: '分钟', nameTextStyle: { color: '#94a3b8' }, axisLabel, splitLine },
+    series: [{ name: '学习时长', type: 'line', smooth: true, data: studyMinutes, areaStyle: { opacity: 0.15 }, itemStyle: { color: '#38bdf8' } }],
   })
 
   barChart.setOption({
-    title: { text: '完课与秩点', left: 'center', textStyle: { fontSize: 14, fontWeight: 600 } },
+    title: { text: '完课与秩点', left: 'center', textStyle: { fontSize: 14, fontWeight: 600, color: '#e0f2fe' } },
     tooltip: { trigger: 'axis' },
-    legend: { data: ['完成课程', '获得秩点'], top: 28 },
+    legend: { data: ['完成课程', '获得秩点'], top: 28, textStyle: { color: '#cbd5e1' } },
     grid: { left: 48, right: 24, top: 64, bottom: 32 },
-    xAxis: { type: 'category', data: dates },
-    yAxis: [{ type: 'value', name: '门', minInterval: 1 }, { type: 'value', name: '秩点', minInterval: 0.5 }],
+    xAxis: { type: 'category', data: dates, axisLabel, axisLine },
+    yAxis: [
+      { type: 'value', name: '门', minInterval: 1, nameTextStyle: { color: '#94a3b8' }, axisLabel, splitLine },
+      { type: 'value', name: '秩点', minInterval: 0.5, nameTextStyle: { color: '#94a3b8' }, axisLabel, splitLine },
+    ],
     series: [
-      { name: '完成课程', type: 'bar', data: coursesCompleted, itemStyle: { color: '#52c41a' }, barMaxWidth: 28 },
-      { name: '获得秩点', type: 'bar', yAxisIndex: 1, data: creditEarned, itemStyle: { color: '#fa8c16' }, barMaxWidth: 28 },
+      { name: '完成课程', type: 'bar', data: coursesCompleted, itemStyle: { color: '#4ade80' }, barMaxWidth: 28 },
+      { name: '获得秩点', type: 'bar', yAxisIndex: 1, data: creditEarned, itemStyle: { color: '#38bdf8' }, barMaxWidth: 28 },
     ],
   })
 }
@@ -186,7 +193,7 @@ defineExpose({ fetchStats })
 
 .learning-charts-panel.embedded {
   padding-bottom: 8px;
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid rgba(125, 211, 252, 0.14);
 }
 
 .panel-head {
@@ -200,7 +207,7 @@ defineExpose({ fetchStats })
 
 .panel-head h2 {
   font-size: 18px;
-  color: var(--color-text);
+  color: #e0f2fe;
 }
 
 .panel-error {

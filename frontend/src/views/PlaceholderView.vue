@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
+import UiIcon from '@/components/ui/UiIcon.vue'
 
 const route = useRoute()
 const title = computed(() => (route.meta.title as string) || '页面建设中')
@@ -9,7 +10,7 @@ const title = computed(() => (route.meta.title as string) || '页面建设中')
 <template>
   <div class="placeholder">
     <div class="placeholder-inner">
-      <div class="icon">🚧</div>
+      <UiIcon class="icon" name="collection" :size="48" />
       <h2>{{ title }}</h2>
       <p>该模块正在开发中，敬请期待</p>
       <router-link to="/" class="back-link">返回首页</router-link>
@@ -19,46 +20,37 @@ const title = computed(() => (route.meta.title as string) || '页面建设中')
 
 <style scoped>
 .placeholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 400px;
-  padding: 60px 20px;
+  min-height: calc(100vh - var(--header-height));
+  display: grid;
+  place-items: center;
+  padding: 40px 16px;
 }
 
 .placeholder-inner {
   text-align: center;
+  color: #e2e8f0;
 }
 
 .icon {
-  font-size: 48px;
   margin-bottom: 16px;
 }
 
-h2 {
-  font-size: 22px;
-  color: var(--color-text);
-  margin-bottom: 8px;
+.placeholder-inner h2 {
+  margin: 0 0 8px;
+  font-size: 24px;
 }
 
-p {
-  font-size: 14px;
-  color: var(--color-text-muted);
-  margin-bottom: 24px;
+.placeholder-inner p {
+  margin: 0 0 20px;
+  color: rgba(186, 230, 253, 0.75);
 }
 
 .back-link {
-  display: inline-block;
-  padding: 8px 24px;
-  background: var(--color-primary);
-  color: var(--color-white);
+  color: #38bdf8;
   text-decoration: none;
-  border-radius: 20px;
-  font-size: 14px;
-  transition: background 0.2s;
 }
 
 .back-link:hover {
-  background: var(--color-primary-dark);
+  text-decoration: underline;
 }
 </style>

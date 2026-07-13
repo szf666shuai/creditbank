@@ -194,12 +194,12 @@ onMounted(async () => {
 
 <style scoped>
 .amount-plus {
-  color: #52c41a;
-  font-weight: 600;
+  color: #4ade80;
+  font-weight: 700;
 }
 
 .amount-minus {
-  color: #fa541c;
-  font-weight: 600;
+  color: #fb7185;
+  font-weight: 700;
 }
 </style>

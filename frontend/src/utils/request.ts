@@ -1,4 +1,5 @@
 import axios, { type AxiosRequestConfig } from 'axios'
+import { readAuthToken } from '@/utils/auth-storage'
 
 export interface ApiResponse<T = unknown> {
   code: number
@@ -12,7 +13,7 @@ const instance = axios.create({
 })
 
 instance.interceptors.request.use((config) => {
-  const token = localStorage.getItem('credit_bank_token')
+  const token = readAuthToken()
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }

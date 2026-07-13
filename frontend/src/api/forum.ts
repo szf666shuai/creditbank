@@ -35,6 +35,7 @@ export interface ForumReply {
   userId: number
   authorName: string
   parentId?: number
+  parentAuthorName?: string
   content: string
   likeCount: number
   status: number

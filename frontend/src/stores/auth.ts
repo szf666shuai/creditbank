@@ -3,11 +3,10 @@ import { ref, computed } from 'vue'
 import { getMeApi, loginApi, registerApi } from '@/api/auth'
 import type { LoginForm, RegisterForm, UserInfo } from '@/types/auth'
 import { ROLE_ADMIN, ROLE_ENTERPRISE, ROLE_STUDENT } from '@/types/auth'
-
-const TOKEN_KEY = 'credit_bank_token'
+import { clearAuthToken, readAuthToken, writeAuthToken } from '@/utils/auth-storage'
 
 export const useAuthStore = defineStore('auth', () => {
-  const token = ref<string | null>(localStorage.getItem(TOKEN_KEY))
+  const token = ref<string | null>(readAuthToken())
   const userInfo = ref<UserInfo | null>(null)
 
   const isLoggedIn = computed(() => !!token.value)
@@ -20,13 +19,13 @@ export const useAuthStore = defineStore('auth', () => {
 
   function setToken(newToken: string) {
     token.value = newToken
-    localStorage.setItem(TOKEN_KEY, newToken)
+    writeAuthToken(newToken)
   }
 
   function clearAuth() {
     token.value = null
     userInfo.value = null
-    localStorage.removeItem(TOKEN_KEY)
+    clearAuthToken()
   }
 
   async function login(form: LoginForm) {

@@ -49,27 +49,27 @@ public class LearningController {
     @GetMapping("/resources")
     public Result<List<LearningResourceVO>> resources(@RequestParam(required = false) String keyword,
                                                       @RequestParam(required = false) String tag) {
-        SysUser student = authSupport.requireStudent();
-        return Result.ok(learningService.listResources(student.getId(), keyword, tag));
+        SysUser user = authSupport.requireStudentOrAdmin();
+        return Result.ok(learningService.listResources(user.getId(), keyword, tag));
     }
 
     @GetMapping("/resources/{courseId}")
     public Result<LearningResourceVO> resource(@PathVariable Long courseId) {
-        SysUser student = authSupport.requireStudent();
-        return Result.ok(learningService.getResource(student.getId(), courseId));
+        SysUser user = authSupport.requireStudentOrAdmin();
+        return Result.ok(learningService.getResource(user.getId(), courseId));
     }
 
     @GetMapping("/tags")
     public Result<List<String>> tags() {
-        authSupport.requireStudent();
+        authSupport.requireStudentOrAdmin();
         return Result.ok(learningService.listSkillTags());
     }
 
     @GetMapping("/resources/{courseId}/comments")
     public Result<List<CourseCommentVO>> comments(@PathVariable Long courseId,
                                                   @RequestParam(defaultValue = "50") int limit) {
-        SysUser student = authSupport.requireStudent();
-        return Result.ok(courseInteractionService.listComments(courseId, student.getId(), limit));
+        SysUser user = authSupport.requireStudentOrAdmin();
+        return Result.ok(courseInteractionService.listComments(courseId, user.getId(), limit));
     }
 
     @PostMapping("/resources/{courseId}/comments")
@@ -88,7 +88,7 @@ public class LearningController {
 
     @GetMapping("/resources/{courseId}/danmaku")
     public Result<List<CourseDanmakuVO>> danmaku(@PathVariable Long courseId) {
-        authSupport.requireStudent();
+        authSupport.requireStudentOrAdmin();
         return Result.ok(courseInteractionService.listDanmaku(courseId));
     }
 
@@ -101,15 +101,15 @@ public class LearningController {
 
     @GetMapping("/resources/{courseId}/materials")
     public Result<List<CourseMaterialVO>> materials(@PathVariable Long courseId) {
-        authSupport.requireStudent();
+        authSupport.requireStudentOrAdmin();
         return Result.ok(courseInteractionService.listMaterials(courseId));
     }
 
     @GetMapping("/resources/{courseId}/episodes")
     public Result<List<CourseEpisodeVO>> episodes(@PathVariable Long courseId) {
-        SysUser student = authSupport.requireStudent();
-        learningService.assertCourseAccess(student.getId(), courseId);
-        return Result.ok(learningEngagementService.listEpisodes(student.getId(), courseId));
+        SysUser user = authSupport.requireStudentOrAdmin();
+        learningService.assertCourseAccess(user.getId(), courseId);
+        return Result.ok(learningEngagementService.listEpisodes(user.getId(), courseId));
     }
 
     @PostMapping("/resources/{courseId}/purchase")

@@ -3,7 +3,9 @@ import { reactive, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useAuthStore } from '@/stores/auth'
-import { BRAND_FULL, BRAND_NAME } from '@/config/brand'
+import { BRAND_FULL, BRAND_NAME, BRAND_SLOGAN } from '@/config/brand'
+import BrandLogo from '@/components/brand/BrandLogo.vue'
+import '@/styles/auth-page.css'
 
 const router = useRouter()
 const route = useRoute()
@@ -36,8 +38,15 @@ async function handleLogin() {
 
 <template>
   <div class="auth-page">
+    <div class="auth-page__glow" aria-hidden="true" />
     <div class="auth-card">
-      <h2 class="auth-title">登录 {{ BRAND_NAME }}</h2>
+      <div class="auth-brand">
+        <BrandLogo :size="56" variant="student" />
+        <h1 class="auth-brand__name">{{ BRAND_NAME }}</h1>
+        <p class="auth-brand__slogan">{{ BRAND_SLOGAN }}</p>
+      </div>
+
+      <h2 class="auth-title">欢迎回来</h2>
       <p class="auth-sub">{{ BRAND_FULL }}</p>
 
       <el-form label-position="top" @submit.prevent="handleLogin">
@@ -54,7 +63,7 @@ async function handleLogin() {
             @keyup.enter="handleLogin"
           />
         </el-form-item>
-        <el-button type="primary" size="large" class="submit-btn" :loading="loading" @click="handleLogin">
+        <el-button class="submit-btn" size="large" :loading="loading" @click="handleLogin">
           登录
         </el-button>
       </el-form>
@@ -65,7 +74,7 @@ async function handleLogin() {
       </div>
 
       <div class="auth-tip">
-        <p>测试账号（需数据库已初始化）：</p>
+        <p><strong>测试账号</strong>（需数据库已初始化）</p>
         <p>学员 student1 / admin123</p>
         <p>企业 enterprise1 / admin123</p>
         <p>管理员 admin / admin123</p>
@@ -73,69 +82,3 @@ async function handleLogin() {
     </div>
   </div>
 </template>
-
-<style scoped>
-.auth-page {
-  min-height: calc(100vh - var(--header-height));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 40px 16px;
-}
-
-.auth-card {
-  width: 100%;
-  max-width: 420px;
-  background: #fff;
-  border-radius: 12px;
-  padding: 36px 32px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-}
-
-.auth-title {
-  font-size: 24px;
-  font-weight: 700;
-  color: var(--color-text);
-  margin-bottom: 8px;
-  text-align: center;
-}
-
-.auth-sub {
-  text-align: center;
-  color: var(--color-text-muted);
-  font-size: 14px;
-  margin-bottom: 28px;
-}
-
-.submit-btn {
-  width: 100%;
-  margin-top: 8px;
-}
-
-.auth-footer {
-  text-align: center;
-  margin-top: 20px;
-  font-size: 14px;
-  color: var(--color-text-secondary);
-}
-
-.auth-footer a {
-  color: var(--color-primary);
-  text-decoration: none;
-  margin-left: 4px;
-}
-
-.auth-tip {
-  margin-top: 24px;
-  padding: 12px;
-  background: #f5f7fa;
-  border-radius: 8px;
-  font-size: 12px;
-  color: var(--color-text-muted);
-  line-height: 1.8;
-}
-
-.auth-tip p {
-  margin: 0;
-}
-</style>

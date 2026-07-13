@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ArrowLeft, OfficeBuilding, Search } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -12,8 +12,10 @@ import {
 } from '@/api/information'
 import { applyJobApi, getOrgParticipationStatusApi, registerActivityApi } from '@/api/enterprise'
 import { useAuthStore } from '@/stores/auth'
+import { BRAND_NAME, BRAND_SLOGAN } from '@/config/brand'
 import { getErrorMessage, unwrapApi } from '@/utils/api'
 import { formatTime } from '@/utils/format'
+import UiIcon from '@/components/ui/UiIcon.vue'
 
 const authStore = useAuthStore()
 const route = useRoute()
@@ -41,6 +43,8 @@ const actionLoading = ref(false)
 const coverMessage = ref('')
 const appliedJobIds = ref<number[]>([])
 const registeredActivityIds = ref<number[]>([])
+const heroIndex = ref(0)
+let heroTimer: number | undefined
 
 const typeOrder: InformationType[] = ['job', 'activity', 'policy']
 
@@ -52,24 +56,42 @@ const typeConfig: Record<
     label: '招聘信息',
     title: '招聘信息',
     description: '机构正式发布的岗位公告，可在详情中投递简历',
-    icon: '💼',
-    accent: '#0d9488',
+    icon: 'job',
+    accent: '#2563eb',
   },
   activity: {
     label: '活动信息',
     title: '活动信息',
     description: '机构正式发布的活动日程，可在详情中报名参加',
-    icon: '🎯',
-    accent: '#14b8a6',
+    icon: 'activity',
+    accent: '#3b82f6',
   },
   policy: {
     label: '政策资讯',
     title: '政策资讯',
     description: '平台与官方政策原文，与论坛讨论帖分开阅读',
-    icon: '📰',
-    accent: '#0f766e',
+    icon: 'news',
+    accent: '#1d4ed8',
   },
 }
+
+const heroSlides = [
+  {
+    badge: '建立',
+    title: '共建共享平台',
+    subtitle: '的资源认证标准与交易机制',
+  },
+  {
+    badge: '汇聚',
+    title: BRAND_NAME,
+    subtitle: '官方招聘 · 活动 · 政策一站发布',
+  },
+  {
+    badge: '互通',
+    title: '学习成果互认',
+    subtitle: BRAND_SLOGAN,
+  },
+]
 
 const isHub = computed(() => !activeType.value)
 
@@ -83,12 +105,9 @@ const currentDescription = computed(() =>
     : '机构与平台发布的正式信息总览',
 )
 
-const heroFeatured = computed(() => hotItems.value[0] ?? null)
-const heroHotList = computed(() => hotItems.value.slice(0, 6))
+const newsFeed = computed(() => hotItems.value.slice(0, 4))
 
-const totalHighlightCount = computed(() =>
-  typeOrder.reduce((sum, type) => sum + (sectionHighlights.value[type]?.length ?? 0), 0),
-)
+const currentSlide = computed(() => heroSlides[heroIndex.value] ?? heroSlides[0])
 
 const canApplyCurrentJob = computed(() => {
   return detail.value?.type === 'job' && !appliedJobIds.value.includes(detail.value.id)
@@ -122,6 +141,32 @@ function dateParts(value?: string) {
 
 function itemTime(item: InformationItem) {
   return item.startTime || item.publishTime || item.createTime
+}
+
+function rankClass(index: number) {
+  if (index === 0) return 'rank-1'
+  if (index === 1) return 'rank-2'
+  if (index === 2) return 'rank-3'
+  return 'rank-n'
+}
+
+function startHeroTimer() {
+  stopHeroTimer()
+  heroTimer = window.setInterval(() => {
+    heroIndex.value = (heroIndex.value + 1) % heroSlides.length
+  }, 4500)
+}
+
+function stopHeroTimer() {
+  if (heroTimer) {
+    window.clearInterval(heroTimer)
+    heroTimer = undefined
+  }
+}
+
+function selectHero(index: number) {
+  heroIndex.value = index
+  startHeroTimer()
 }
 
 async function fetchList() {
@@ -308,90 +353,68 @@ onMounted(async () => {
   applyTypeFromRoute()
   await refreshCurrentView()
   await openDetailFromRoute()
+  startHeroTimer()
 })
+
+onUnmounted(stopHeroTimer)
 </script>
 
 <template>
   <div class="news-page" v-loading="hubLoading || loading">
-    <div class="news-inner">
-      <!-- 总览 -->
-      <template v-if="isHub">
-        <section class="hero-stage">
-          <div class="hero-stage__main">
-            <div class="hero-stage__grid" aria-hidden="true" />
-            <p class="hero-kicker">Official Bulletin</p>
-            <h1>资讯中心</h1>
-            <p class="hero-lead">
-              招聘、活动与政策由机构及平台正式发布。这里是权威信息入口；经验讨论请前往论坛。
-            </p>
-            <div class="hero-stats">
-              <div>
-                <strong>{{ typeOrder.length }}</strong>
-                <span>资讯栏目</span>
-              </div>
-              <div>
-                <strong>{{ totalHighlightCount }}</strong>
-                <span>近期条目</span>
-              </div>
-              <div>
-                <strong>{{ hotItems.length }}</strong>
-                <span>热门速览</span>
-              </div>
-            </div>
-            <div class="hero-actions">
-              <el-button type="primary" size="large" @click="openType('job')">查看招聘</el-button>
-              <el-button size="large" plain @click="openType('activity')">浏览活动</el-button>
-              <el-button size="large" text @click="openType('policy')">政策原文</el-button>
-            </div>
+    <!-- 总览：科技蓝 Banner + 资讯动态 -->
+    <template v-if="isHub">
+      <section class="tech-banner">
+        <div class="tech-banner__grid" aria-hidden="true" />
+        <div class="tech-banner__orbs" aria-hidden="true" />
 
-            <article
-              v-if="heroFeatured"
-              class="hero-feature"
-              @click="openDetail(heroFeatured)"
-            >
-              <span class="hero-feature__badge">
-                {{ typeConfig[heroFeatured.type].label }}
-              </span>
-              <h2>{{ heroFeatured.title }}</h2>
-              <p>{{ truncate(heroFeatured.summary || '点击查看完整内容', 110) }}</p>
-              <div class="hero-feature__meta">
-                <span v-if="heroFeatured.orgName">{{ heroFeatured.orgName }}</span>
-                <span>{{ formatTime(itemTime(heroFeatured)) }}</span>
+        <div class="tech-banner__inner">
+          <div class="banner-left">
+            <div class="banner-slogan">
+              <span class="slogan-badge">{{ currentSlide.badge }}</span>
+              <div class="slogan-copy">
+                <h1>{{ currentSlide.title }}</h1>
+                <p>{{ currentSlide.subtitle }}</p>
               </div>
-            </article>
+            </div>
+            <div class="banner-dots" role="tablist" aria-label="资讯标语轮播">
+              <button
+                v-for="(_, index) in heroSlides"
+                :key="index"
+                type="button"
+                class="banner-dot"
+                :class="{ active: heroIndex === index }"
+                :aria-selected="heroIndex === index"
+                @click="selectHero(index)"
+              />
+            </div>
           </div>
 
-          <aside class="hero-hot-panel">
-            <div class="hero-hot-panel__head">
-              <h3>最新速览</h3>
-              <span>官方发布</span>
+          <aside class="news-panel">
+            <div class="news-panel__mark" aria-hidden="true" />
+            <div class="news-panel__head">
+              <h2>资讯动态</h2>
+              <button type="button" class="more-link" @click="openType('policy')">
+                更多 &gt;
+              </button>
             </div>
             <el-empty
-              v-if="!hubLoading && heroHotList.length === 0"
-              :image-size="64"
+              v-if="!hubLoading && newsFeed.length === 0"
+              :image-size="56"
               description="暂无资讯"
             />
-            <button
-              v-for="(item, index) in heroHotList"
-              :key="`${item.type}-${item.id}`"
-              type="button"
-              class="hot-item"
-              @click="openDetail(item)"
-            >
-              <span class="hot-date">
-                <strong>{{ dateParts(itemTime(item)).monthDay }}</strong>
-                <small>{{ dateParts(itemTime(item)).year }}</small>
-              </span>
-              <span class="hot-body">
-                <em>{{ typeConfig[item.type].label }}</em>
-                <strong>{{ item.title }}</strong>
-                <small>{{ item.orgName || item.tag || item.location || '平台发布' }}</small>
-              </span>
-              <span class="hot-index">{{ String(index + 1).padStart(2, '0') }}</span>
-            </button>
+            <ul v-else class="news-feed">
+              <li v-for="(item, index) in newsFeed" :key="`${item.type}-${item.id}`">
+                <button type="button" class="news-feed__item" @click="openDetail(item)">
+                  <span class="rank" :class="rankClass(index)">{{ index + 1 }}</span>
+                  <span class="feed-title">{{ item.title }}</span>
+                </button>
+              </li>
+            </ul>
           </aside>
-        </section>
+        </div>
+      </section>
 
+      <div class="news-body">
         <el-alert
           v-if="loadError"
           :title="loadError"
@@ -405,13 +428,26 @@ onMounted(async () => {
           </template>
         </el-alert>
 
+        <section class="channel-nav">
+          <button
+            v-for="type in typeOrder"
+            :key="type"
+            type="button"
+            class="channel-pill"
+            @click="openType(type)"
+          >
+            <UiIcon :name="typeConfig[type].icon" :size="18" />
+            {{ typeConfig[type].label }}
+          </button>
+        </section>
+
         <section class="section-showcase">
           <header class="section-head">
             <div>
               <p class="eyebrow">Channels</p>
               <h2>栏目精选</h2>
             </div>
-            <p>点击「更多」进入栏目列表；也可从导航栏下拉直接跳转。</p>
+            <p>点击条目查看详情，或进入栏目浏览全部官方发布信息。</p>
           </header>
 
           <div
@@ -422,7 +458,7 @@ onMounted(async () => {
           >
             <div class="type-block__head">
               <div class="type-block__title">
-                <span class="type-icon">{{ typeConfig[type].icon }}</span>
+                <span class="type-icon"><UiIcon :name="typeConfig[type].icon" :size="22" /></span>
                 <div>
                   <h3>{{ typeConfig[type].title }}</h3>
                   <p>{{ typeConfig[type].description }}</p>
@@ -436,150 +472,151 @@ onMounted(async () => {
               :image-size="56"
               description="该栏目暂无内容"
             />
-            <div v-else class="type-cards" :class="`type-cards--${type}`">
-              <article
-                v-for="item in sectionHighlights[type]"
+            <div v-else class="type-list">
+              <button
+                v-for="(item, index) in sectionHighlights[type]"
                 :key="`${item.type}-${item.id}`"
-                class="type-card"
+                type="button"
+                class="type-row"
                 @click="openDetail(item)"
               >
-                <div class="type-card__date">
-                  <strong>{{ dateParts(itemTime(item)).monthDay }}</strong>
-                  <small>{{ dateParts(itemTime(item)).year }}</small>
-                </div>
-                <div class="type-card__body">
-                  <h4>{{ item.title }}</h4>
-                  <p>{{ truncate(item.summary || '暂无摘要', 72) }}</p>
-                  <div class="type-card__meta">
-                    <span v-if="item.orgName">{{ item.orgName }}</span>
-                    <span v-if="item.location">{{ item.location }}</span>
-                    <span v-if="item.statusName">{{ item.statusName }}</span>
-                  </div>
-                </div>
-              </article>
-            </div>
-          </div>
-        </section>
-      </template>
-
-      <!-- 栏目列表 -->
-      <template v-else>
-        <section class="list-head">
-          <button type="button" class="back-link" @click="goHub">
-            <el-icon><ArrowLeft /></el-icon>
-            返回资讯总览
-          </button>
-          <div class="list-head__row">
-            <div>
-              <p class="eyebrow">{{ typeConfig[activeType!].icon }} Channel</p>
-              <h1>{{ currentTitle }}</h1>
-              <p class="hero-lead">{{ currentDescription }}</p>
-            </div>
-            <div class="type-tabs">
-              <button
-                v-for="type in typeOrder"
-                :key="type"
-                type="button"
-                class="type-tab"
-                :class="{ active: activeType === type }"
-                @click="openType(type)"
-              >
-                {{ typeConfig[type].label }}
+                <span class="type-row__rank" :class="rankClass(index)">{{ index + 1 }}</span>
+                <span class="type-row__main">
+                  <strong>{{ item.title }}</strong>
+                  <small>
+                    {{ item.orgName || typeConfig[type].label }}
+                    · {{ formatTime(itemTime(item)) }}
+                  </small>
+                </span>
               </button>
             </div>
           </div>
         </section>
+      </div>
+    </template>
 
-        <section class="list-panel">
-          <div class="list-toolbar">
-            <div class="glass-search glass-search--light">
-              <el-input
-                v-model="keyword"
-                clearable
-                :placeholder="`搜索${typeConfig[activeType!].label}`"
-                @keyup.enter="handleSearch"
-                @clear="handleSearch"
-              >
-                <template #prefix>
-                  <el-icon><Search /></el-icon>
-                </template>
-              </el-input>
-              <el-button class="glass-search__btn" type="primary" @click="handleSearch">搜索</el-button>
-            </div>
+    <!-- 栏目列表 -->
+    <div v-else class="news-body list-mode">
+      <section class="list-head">
+        <button type="button" class="back-link" @click="goHub">
+          <el-icon><ArrowLeft /></el-icon>
+          返回资讯总览
+        </button>
+        <div class="list-head__row">
+          <div>
+            <p class="eyebrow">Channel</p>
+            <h1>{{ currentTitle }}</h1>
+            <p class="list-desc">{{ currentDescription }}</p>
           </div>
-
-          <el-alert
-            v-if="loadError"
-            :title="loadError"
-            type="warning"
-            show-icon
-            :closable="false"
-            class="news-alert"
-          >
-            <template #default>
-              <el-button link type="primary" @click="fetchList">重新加载</el-button>
-            </template>
-          </el-alert>
-
-          <el-empty
-            v-if="!loading && list.length === 0"
-            :image-size="80"
-            description="暂无资讯"
-          />
-
-          <div class="info-list">
-            <article
-              v-for="item in list"
-              :key="`${item.type}-${item.id}`"
-              class="info-card"
-              @click="openDetail(item)"
+          <div class="type-tabs">
+            <button
+              v-for="type in typeOrder"
+              :key="type"
+              type="button"
+              class="type-tab"
+              :class="{ active: activeType === type }"
+              @click="openType(type)"
             >
-              <div class="info-date">
-                <strong>{{ dateParts(itemTime(item)).monthDay }}</strong>
-                <small>{{ dateParts(itemTime(item)).year }}</small>
-              </div>
-              <div class="info-main">
-                <div class="info-title-line">
-                  <h3>{{ item.title }}</h3>
-                  <el-tag size="small" effect="plain" type="success">
-                    {{ item.statusName || typeConfig[item.type].label }}
-                  </el-tag>
-                </div>
-                <p>{{ item.summary || '暂无摘要' }}</p>
-                <div class="info-meta">
-                  <span v-if="item.orgName">
-                    <el-icon><OfficeBuilding /></el-icon>
-                    {{ item.orgName }}
-                  </span>
-                  <span v-if="item.location">{{ item.location }}</span>
-                  <span v-if="item.tag">{{ item.tag }}</span>
-                </div>
-              </div>
-            </article>
+              {{ typeConfig[type].label }}
+            </button>
           </div>
+        </div>
+      </section>
 
-          <div v-if="total > 0" class="page-pagination">
-            <el-pagination
-              v-model:current-page="page"
-              :page-size="pageSize"
-              :total="total"
-              layout="total, prev, pager, next"
-              background
-            />
+      <section class="list-panel">
+        <div class="list-toolbar">
+          <div class="glass-search glass-search--light">
+            <el-input
+              v-model="keyword"
+              clearable
+              :placeholder="`搜索${typeConfig[activeType!].label}`"
+              @keyup.enter="handleSearch"
+              @clear="handleSearch"
+            >
+              <template #prefix>
+                <el-icon><Search /></el-icon>
+              </template>
+            </el-input>
+            <el-button class="glass-search__btn" type="primary" @click="handleSearch">搜索</el-button>
           </div>
-        </section>
-      </template>
+        </div>
+
+        <el-alert
+          v-if="loadError"
+          :title="loadError"
+          type="warning"
+          show-icon
+          :closable="false"
+          class="news-alert"
+        >
+          <template #default>
+            <el-button link type="primary" @click="fetchList">重新加载</el-button>
+          </template>
+        </el-alert>
+
+        <el-empty v-if="!loading && list.length === 0" :image-size="80" description="暂无资讯" />
+
+        <div class="info-list">
+          <article
+            v-for="item in list"
+            :key="`${item.type}-${item.id}`"
+            class="info-card"
+            @click="openDetail(item)"
+          >
+            <div class="info-date">
+              <strong>{{ dateParts(itemTime(item)).monthDay }}</strong>
+              <small>{{ dateParts(itemTime(item)).year }}</small>
+            </div>
+            <div class="info-main">
+              <div class="info-title-line">
+                <h3>{{ item.title }}</h3>
+                <el-tag size="small" effect="plain" type="primary">
+                  {{ item.statusName || typeConfig[item.type].label }}
+                </el-tag>
+              </div>
+              <p>{{ item.summary || '暂无摘要' }}</p>
+              <div class="info-meta">
+                <span v-if="item.orgName">
+                  <el-icon><OfficeBuilding /></el-icon>
+                  {{ item.orgName }}
+                </span>
+                <span v-if="item.location">{{ item.location }}</span>
+                <span v-if="item.tag">{{ item.tag }}</span>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <div v-if="total > 0" class="page-pagination">
+          <el-pagination
+            v-model:current-page="page"
+            :page-size="pageSize"
+            :total="total"
+            layout="total, prev, pager, next"
+            background
+          />
+        </div>
+      </section>
     </div>
 
-    <el-dialog v-model="detailVisible" width="720px" destroy-on-close>
+    <el-dialog
+      v-model="detailVisible"
+      class="news-detail-dialog"
+      width="720px"
+      destroy-on-close
+      align-center
+    >
       <template #header>
-        <span>{{ detail?.title || '资讯详情' }}</span>
+        <div class="dialog-head">
+          <p class="dialog-kicker">资讯详情</p>
+          <h2 class="dialog-title">{{ detail?.title || '资讯详情' }}</h2>
+        </div>
       </template>
       <div v-loading="detailLoading" class="detail-panel">
         <template v-if="detail">
           <div class="detail-tags">
-            <el-tag type="success">{{ typeConfig[detail.type].label }}</el-tag>
-            <el-tag v-if="detail.statusName" type="info">{{ detail.statusName }}</el-tag>
+            <span class="detail-chip detail-chip--primary">{{ typeConfig[detail.type].label }}</span>
+            <span v-if="detail.statusName" class="detail-chip">{{ detail.statusName }}</span>
             <span v-if="detail.orgName">{{ detail.orgName }}</span>
             <span>{{ formatTime(detail.startTime || detail.publishTime || detail.createTime) }}</span>
           </div>
@@ -646,19 +683,21 @@ onMounted(async () => {
         </template>
       </div>
       <template #footer>
-        <el-button @click="detailVisible = false">关闭</el-button>
+        <el-button class="news-btn news-btn--ghost" @click="detailVisible = false">关闭</el-button>
         <el-button
           v-if="detail?.type === 'job' && canApplyCurrentJob"
-          type="primary"
+          class="news-btn news-btn--primary"
           :loading="actionLoading"
           @click="handleApply"
         >
           发送简历
         </el-button>
-        <el-button v-else-if="detail?.type === 'job'" type="success" disabled>已投递</el-button>
+        <el-button v-else-if="detail?.type === 'job'" class="news-btn news-btn--done" disabled>
+          已投递
+        </el-button>
         <el-button
           v-if="detail?.type === 'activity' && canRegisterCurrentActivity"
-          type="primary"
+          class="news-btn news-btn--primary"
           :loading="actionLoading"
           @click="handleRegister"
         >
@@ -666,7 +705,7 @@ onMounted(async () => {
         </el-button>
         <el-button
           v-else-if="detail?.type === 'activity' && registeredActivityIds.includes(detail.id)"
-          type="success"
+          class="news-btn news-btn--done"
           disabled
         >
           已报名
@@ -678,255 +717,287 @@ onMounted(async () => {
 
 <style scoped>
 .news-page {
-  padding: 20px 16px 56px;
   background: transparent;
   min-height: calc(100vh - var(--header-height));
+  padding-bottom: 48px;
 }
 
-.news-inner {
-  max-width: var(--content-max-width);
-  margin: 0 auto;
-}
-
-.hero-stage {
-  display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(280px, 0.95fr);
-  gap: 18px;
-  min-height: 420px;
-  margin-bottom: 28px;
-}
-
-.hero-stage__main {
+.tech-banner {
   position: relative;
   overflow: hidden;
-  border-radius: 8px 28px 8px 28px;
-  padding: 36px 36px 28px;
-  color: #ecfeff;
+  min-height: 360px;
+  margin-bottom: 28px;
   background:
-    linear-gradient(160deg, rgba(15, 118, 110, 0.92) 0%, rgba(13, 148, 136, 0.86) 42%, rgba(45, 212, 191, 0.72) 100%);
-  border: 1px solid rgba(94, 234, 212, 0.35);
-  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.28);
+    radial-gradient(circle at 12% 18%, rgba(59, 130, 246, 0.35), transparent 42%),
+    radial-gradient(circle at 88% 10%, rgba(14, 165, 233, 0.22), transparent 40%),
+    linear-gradient(135deg, #062a63 0%, #0a3d8f 46%, #0b4db4 100%);
 }
 
-.hero-stage__grid {
+.tech-banner__grid {
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
-  background-size: 28px 28px;
-  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.55), transparent 78%);
+    linear-gradient(rgba(147, 197, 253, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(147, 197, 253, 0.08) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.75), transparent 90%);
   pointer-events: none;
 }
 
-.hero-kicker,
+.tech-banner__orbs {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 8% 82%, rgba(255, 255, 255, 0.12) 0 2px, transparent 3px),
+    radial-gradient(circle at 18% 70%, rgba(255, 255, 255, 0.1) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 78% 78%, rgba(255, 255, 255, 0.12) 0 2px, transparent 3px),
+    radial-gradient(circle at 90% 60%, rgba(255, 255, 255, 0.08) 0 1px, transparent 2px);
+  pointer-events: none;
+}
+
+.tech-banner__inner {
+  position: relative;
+  z-index: 1;
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  padding: 48px 16px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(300px, 420px);
+  gap: 28px;
+  align-items: center;
+  min-height: 360px;
+}
+
+.banner-left {
+  color: #fff;
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 28px;
+}
+
+.banner-slogan {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.slogan-badge {
+  flex-shrink: 0;
+  width: 42px;
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  letter-spacing: 0.2em;
+  display: grid;
+  place-items: center;
+  padding: 10px 0;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 700;
+  background: linear-gradient(180deg, #38bdf8, #2563eb);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+}
+
+.slogan-copy h1 {
+  margin: 0 0 10px;
+  font-size: clamp(34px, 4.5vw, 48px);
+  line-height: 1.2;
+  font-weight: 800;
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.28);
+}
+
+.slogan-copy p {
+  margin: 0;
+  font-size: clamp(18px, 2vw, 24px);
+  line-height: 1.5;
+  color: rgba(239, 246, 255, 0.92);
+}
+
+.banner-dots {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.banner-dot {
+  width: 8px;
+  height: 8px;
+  border: none;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.35);
+  cursor: pointer;
+  padding: 0;
+  transition: width 0.2s, background 0.2s;
+}
+
+.banner-dot.active {
+  width: 28px;
+  background: #fff;
+}
+
+.news-panel {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  padding: 18px 18px 12px;
+  background: rgba(4, 28, 72, 0.55);
+  border: 1px solid rgba(147, 197, 253, 0.22);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+  min-height: 260px;
+}
+
+.news-panel__mark {
+  position: absolute;
+  right: -20px;
+  bottom: -30px;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  border: 2px solid rgba(147, 197, 253, 0.12);
+  background:
+    radial-gradient(circle at center, rgba(96, 165, 250, 0.18), transparent 62%);
+  pointer-events: none;
+}
+
+.news-panel__mark::after {
+  content: '';
+  position: absolute;
+  inset: 18%;
+  border-radius: 50%;
+  border: 2px solid rgba(147, 197, 253, 0.18);
+  opacity: 0.9;
+}
+
+.news-panel__head {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.news-panel__head h2 {
+  margin: 0;
+  color: #fff;
+  font-size: 20px;
+}
+
+.more-link {
+  border: none;
+  background: transparent;
+  color: rgba(191, 219, 254, 0.9);
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.more-link:hover {
+  color: #fff;
+}
+
+.news-feed {
+  position: relative;
+  z-index: 1;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.news-feed__item {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  padding: 10px 4px;
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+
+.news-feed__item:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.rank {
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.rank-1 { background: #ef4444; }
+.rank-2 { background: #f97316; }
+.rank-3 { background: #3b82f6; }
+.rank-n { background: rgba(148, 163, 184, 0.55); }
+
+.feed-title {
+  color: rgba(239, 246, 255, 0.95);
+  font-size: 14px;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.news-body {
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
 .eyebrow {
   margin: 0 0 8px;
+  color: #93c5fd;
   font-size: 12px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: rgba(204, 251, 241, 0.86);
   font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
 }
 
-.hero-stage__main h1,
-.list-head h1 {
-  margin: 0 0 12px;
-  font-size: clamp(32px, 4vw, 44px);
-  line-height: 1.15;
-  letter-spacing: 0.02em;
-  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.28);
+.news-alert {
+  margin-bottom: 16px;
 }
 
-.hero-lead {
-  margin: 0;
-  max-width: 540px;
-  line-height: 1.75;
-  color: rgba(236, 254, 255, 0.88);
-}
-
-.hero-stats {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 18px;
-  margin: 22px 0 18px;
-}
-
-.hero-stats strong {
-  display: block;
-  font-size: 26px;
-  line-height: 1.1;
-  font-variant-numeric: tabular-nums;
-}
-
-.hero-stats span {
-  font-size: 12px;
-  color: rgba(204, 251, 241, 0.72);
-}
-
-.hero-actions {
+.channel-nav {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
   margin-bottom: 22px;
 }
 
-.hero-feature {
-  position: relative;
-  z-index: 1;
-  padding: 18px 20px;
-  border-radius: 4px 16px;
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px);
-  cursor: pointer;
-  transition: transform 0.18s, background 0.18s;
-}
-
-.hero-feature:hover {
-  transform: translateY(-2px);
-  background: rgba(255, 255, 255, 0.18);
-}
-
-.hero-feature__badge {
-  display: inline-block;
-  margin-bottom: 8px;
-  padding: 2px 10px;
-  border-radius: 4px;
-  font-size: 12px;
-  background: rgba(45, 212, 191, 0.28);
-  border: 1px solid rgba(153, 246, 228, 0.45);
-}
-
-.hero-feature h2 {
-  margin: 0 0 8px;
-  font-size: 20px;
-}
-
-.hero-feature p,
-.hero-feature__meta {
-  margin: 0;
-  color: rgba(236, 254, 255, 0.8);
-  line-height: 1.6;
-}
-
-.hero-feature__meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 10px;
-  font-size: 12px;
-}
-
-.hero-hot-panel {
-  border-radius: 28px 8px 28px 8px;
-  padding: 22px 16px;
-  background: rgba(8, 28, 36, 0.45);
-  border: 1px solid rgba(153, 246, 228, 0.18);
-  backdrop-filter: blur(16px);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.22);
-  display: flex;
-  flex-direction: column;
+.channel-pill {
+  display: inline-flex;
+  align-items: center;
   gap: 6px;
-}
-
-.hero-hot-panel__head {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin-bottom: 8px;
-  padding: 0 8px;
-}
-
-.hero-hot-panel__head h3 {
-  margin: 0;
-  color: #ecfeff;
-  font-size: 18px;
-}
-
-.hero-hot-panel__head span {
-  color: rgba(153, 246, 228, 0.58);
-  font-size: 12px;
-  letter-spacing: 0.08em;
-}
-
-.hot-item {
-  display: grid;
-  grid-template-columns: 52px minmax(0, 1fr) auto;
-  gap: 12px;
-  align-items: start;
-  width: 100%;
-  padding: 12px 10px;
-  border: none;
-  border-radius: 10px;
-  background: transparent;
-  text-align: left;
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(96, 165, 250, 0.35);
+  background: rgba(15, 23, 42, 0.35);
+  color: #dbeafe;
   cursor: pointer;
-  transition: background 0.15s;
+  backdrop-filter: blur(8px);
 }
 
-.hot-item:hover {
-  background: rgba(45, 212, 191, 0.1);
-}
-
-.hot-date {
-  text-align: center;
-  color: #99f6e4;
-}
-
-.hot-date strong {
-  display: block;
-  font-size: 14px;
-  font-variant-numeric: tabular-nums;
-}
-
-.hot-date small {
-  font-size: 11px;
-  opacity: 0.7;
-}
-
-.hot-body {
-  min-width: 0;
-  display: grid;
-  gap: 3px;
-}
-
-.hot-body em {
-  font-style: normal;
-  font-size: 11px;
-  color: #5eead4;
-  letter-spacing: 0.06em;
-}
-
-.hot-body strong {
-  color: #ecfeff;
-  font-size: 14px;
-  line-height: 1.45;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.hot-body small {
-  color: rgba(204, 251, 241, 0.55);
-  font-size: 12px;
-}
-
-.hot-index {
-  color: rgba(153, 246, 228, 0.35);
-  font-size: 12px;
-  font-variant-numeric: tabular-nums;
-  padding-top: 2px;
-}
-
-.news-alert {
-  margin-bottom: 18px;
+.channel-pill:hover {
+  background: rgba(37, 99, 235, 0.28);
+  border-color: rgba(147, 197, 253, 0.55);
 }
 
 .section-showcase {
   display: grid;
-  gap: 18px;
+  gap: 16px;
 }
 
 .section-head {
@@ -934,30 +1005,26 @@ onMounted(async () => {
   justify-content: space-between;
   gap: 16px;
   align-items: end;
-  color: rgba(204, 251, 241, 0.78);
+  color: rgba(191, 219, 254, 0.78);
+  margin-bottom: 4px;
 }
 
 .section-head h2 {
   margin: 0;
-  color: #ecfeff;
+  color: #eff6ff;
   font-size: 28px;
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.35);
 }
 
 .section-head p {
   margin: 0;
-  max-width: 360px;
-  line-height: 1.6;
-  font-size: 14px;
 }
 
 .type-block {
-  padding: 20px 22px;
-  border-radius: 6px 20px;
-  background: rgba(8, 40, 44, 0.42);
-  border: 1px solid rgba(153, 246, 228, 0.16);
+  padding: 18px 20px;
+  border-radius: 14px;
+  background: rgba(8, 24, 56, 0.42);
+  border: 1px solid rgba(96, 165, 250, 0.18);
   backdrop-filter: blur(12px);
-  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.18);
 }
 
 .type-block__head {
@@ -965,133 +1032,115 @@ onMounted(async () => {
   justify-content: space-between;
   gap: 12px;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .type-block__title {
   display: flex;
-  gap: 14px;
+  gap: 12px;
   align-items: center;
-  min-width: 0;
 }
 
 .type-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 8px;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
   display: grid;
   place-items: center;
-  font-size: 24px;
-  background: color-mix(in srgb, var(--type-accent) 28%, transparent);
-  border: 1px solid color-mix(in srgb, var(--type-accent) 45%, transparent);
+  font-size: 22px;
+  background: color-mix(in srgb, var(--type-accent) 24%, transparent);
+  border: 1px solid color-mix(in srgb, var(--type-accent) 40%, transparent);
 }
 
 .type-block__title h3 {
   margin: 0 0 4px;
-  color: #ecfeff;
-  font-size: 20px;
+  color: #eff6ff;
+  font-size: 18px;
 }
 
 .type-block__title p {
   margin: 0;
-  color: rgba(204, 251, 241, 0.68);
+  color: rgba(191, 219, 254, 0.68);
   font-size: 13px;
 }
 
 .more-btn {
-  color: #5eead4 !important;
+  color: #93c5fd !important;
   font-weight: 600;
 }
 
-.type-cards {
+.type-list {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.type-row {
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr);
   gap: 12px;
-}
-
-.type-card {
-  display: flex;
-  gap: 14px;
-  padding: 14px;
-  border-radius: 4px 14px;
-  background: rgba(255, 255, 255, 0.94);
-  border: 1px solid rgba(153, 246, 228, 0.35);
-  cursor: pointer;
-  transition: transform 0.15s, box-shadow 0.15s;
-}
-
-.type-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.16);
-}
-
-.type-card__date {
-  width: 52px;
-  flex-shrink: 0;
-  text-align: center;
-  padding: 8px 0;
+  align-items: center;
+  width: 100%;
+  padding: 12px 8px;
+  border: none;
   border-radius: 8px;
-  background: #ecfdf8;
-  color: #0f766e;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s;
 }
 
-.type-card__date strong {
-  display: block;
-  font-size: 14px;
+.type-row:hover {
+  background: rgba(59, 130, 246, 0.12);
 }
 
-.type-card__date small {
-  font-size: 11px;
-  color: #14b8a6;
+.type-row__rank {
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
 }
 
-.type-card__body {
+.type-row__main {
   min-width: 0;
+  display: grid;
+  gap: 4px;
 }
 
-.type-card h4 {
-  margin: 0 0 6px;
-  font-size: 15px;
-  color: #134e4a;
-  line-height: 1.4;
-}
-
-.type-card p {
-  margin: 0;
-  color: #5b716e;
-  font-size: 13px;
-  line-height: 1.55;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+.type-row__main strong {
+  color: #eff6ff;
+  font-size: 14px;
+  white-space: nowrap;
   overflow: hidden;
-  min-height: 40px;
+  text-overflow: ellipsis;
 }
 
-.type-card__meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 10px;
-  color: #94a9a6;
+.type-row__main small {
+  color: rgba(147, 197, 253, 0.7);
   font-size: 12px;
 }
 
+.list-mode {
+  padding-top: 20px;
+}
+
 .list-head {
-  margin-bottom: 18px;
-  color: #ecfeff;
+  margin-bottom: 16px;
+  color: #eff6ff;
 }
 
 .back-link {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
   border: none;
   background: transparent;
-  color: #5eead4;
+  color: #93c5fd;
   cursor: pointer;
-  font-size: 14px;
 }
 
 .list-head__row {
@@ -1101,6 +1150,17 @@ onMounted(async () => {
   align-items: end;
 }
 
+.list-head h1 {
+  margin: 0 0 8px;
+  font-size: 32px;
+}
+
+.list-desc {
+  margin: 0;
+  color: rgba(191, 219, 254, 0.8);
+  line-height: 1.6;
+}
+
 .type-tabs {
   display: flex;
   flex-wrap: wrap;
@@ -1108,39 +1168,31 @@ onMounted(async () => {
 }
 
 .type-tab {
-  border: 1px solid rgba(94, 234, 212, 0.35);
-  background: rgba(8, 40, 44, 0.45);
-  color: #99f6e4;
+  border: 1px solid rgba(96, 165, 250, 0.35);
+  background: rgba(8, 24, 56, 0.45);
+  color: #bfdbfe;
   border-radius: 4px;
   padding: 7px 12px;
   cursor: pointer;
-  font-size: 13px;
 }
 
 .type-tab.active {
-  background: #0d9488;
-  border-color: #0d9488;
+  background: #2563eb;
+  border-color: #2563eb;
   color: #fff;
 }
 
 .list-panel {
   padding: 18px;
-  border-radius: 6px 20px;
-  background: rgba(255, 255, 255, 0.95);
-  border: 1px solid rgba(153, 246, 228, 0.28);
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.18);
+  border-radius: 12px;
+  background: rgba(12, 20, 36, 0.42);
+  border: 1px solid rgba(147, 197, 253, 0.2);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.16);
 }
 
 .list-toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  align-items: center;
   margin-bottom: 12px;
-}
-
-.info-search {
-  width: 280px;
 }
 
 .info-list {
@@ -1151,14 +1203,13 @@ onMounted(async () => {
 .info-card {
   display: flex;
   gap: 18px;
-  border-bottom: 1px solid #e7f6f3;
+  border-bottom: 1px solid rgba(147, 197, 253, 0.18);
   padding: 16px 4px;
   cursor: pointer;
-  transition: background 0.15s;
 }
 
 .info-card:hover {
-  background: #f0fdfa;
+  background: rgba(59, 130, 246, 0.12);
 }
 
 .info-date {
@@ -1167,21 +1218,18 @@ onMounted(async () => {
   text-align: center;
   padding: 6px 0;
   border-radius: 8px;
-  background: #ecfdf8;
+  background: rgba(59, 130, 246, 0.22);
+  color: #bfdbfe;
 }
 
 .info-date strong {
   display: block;
   font-size: 16px;
-  font-weight: 700;
-  color: #0f766e;
 }
 
 .info-date small {
-  display: block;
-  margin-top: 4px;
   font-size: 12px;
-  color: #14b8a6;
+  color: #93c5fd;
 }
 
 .info-main {
@@ -1197,13 +1245,14 @@ onMounted(async () => {
 }
 
 .info-title-line h3 {
-  color: var(--color-text);
+  margin: 0;
   font-size: 16px;
-  font-weight: 600;
+  color: #eff6ff;
 }
 
 .info-main p {
-  color: var(--color-text-secondary);
+  margin: 0;
+  color: rgba(191, 219, 254, 0.78);
   line-height: 1.6;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -1218,7 +1267,7 @@ onMounted(async () => {
   flex-wrap: wrap;
   align-items: center;
   gap: 12px;
-  color: var(--color-text-muted);
+  color: rgba(186, 230, 253, 0.78);
   font-size: 12px;
   margin-top: 10px;
 }
@@ -1235,24 +1284,64 @@ onMounted(async () => {
   margin-top: 12px;
 }
 
+.dialog-head {
+  min-width: 0;
+  padding-right: 8px;
+}
+
+.dialog-kicker {
+  margin: 0 0 4px;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(125, 211, 252, 0.9);
+  font-weight: 700;
+}
+
+.dialog-title {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.4;
+  color: #e0f2fe;
+  font-weight: 700;
+}
+
 .detail-panel {
-  min-height: 240px;
+  min-height: 200px;
+}
+
+.detail-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(125, 211, 252, 0.28);
+  background: rgba(56, 189, 248, 0.12);
+  color: #bae6fd;
+  font-weight: 600;
+}
+
+.detail-chip--primary {
+  border-color: rgba(59, 130, 246, 0.45);
+  background: rgba(37, 99, 235, 0.28);
+  color: #dbeafe;
 }
 
 .cover {
   width: 100%;
   max-height: 260px;
   object-fit: cover;
-  border-radius: 10px;
+  border-radius: 12px;
   margin: 16px 0;
+  border: 1px solid rgba(125, 211, 252, 0.18);
 }
 
 .detail-section {
-  margin-top: 16px;
+  margin-top: 8px;
 }
 
 .detail-section p {
-  color: var(--color-text-secondary);
+  color: rgba(226, 232, 240, 0.9);
   line-height: 1.8;
   white-space: pre-wrap;
   margin-bottom: 14px;
@@ -1260,7 +1349,7 @@ onMounted(async () => {
 
 .detail-section h3 {
   font-size: 15px;
-  color: var(--color-text);
+  color: #e0f2fe;
   margin: 16px 0 8px;
 }
 
@@ -1272,42 +1361,133 @@ onMounted(async () => {
 }
 
 .detail-grid div {
-  border: 1px solid var(--color-border);
-  border-radius: 10px;
+  border: 1px solid rgba(125, 211, 252, 0.22);
+  border-radius: 12px;
   padding: 12px;
+  background: rgba(8, 24, 48, 0.45);
 }
 
 .detail-grid dt {
-  color: var(--color-text-muted);
+  color: rgba(147, 197, 253, 0.72);
   font-size: 12px;
   margin-bottom: 6px;
 }
 
 .detail-grid dd {
-  color: var(--color-text);
+  color: #f0f9ff;
   margin: 0;
+  font-weight: 600;
 }
 
 .policy-content p {
   white-space: pre-wrap;
 }
 
+.news-btn {
+  --el-button-bg-color: rgba(56, 189, 248, 0.16);
+  --el-button-border-color: rgba(56, 189, 248, 0.35);
+  --el-button-text-color: #e0f2fe;
+  --el-button-hover-bg-color: rgba(56, 189, 248, 0.28);
+  --el-button-hover-border-color: rgba(56, 189, 248, 0.5);
+  --el-button-hover-text-color: #f0f9ff;
+}
+
+.news-btn--primary {
+  --el-button-bg-color: rgba(37, 99, 235, 0.9);
+  --el-button-border-color: rgba(37, 99, 235, 1);
+  --el-button-text-color: #eff6ff;
+  --el-button-hover-bg-color: rgba(29, 78, 216, 0.95);
+  --el-button-hover-border-color: rgba(29, 78, 216, 1);
+}
+
+.news-btn--ghost {
+  --el-button-bg-color: transparent;
+  --el-button-border-color: rgba(186, 230, 253, 0.28);
+  --el-button-text-color: rgba(226, 232, 240, 0.88);
+}
+
+.news-btn--done {
+  --el-button-bg-color: rgba(34, 197, 94, 0.2);
+  --el-button-border-color: rgba(34, 197, 94, 0.4);
+  --el-button-text-color: #86efac;
+  --el-button-disabled-bg-color: rgba(34, 197, 94, 0.2);
+  --el-button-disabled-border-color: rgba(34, 197, 94, 0.4);
+  --el-button-disabled-text-color: #86efac;
+}
+
 @media (max-width: 960px) {
-  .hero-stage,
-  .type-cards {
-    grid-template-columns: 1fr;
-  }
-
-  .section-head,
+  .tech-banner__inner,
   .list-head__row,
-  .info-card,
-  .info-title-line {
+  .section-head {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
   }
 
-  .info-search {
+  .tech-banner__inner {
+    display: flex;
+  }
+
+  .news-panel {
     width: 100%;
   }
+}
+</style>
+
+<style>
+.news-detail-dialog.el-dialog {
+  background:
+    radial-gradient(ellipse at 12% 0%, rgba(59, 130, 246, 0.22), transparent 42%),
+    radial-gradient(ellipse at 100% 18%, rgba(14, 165, 233, 0.12), transparent 46%),
+    rgba(8, 18, 36, 0.94);
+  border: 1px solid rgba(125, 211, 252, 0.28);
+  border-radius: 16px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(18px);
+}
+
+.news-detail-dialog .el-dialog__header {
+  margin-right: 0;
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid rgba(147, 197, 253, 0.14);
+}
+
+.news-detail-dialog .el-dialog__headerbtn .el-dialog__close {
+  color: rgba(186, 230, 253, 0.78);
+}
+
+.news-detail-dialog .el-dialog__body {
+  padding: 16px 20px;
+  color: #e2e8f0;
+}
+
+.news-detail-dialog .el-dialog__footer {
+  padding: 12px 20px 18px;
+  border-top: 1px solid rgba(147, 197, 253, 0.14);
+}
+
+.news-detail-dialog .el-textarea__inner {
+  background: rgba(8, 20, 40, 0.55);
+  border: 1px solid rgba(125, 211, 252, 0.28);
+  box-shadow: none;
+  color: #e0f2fe;
+  border-radius: 12px;
+}
+
+.news-detail-dialog .el-textarea__inner:hover,
+.news-detail-dialog .el-textarea__inner:focus {
+  border-color: rgba(56, 189, 248, 0.5);
+}
+
+.news-detail-dialog .el-textarea__inner::placeholder {
+  color: rgba(147, 197, 253, 0.45);
+}
+
+.news-detail-dialog .el-input__count {
+  background: transparent;
+  color: rgba(147, 197, 253, 0.5);
+}
+
+.news-detail-dialog .el-loading-mask {
+  background: rgba(8, 18, 36, 0.45);
 }
 </style>

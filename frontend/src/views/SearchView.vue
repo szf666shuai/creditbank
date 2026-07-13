@@ -5,6 +5,7 @@ import { ElMessage } from 'element-plus'
 import { searchApi } from '@/api/search'
 import type { SearchItem } from '@/api/search'
 import SearchAgentPanel from '@/components/agent/SearchAgentPanel.vue'
+import UiIcon from '@/components/ui/UiIcon.vue'
 import {
   ALL_SEARCH_TYPE_VALUES,
   allSearchSections,
@@ -61,9 +62,9 @@ function highlightKeyword(text: string) {
 }
 
 function gridIcon(type: string) {
-  if (type === 'resource') return '📄'
-  if (type === 'course') return '📚'
-  return '🎁'
+  if (type === 'resource') return 'document'
+  if (type === 'course') return 'course'
+  return 'gift'
 }
 
 function limitForType(type: string) {
@@ -202,7 +203,7 @@ watch(() => [route.query.q, route.query.type], fetchResults)
                     loading="lazy"
                   />
                   <div v-else class="cover-placeholder">
-                    <span class="placeholder-icon">{{ gridIcon(col.value) }}</span>
+                    <UiIcon class="placeholder-icon" :name="gridIcon(col.value)" :size="28" />
                   </div>
                 </div>
                 <h4 class="grid-title" v-html="highlightKeyword(item.title)" />
@@ -222,7 +223,7 @@ watch(() => [route.query.q, route.query.type], fetchResults)
                   class="stack-icon"
                   :style="{ background: panel.color + '18', color: panel.color }"
                 >
-                  {{ panel.icon }}
+                  <UiIcon :name="panel.icon" :size="18" :color="panel.color" />
                 </span>
                 <h3 class="block-title inline">{{ panel.label }}</h3>
               </div>
@@ -257,7 +258,7 @@ watch(() => [route.query.q, route.query.type], fetchResults)
                 class="stack-icon"
                 :style="{ background: block.color + '18', color: block.color }"
               >
-                {{ block.icon }}
+                <UiIcon :name="block.icon" :size="18" :color="block.color" />
               </span>
               <h3 class="block-title inline">{{ block.label }}</h3>
             </div>
@@ -289,7 +290,11 @@ watch(() => [route.query.q, route.query.type], fetchResults)
                   color: allSearchSections.enterprise.color,
                 }"
               >
-                {{ allSearchSections.enterprise.icon }}
+                <UiIcon
+                  :name="allSearchSections.enterprise.icon"
+                  :size="18"
+                  :color="allSearchSections.enterprise.color"
+                />
               </span>
               <h3 class="block-title inline">{{ allSearchSections.enterprise.label }}</h3>
             </div>
@@ -340,7 +345,7 @@ watch(() => [route.query.q, route.query.type], fetchResults)
                     loading="lazy"
                   />
                   <div v-else class="cover-placeholder">
-                    <span class="placeholder-icon">{{ gridIcon(col.value) }}</span>
+                    <UiIcon class="placeholder-icon" :name="gridIcon(col.value)" :size="28" />
                   </div>
                 </div>
                 <h4 class="grid-title" v-html="highlightKeyword(item.title)" />

@@ -67,7 +67,7 @@ onMounted(fetchData)
         <template #default="{ row }"><el-tag :type="row.status === 1 ? 'success' : 'info'" size="small">{{ row.statusName }}</el-tag></template>
       </el-table-column>
       <el-table-column label="发布时间" width="170"><template #default="{ row }">{{ formatTime(row.createTime) }}</template></el-table-column>
-      <el-table-column label="操作" width="90" fixed="right">
+      <el-table-column label="操作" width="90">
         <template #default="{ row }">
           <el-button type="primary" link :loading="actingId === row.id" @click="toggleStatus(row)">{{ row.status === 1 ? '下架' : '上架' }}</el-button>
         </template>

@@ -29,6 +29,7 @@ import ProfileEnterpriseProductsView from '@/views/profile/enterprise/ProductsVi
 import ProfileIndexView from '@/views/profile/IndexView.vue'
 import ProfileResumeView from '@/views/profile/ResumeView.vue'
 import ProfileLearningView from '@/views/profile/LearningView.vue'
+import ProfileLearningProfileView from '@/views/profile/LearningProfileView.vue'
 import ProfileCreditView from '@/views/profile/CreditView.vue'
 import ProfileIntegrityView from '@/views/profile/IntegrityView.vue'
 import ProfilePostsView from '@/views/profile/PostsView.vue'
@@ -168,6 +169,12 @@ const router = createRouter({
               name: 'profile-learning',
               component: ProfileLearningView,
               meta: { title: '学习档案', ...studentRoute },
+            },
+            {
+              path: 'learning-profile',
+              name: 'profile-learning-profile',
+              component: ProfileLearningProfileView,
+              meta: { title: '学习画像', ...studentRoute },
             },
             {
               path: 'credit',
@@ -391,7 +398,7 @@ router.beforeEach(async (to) => {
     return { path: getDefaultHomePath(role) }
   }
 
-  if (to.meta.requiresStudent && !authStore.isStudent) {
+  if (to.meta.requiresStudent && !authStore.isStudent && !authStore.isAdmin) {
     return { path: getDefaultHomePath(role) }
   }
   if (to.meta.requiresEnterprise && !authStore.isEnterprise) {

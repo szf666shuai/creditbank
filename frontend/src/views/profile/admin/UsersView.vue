@@ -150,7 +150,7 @@ onMounted(async () => {
       <el-table-column label="注册时间" width="170">
         <template #default="{ row }">{{ formatTime(row.createTime) }}</template>
       </el-table-column>
-      <el-table-column label="操作" width="100" fixed="right">
+      <el-table-column label="操作" width="100">
         <template #default="{ row }">
           <el-button v-if="row.role !== 2" type="primary" link :loading="actingId === row.id" @click="handleToggleStatus(row)">
             {{ row.status === 1 ? '禁用' : '启用' }}

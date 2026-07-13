@@ -148,7 +148,7 @@ onMounted(fetchMaterials)
       <el-table-column label="发布时间" width="160">
         <template #default="{ row }">{{ formatTime(row.createTime) }}</template>
       </el-table-column>
-      <el-table-column label="操作" width="160" fixed="right">
+      <el-table-column label="操作" width="160">
         <template #default="{ row }">
           <el-button link type="primary" @click="openEdit(row)">编辑</el-button>
           <el-button link :type="row.status === 1 ? 'warning' : 'success'" @click="toggleStatus(row)">

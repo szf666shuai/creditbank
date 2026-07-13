@@ -200,7 +200,8 @@ onMounted(async () => {
   gap: 28px;
   margin-bottom: 24px;
   padding: 20px;
-  background: var(--color-primary-light);
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(125, 211, 252, 0.16);
   border-radius: 12px;
 }
 
@@ -213,7 +214,7 @@ onMounted(async () => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: var(--color-white);
+  background: rgba(8, 20, 40, 0.55);
   flex-shrink: 0;
 }
 

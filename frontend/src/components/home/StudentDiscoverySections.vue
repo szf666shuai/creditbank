@@ -5,6 +5,7 @@ import type { HomeData } from '@/api/home'
 import type { SearchItem } from '@/api/search'
 import { homeFallbackData, normalizeHomeData } from '@/config/home-fallback'
 import HomeSectionHeader from '@/components/home/HomeSectionHeader.vue'
+import UiIcon from '@/components/ui/UiIcon.vue'
 
 const loading = ref(true)
 const homeData = ref<HomeData | null>(null)
@@ -69,7 +70,7 @@ onMounted(loadHomeData)
       </el-alert>
 
       <section class="discovery-block">
-        <HomeSectionHeader title="推荐课程" icon="📚" more-to="/resources" />
+        <HomeSectionHeader title="推荐课程" icon="course" more-to="/resources" />
         <el-empty v-if="!courses.length" description="暂无课程" :image-size="64" />
         <div v-else class="card-grid card-grid--4">
           <router-link
@@ -85,7 +86,7 @@ onMounted(loadHomeData)
                 :alt="item.title"
                 loading="lazy"
               />
-              <span v-else class="cover-fallback">📚</span>
+              <UiIcon v-else class="cover-fallback" name="course" :size="32" />
             </div>
             <h3>{{ item.title }}</h3>
             <p v-if="item.extra" class="meta highlight">{{ item.extra }}</p>
@@ -94,7 +95,7 @@ onMounted(loadHomeData)
       </section>
 
       <section class="discovery-block">
-        <HomeSectionHeader title="热门活动" icon="🎯" more-to="/enterprise" />
+        <HomeSectionHeader title="热门活动" icon="activity" more-to="/enterprise" />
         <el-empty v-if="!activities.length" description="暂无活动" :image-size="64" />
         <div v-else class="card-grid card-grid--3">
           <router-link
@@ -103,7 +104,7 @@ onMounted(loadHomeData)
             :to="itemLink(item)"
             class="activity-card"
           >
-            <span class="activity-icon">🎪</span>
+            <UiIcon class="activity-icon" name="activity" :size="28" />
             <div>
               <h3>{{ item.title }}</h3>
               <p v-if="item.extra">{{ item.extra }}</p>
@@ -113,7 +114,7 @@ onMounted(loadHomeData)
       </section>
 
       <section class="discovery-block">
-        <HomeSectionHeader title="精选好物" icon="🎁" more-to="/credit" />
+        <HomeSectionHeader title="精选好物" icon="gift" more-to="/credit" />
         <el-empty v-if="!products.length" description="暂无商品" :image-size="64" />
         <div v-else class="card-grid card-grid--4">
           <router-link
@@ -129,7 +130,7 @@ onMounted(loadHomeData)
                 :alt="item.title"
                 loading="lazy"
               />
-              <span v-else class="cover-fallback">🎁</span>
+              <UiIcon v-else class="cover-fallback" name="gift" :size="32" />
             </div>
             <h3>{{ item.title }}</h3>
             <p v-if="item.extra" class="meta highlight">{{ item.extra }}</p>

@@ -141,7 +141,7 @@ onMounted(() => {
       <el-table-column label="举报时间" width="170">
         <template #default="{ row }">{{ formatTime(row.createTime) }}</template>
       </el-table-column>
-      <el-table-column label="操作" width="100" fixed="right" align="center">
+      <el-table-column label="操作" width="100" align="center">
         <template #default="{ row }">
           <el-button v-if="row.status === 0" type="primary" link @click="openHandleDialog(row)">处理</el-button>
           <span v-else class="muted">已处理</span>

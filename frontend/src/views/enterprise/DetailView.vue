@@ -18,7 +18,12 @@ import {
   type OrgMaterialItem,
 } from '@/api/enterprise'
 import { getErrorMessage, unwrapApi } from '@/utils/api'
+import { listResumesApi, type UserResumeSummary } from '@/api/profile-resume'
+import UiIcon from '@/components/ui/UiIcon.vue'
 import { formatTime } from '@/utils/format'
+import '@/styles/enterprise-form-dialog.css'
+
+type ResumeAttachMode = 'default' | 'custom' | 'none'
 
 const route = useRoute()
 const router = useRouter()
@@ -46,14 +51,18 @@ const applyDialogVisible = ref(false)
 const applyingJob = ref<JobPostingItem | null>(null)
 const coverMessage = ref('')
 const applying = ref(false)
+const resumeAttachMode = ref<ResumeAttachMode>('default')
+const selectedResumeId = ref<number | null>(null)
+const resumeOptions = ref<UserResumeSummary[]>([])
+const resumesLoading = ref(false)
 
 const canOperateAsStudent = computed(() => authStore.isLoggedIn && authStore.isStudent)
 
 const typeIcons: Record<number, string> = {
-  1: '🏫',
-  2: '📚',
-  3: '🏢',
-  4: '🏛️',
+  1: 'school',
+  2: 'course',
+  3: 'enterprise',
+  4: 'admin',
 }
 
 function isJobApplied(jobId: number) {
@@ -141,7 +150,7 @@ async function fetchTabData() {
   }
 }
 
-function openApplyDialog(job: JobPostingItem) {
+async function openApplyDialog(job: JobPostingItem) {
   if (!ensureStudentLogin()) return
   if (isJobApplied(job.id)) {
     ElMessage.info('您已投递该职位')
@@ -149,18 +158,45 @@ function openApplyDialog(job: JobPostingItem) {
   }
   applyingJob.value = job
   coverMessage.value = ''
+  resumeAttachMode.value = 'default'
+  selectedResumeId.value = null
+  resumesLoading.value = true
+  try {
+    resumeOptions.value = unwrapApi(await listResumesApi())
+    const defaultResume = resumeOptions.value.find((item) => item.isDefault === 1)
+    if (!defaultResume && resumeOptions.value.length > 0) {
+      resumeAttachMode.value = 'custom'
+      selectedResumeId.value = resumeOptions.value[0].id
+    }
+  } catch {
+    resumeOptions.value = []
+  } finally {
+    resumesLoading.value = false
+  }
   applyDialogVisible.value = true
 }
 
 async function handleApply() {
   if (!applyingJob.value) return
+  if (resumeAttachMode.value === 'custom' && !selectedResumeId.value) {
+    ElMessage.warning('请选择要投递的简历')
+    return
+  }
   applying.value = true
   try {
-    unwrapApi(
-      await applyJobApi(applyingJob.value.id, {
-        coverMessage: coverMessage.value.trim() || undefined,
-      }),
-    )
+    const payload: {
+      coverMessage?: string
+      resumeId?: number
+      attachResume?: boolean
+    } = {
+      coverMessage: coverMessage.value.trim() || undefined,
+    }
+    if (resumeAttachMode.value === 'none') {
+      payload.attachResume = false
+    } else if (resumeAttachMode.value === 'custom' && selectedResumeId.value) {
+      payload.resumeId = selectedResumeId.value
+    }
+    unwrapApi(await applyJobApi(applyingJob.value.id, payload))
     ElMessage.success('投递成功')
     applyDialogVisible.value = false
     if (!appliedJobIds.value.includes(applyingJob.value.id)) {
@@ -233,24 +269,31 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="detail-page-wrap">
-    <PageShell :loading="loading" :error="loadError" @retry="fetchOrgDetail">
+  <div class="org-detail-page">
+    <PageShell :loading="loading" :error="loadError" plain @retry="fetchOrgDetail">
       <template #header>
-        <button type="button" class="back-btn" @click="router.push('/enterprise')">
-          ← 返回企业列表
+        <button type="button" class="back-link" @click="router.push('/enterprise')">
+          <span aria-hidden="true">←</span> 返回企业列表
         </button>
       </template>
 
-      <div v-if="org" class="org-header">
-        <div class="org-header-main">
+      <div v-if="org" class="org-hero">
+        <div class="org-hero__glow" aria-hidden="true" />
+        <div class="org-hero__main">
           <div class="org-logo">
             <img v-if="org.logo" :src="org.logo" :alt="org.name" />
-            <span v-else class="org-logo-fallback">{{ typeIcons[org.type] || '🏢' }}</span>
+            <UiIcon
+              v-else
+              class="org-logo-fallback"
+              :name="typeIcons[org.type] || 'enterprise'"
+              :size="44"
+            />
           </div>
           <div class="org-info">
+            <p class="org-kicker">Partner Profile</p>
             <div class="org-title-row">
               <h1>{{ org.name }}</h1>
-              <el-tag type="info">{{ org.typeName }}</el-tag>
+              <el-tag effect="dark" type="info">{{ org.typeName }}</el-tag>
             </div>
             <p class="org-intro">{{ org.intro || '暂无简介' }}</p>
           </div>
@@ -280,7 +323,7 @@ onMounted(async () => {
         </div>
       </div>
 
-      <el-tabs v-if="org" v-model="activeTab" class="page-tabs detail-tabs">
+      <el-tabs v-if="org" v-model="activeTab" class="detail-tabs">
         <el-tab-pane label="招聘" name="jobs">
           <div v-loading="tabLoading">
             <el-alert
@@ -300,18 +343,25 @@ onMounted(async () => {
               description="暂无招聘信息"
             />
             <div v-else-if="jobs.length > 0" class="tab-list">
-              <article v-for="job in jobs" :key="job.id" class="tab-card">
+              <article v-for="job in jobs" :key="job.id" class="tab-card job-card">
                 <div class="tab-card-header">
-                  <h3>{{ job.title }}</h3>
+                  <div class="tab-card-title">
+                    <h3>{{ job.title }}</h3>
+                    <div class="tab-meta">
+                      <span v-if="job.salaryRange" class="meta-chip">💰 {{ job.salaryRange }}</span>
+                      <span v-if="job.location" class="meta-chip">📍 {{ job.location }}</span>
+                      <span v-if="job.eduRequirement" class="meta-chip">🎓 {{ job.eduRequirement }}</span>
+                    </div>
+                  </div>
                   <div class="tab-card-actions">
-                    <el-tag size="small" type="success">{{ job.statusName }}</el-tag>
-                    <el-tag v-if="canOperateAsStudent && isJobApplied(job.id)" size="small" type="info">
+                    <el-tag size="small" type="success" effect="dark">{{ job.statusName }}</el-tag>
+                    <el-tag v-if="canOperateAsStudent && isJobApplied(job.id)" size="small" type="info" effect="dark">
                       已投递
                     </el-tag>
                     <el-button
                       v-else-if="canOperateAsStudent"
                       type="primary"
-                      size="small"
+                      round
                       @click="openApplyDialog(job)"
                     >
                       投递简历
@@ -319,12 +369,7 @@ onMounted(async () => {
                   </div>
                 </div>
                 <p class="tab-desc">{{ job.description || '暂无描述' }}</p>
-                <div class="tab-meta">
-                  <span v-if="job.salaryRange">💰 {{ job.salaryRange }}</span>
-                  <span v-if="job.location">📍 {{ job.location }}</span>
-                  <span v-if="job.eduRequirement">🎓 {{ job.eduRequirement }}</span>
-                </div>
-                <p v-if="job.requirements" class="tab-sub">要求：{{ job.requirements }}</p>
+                <p v-if="job.requirements" class="tab-sub">任职要求：{{ job.requirements }}</p>
               </article>
             </div>
             <p v-if="jobsTotal > jobs.length" class="tab-total">共 {{ jobsTotal }} 条招聘</p>
@@ -375,8 +420,8 @@ onMounted(async () => {
                 </div>
                 <p class="tab-desc">{{ activity.description || '暂无描述' }}</p>
                 <div class="tab-meta">
-                  <span v-if="activity.location">📍 {{ activity.location }}</span>
-                  <span>🕐 {{ formatTime(activity.startTime) }} - {{ formatTime(activity.endTime) }}</span>
+                  <span v-if="activity.location">地点 {{ activity.location }}</span>
+                  <span>时间 {{ formatTime(activity.startTime) }} - {{ formatTime(activity.endTime) }}</span>
                   <span v-if="activity.creditReward">⭐ 奖励 {{ activity.creditReward }} 秩点</span>
                 </div>
               </article>
@@ -411,7 +456,7 @@ onMounted(async () => {
                 </div>
                 <p class="tab-desc">{{ material.description || '暂无描述' }}</p>
                 <div class="tab-meta">
-                  <span>📅 {{ formatTime(material.createTime) }}</span>
+                  <span>{{ formatTime(material.createTime) }}</span>
                   <a
                     v-if="material.fileUrl"
                     :href="material.fileUrl"
@@ -430,18 +475,65 @@ onMounted(async () => {
       </el-tabs>
     </PageShell>
 
-    <el-dialog v-model="applyDialogVisible" title="投递简历" width="520px" destroy-on-close>
+    <el-dialog
+      v-model="applyDialogVisible"
+      title="投递简历"
+      width="560px"
+      destroy-on-close
+      class="enterprise-form-dialog apply-dialog"
+    >
       <template v-if="applyingJob">
-        <p class="apply-job-title">应聘职位：{{ applyingJob.title }}</p>
-        <el-input
-          v-model="coverMessage"
-          type="textarea"
-          :rows="4"
-          maxlength="500"
-          show-word-limit
-          placeholder="选填求职信，将随简历一并发送给企业"
-        />
-        <p class="apply-tip">系统将自动关联您的默认简历</p>
+        <div class="apply-job-banner">
+          <span class="apply-job-label">应聘职位</span>
+          <strong>{{ applyingJob.title }}</strong>
+        </div>
+
+        <div v-loading="resumesLoading" class="apply-section">
+          <p class="apply-section-title">附带简历</p>
+          <el-radio-group v-model="resumeAttachMode" class="resume-mode-group">
+            <el-radio value="default">使用默认简历</el-radio>
+            <el-radio value="custom" :disabled="resumeOptions.length === 0">选择其他简历</el-radio>
+            <el-radio value="none">不附带简历</el-radio>
+          </el-radio-group>
+          <el-select
+            v-if="resumeAttachMode === 'custom'"
+            v-model="selectedResumeId"
+            placeholder="请选择简历版本"
+            style="width: 100%; margin-top: 12px"
+          >
+            <el-option
+              v-for="item in resumeOptions"
+              :key="item.id"
+              :label="`${item.title}${item.isDefault === 1 ? '（默认）' : ''}`"
+              :value="item.id"
+            />
+          </el-select>
+          <p v-if="resumeAttachMode === 'none'" class="apply-tip">
+            仅发送求职信，企业端将看不到简历附件。
+          </p>
+          <p v-else-if="resumeAttachMode === 'default'" class="apply-tip">
+            将自动关联您在「我的简历」中设为默认的版本。
+          </p>
+          <router-link
+            v-if="resumeOptions.length === 0 && !resumesLoading"
+            to="/profile/resume/new"
+            class="apply-resume-link"
+          >
+            还没有简历？去创建 →
+          </router-link>
+        </div>
+
+        <div class="apply-section">
+          <p class="apply-section-title">求职信（选填）</p>
+          <el-input
+            v-model="coverMessage"
+            type="textarea"
+            :rows="4"
+            maxlength="500"
+            show-word-limit
+            placeholder="简要介绍您的优势与求职意向，将随投递一并发送"
+          />
+        </div>
       </template>
       <template #footer>
         <el-button @click="applyDialogVisible = false">取消</el-button>
@@ -452,49 +544,74 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.detail-page-wrap {
-  padding: 32px 16px 48px;
+.org-detail-page {
+  padding: 24px 16px 56px;
 }
 
-.detail-page-wrap :deep(.page-shell) {
+.org-detail-page :deep(.page-shell) {
   max-width: var(--content-max-width);
   margin: 0 auto;
 }
 
-.back-btn {
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   border: none;
-  background: none;
-  color: var(--color-primary);
+  background: rgba(56, 189, 248, 0.1);
+  color: #7dd3fc;
   font-size: 14px;
   cursor: pointer;
   margin-bottom: 20px;
-  padding: 0;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(125, 211, 252, 0.22);
+  transition: background 0.2s, color 0.2s;
 }
 
-.back-btn:hover {
-  color: var(--color-primary-dark);
+.back-link:hover {
+  background: rgba(56, 189, 248, 0.18);
+  color: #e0f2fe;
 }
 
-.org-header {
-  background: var(--color-white);
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
-  padding: 24px;
+.org-hero {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 10% 0%, rgba(56, 189, 248, 0.2), transparent 48%),
+    rgba(8, 20, 40, 0.55);
+  border: 1px solid rgba(125, 211, 252, 0.18);
+  border-radius: 18px;
+  padding: 28px;
   margin-bottom: 24px;
+  backdrop-filter: blur(14px);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.22);
 }
 
-.org-header-main {
+.org-hero__glow {
+  position: absolute;
+  inset: auto -80px -80px auto;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.22), transparent 70%);
+  pointer-events: none;
+}
+
+.org-hero__main {
+  position: relative;
   display: flex;
-  gap: 20px;
-  margin-bottom: 20px;
+  gap: 22px;
+  margin-bottom: 22px;
 }
 
 .org-logo {
-  width: 72px;
-  height: 72px;
-  border-radius: 14px;
+  width: 88px;
+  height: 88px;
+  border-radius: 18px;
   overflow: hidden;
-  background: var(--color-primary-light);
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(125, 211, 252, 0.24);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -508,49 +625,64 @@ onMounted(async () => {
 }
 
 .org-logo-fallback {
-  font-size: 32px;
+  color: #7dd3fc;
+}
+
+.org-kicker {
+  margin-bottom: 8px;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(186, 230, 253, 0.72);
 }
 
 .org-title-row {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   flex-wrap: wrap;
 }
 
 .org-title-row h1 {
-  font-size: 24px;
-  color: var(--color-text);
+  font-size: 28px;
+  color: #e0f2fe;
 }
 
 .org-intro {
-  font-size: 14px;
-  line-height: 1.7;
-  color: var(--color-text-secondary);
+  font-size: 15px;
+  line-height: 1.75;
+  color: rgba(186, 230, 253, 0.88);
+  max-width: 760px;
 }
 
 .contact-grid {
+  position: relative;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 12px;
-  padding-top: 16px;
-  border-top: 1px solid var(--color-border);
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(125, 211, 252, 0.14);
 }
 
 .contact-item {
-  font-size: 13px;
-  color: var(--color-text-secondary);
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(125, 211, 252, 0.1);
+  font-size: 14px;
+  color: #e2e8f0;
 }
 
 .contact-item .label {
   display: block;
-  color: var(--color-text-muted);
-  margin-bottom: 4px;
+  color: rgba(186, 230, 253, 0.65);
+  font-size: 12px;
+  margin-bottom: 6px;
 }
 
 .contact-item a {
-  color: var(--color-primary);
+  color: #38bdf8;
   text-decoration: none;
 }
 
@@ -559,10 +691,32 @@ onMounted(async () => {
 }
 
 .detail-tabs {
-  background: var(--color-white);
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
-  padding: 8px 20px 20px;
+  background: rgba(8, 20, 40, 0.42);
+  border: 1px solid rgba(125, 211, 252, 0.16);
+  border-radius: 16px;
+  padding: 8px 20px 24px;
+  backdrop-filter: blur(12px);
+}
+
+.detail-tabs :deep(.el-tabs__header) {
+  margin-bottom: 20px;
+}
+
+.detail-tabs :deep(.el-tabs__item) {
+  color: rgba(186, 230, 253, 0.72);
+  font-size: 15px;
+}
+
+.detail-tabs :deep(.el-tabs__item.is-active) {
+  color: #38bdf8;
+}
+
+.detail-tabs :deep(.el-tabs__active-bar) {
+  background: #38bdf8;
+}
+
+.detail-tabs :deep(.el-tabs__nav-wrap::after) {
+  background: rgba(125, 211, 252, 0.12);
 }
 
 .tab-error {
@@ -576,22 +730,35 @@ onMounted(async () => {
 }
 
 .tab-card {
-  border: 1px solid var(--color-border);
-  border-radius: 10px;
-  padding: 16px;
+  border: 1px solid rgba(125, 211, 252, 0.14);
+  border-radius: 14px;
+  padding: 18px 20px;
+  background: rgba(255, 255, 255, 0.03);
+  transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+
+.tab-card:hover {
+  border-color: rgba(56, 189, 248, 0.35);
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+}
+
+.job-card {
+  border-left: 3px solid rgba(56, 189, 248, 0.55);
 }
 
 .tab-card-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 8px;
+  gap: 16px;
+  margin-bottom: 10px;
 }
 
-.tab-card-header h3 {
-  font-size: 16px;
-  color: var(--color-text);
+.tab-card-title h3 {
+  font-size: 18px;
+  color: #e0f2fe;
+  margin-bottom: 10px;
 }
 
 .tab-card-actions {
@@ -599,45 +766,118 @@ onMounted(async () => {
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .tab-desc {
-  font-size: 13px;
-  line-height: 1.6;
-  color: var(--color-text-secondary);
-  margin-bottom: 10px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: rgba(186, 230, 253, 0.82);
+  margin-bottom: 8px;
 }
 
 .tab-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: 8px;
+}
+
+.meta-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
   font-size: 12px;
-  color: var(--color-text-muted);
+  color: rgba(224, 242, 254, 0.92);
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(125, 211, 252, 0.16);
 }
 
 .tab-sub {
-  margin-top: 8px;
-  font-size: 12px;
-  color: var(--color-text-muted);
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed rgba(125, 211, 252, 0.14);
+  font-size: 13px;
+  color: rgba(186, 230, 253, 0.72);
+  line-height: 1.6;
 }
 
 .tab-total {
-  margin-top: 12px;
+  margin-top: 14px;
   font-size: 12px;
-  color: var(--color-text-muted);
+  color: rgba(186, 230, 253, 0.65);
   text-align: right;
 }
 
-.apply-job-title {
-  margin-bottom: 12px;
-  font-size: 14px;
-  color: var(--color-text-secondary);
+.apply-job-banner {
+  padding: 14px 16px;
+  margin-bottom: 18px;
+  border-radius: 12px;
+  background: rgba(56, 189, 248, 0.1);
+  border: 1px solid rgba(125, 211, 252, 0.18);
+}
+
+.apply-job-label {
+  display: block;
+  font-size: 12px;
+  color: rgba(186, 230, 253, 0.72);
+  margin-bottom: 6px;
+}
+
+.apply-job-banner strong {
+  color: #e0f2fe;
+  font-size: 16px;
+}
+
+.apply-section {
+  margin-bottom: 18px;
+}
+
+.apply-section-title {
+  margin-bottom: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(186, 230, 253, 0.88);
+}
+
+.resume-mode-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
 }
 
 .apply-tip {
   margin-top: 10px;
   font-size: 12px;
-  color: var(--color-text-muted);
+  line-height: 1.6;
+  color: rgba(186, 230, 253, 0.68);
+}
+
+.apply-resume-link {
+  display: inline-block;
+  margin-top: 10px;
+  font-size: 13px;
+  color: #38bdf8;
+  text-decoration: none;
+}
+
+.apply-resume-link:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .org-hero__main {
+    flex-direction: column;
+  }
+
+  .tab-card-header {
+    flex-direction: column;
+  }
+
+  .tab-card-actions {
+    justify-content: flex-start;
+  }
 }
 </style>

@@ -166,7 +166,7 @@ onMounted(fetchActivities)
           <el-tag :type="statusTagType(row.status)" size="small">{{ row.statusName }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="操作" width="160" fixed="right">
+      <el-table-column label="操作" width="160">
         <template #default="{ row }">
           <el-button v-if="row.status !== 0" link type="primary" @click="openEdit(row)">
             编辑

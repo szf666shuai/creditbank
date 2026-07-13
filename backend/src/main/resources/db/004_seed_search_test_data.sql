@@ -4,7 +4,6 @@
 DELETE FROM course_tag WHERE course_id IN (SELECT id FROM (SELECT id FROM course WHERE title LIKE '[测试]%') t);
 DELETE FROM course WHERE title LIKE '[测试]%';
 DELETE FROM activity WHERE title LIKE '[测试]%';
-DELETE FROM forum_post WHERE title LIKE '[测试]%';
 DELETE FROM job_posting WHERE title LIKE '[测试]%';
 DELETE FROM policy_news WHERE title LIKE '[测试]%';
 DELETE FROM mall_product WHERE name LIKE '[测试]%';
@@ -30,11 +29,18 @@ INSERT INTO activity (org_id, publisher_id, title, description, location, start_
 (2, 3, '[测试] 校园编程马拉松 Java 赛道', '48 小时编程挑战，Java 组题目涵盖算法与工程实现，优胜者奖励学分。', '大学城创新中心', '2026-09-01 09:00:00', '2026-09-03 18:00:00', 120, 10.00, 1),
 (1, 1, '[测试] 区块链技术分享会', '介绍联盟链在学习成果存证中的应用，不涉及 Java 编程。', '示例大学图书馆', '2026-08-20 15:00:00', '2026-08-20 17:00:00', 60, 3.00, 1);
 
--- 论坛帖子（student1=2）
-INSERT INTO forum_post (board_id, user_id, title, content, status) VALUES
-(1, 2, '[测试] Java 学习路线求助', '请问学分银行平台上有没有推荐的 Java 入门课程？想先从基础语法学起。', 1),
-(3, 2, '[测试] 春招 Java 后端面经', '分享一下 Java 后端岗位面试题，包括 JVM、Spring、MySQL 等。', 1),
-(2, 2, '[测试] 转让二手显示器', '毕业出显示器，有意私信联系我。', 1);
+-- 论坛帖子（student1=2）：按标题幂等插入，避免重启后 ID 变化导致详情 404
+INSERT INTO forum_post (board_id, user_id, title, content, status)
+SELECT 1, 2, '[测试] Java 学习路线求助', '请问学分银行平台上有没有推荐的 Java 入门课程？想先从基础语法学起。', 1
+WHERE NOT EXISTS (SELECT 1 FROM forum_post WHERE title = '[测试] Java 学习路线求助' AND deleted = 0);
+
+INSERT INTO forum_post (board_id, user_id, title, content, status)
+SELECT 3, 2, '[测试] 春招 Java 后端面经', '分享一下 Java 后端岗位面试题，包括 JVM、Spring、MySQL 等。', 1
+WHERE NOT EXISTS (SELECT 1 FROM forum_post WHERE title = '[测试] 春招 Java 后端面经' AND deleted = 0);
+
+INSERT INTO forum_post (board_id, user_id, title, content, status)
+SELECT 2, 2, '[测试] 转让二手显示器', '毕业出显示器，有意私信联系我。', 1
+WHERE NOT EXISTS (SELECT 1 FROM forum_post WHERE title = '[测试] 转让二手显示器' AND deleted = 0);
 
 -- 招聘
 INSERT INTO job_posting (org_id, publisher_id, title, description, requirements, salary_range, location, edu_requirement, status) VALUES

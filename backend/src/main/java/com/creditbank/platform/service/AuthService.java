@@ -16,6 +16,7 @@ import com.creditbank.platform.mapper.CreditAccountMapper;
 import com.creditbank.platform.mapper.IntegrityScoreMapper;
 import com.creditbank.platform.mapper.SysOrganizationMapper;
 import com.creditbank.platform.mapper.SysUserMapper;
+import com.creditbank.platform.module.admin.service.AdminSupport;
 import com.creditbank.platform.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -89,7 +90,7 @@ public class AuthService {
             org.setContact(StringUtils.hasText(request.getOrgContact()) ? request.getOrgContact() : request.getRealName());
             org.setPhone(StringUtils.hasText(request.getOrgPhone()) ? request.getOrgPhone() : request.getPhone());
             org.setEmail(request.getEmail());
-            org.setJoinStatus(1);
+            org.setJoinStatus(AdminSupport.JOIN_PENDING);
             org.setStatus(1);
             orgMapper.insert(org);
             orgId = org.getId();

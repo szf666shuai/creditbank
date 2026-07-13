@@ -36,6 +36,7 @@ export const siteNav: NavItem[] = [
   {
     key: 'resources',
     label: '学习资源',
+    path: '/resources',
     children: [
       { label: '资源列表', path: '/resources' },
       { label: '学习档案', path: '/archive' },
@@ -98,19 +99,17 @@ export function getSiteNavForRole(role?: number): NavItem[] {
   }
 
   if (role === 2) {
-    return siteNav
-      .filter((item) => item.key !== 'resources' && item.key !== 'credit')
-      .map((item) => {
-        if (item.key !== 'enterprise') return item
-        return {
-          ...item,
-          label: '平台监管',
-          children: [
-            { label: '管理概览', path: '/profile/admin' },
-            { label: '机构加盟', path: '/profile/admin/organizations' },
-          ],
-        }
-      })
+    return siteNav.map((item) => {
+      if (item.key !== 'enterprise') return item
+      return {
+        ...item,
+        label: '平台监管',
+        children: [
+          { label: '管理概览', path: '/profile/admin' },
+          { label: '机构加盟', path: '/profile/admin/organizations' },
+        ],
+      }
+    })
   }
 
   return siteNav
@@ -138,6 +137,8 @@ export const profileNavByRole: Record<number, NavChild[]> = {
   /** 管理员 */
   2: [
     { label: '管理概览', path: '/profile/admin' },
+    { label: '秩点商城', path: '/credit' },
+    { label: '学习资源', path: '/resources' },
     { label: '商品审核', path: '/profile/admin/products' },
     { label: '机构加盟', path: '/profile/admin/organizations' },
     { label: '用户管理', path: '/profile/admin/users' },

@@ -118,12 +118,10 @@ public class StudentEnterpriseActionService {
             throw new BusinessException(400, "您已投递该职位");
         }
 
-        UserResume resume = profileResumeService.ensureDefaultResume(user.getId());
-
         JobApplication application = new JobApplication();
         application.setJobId(jobId);
         application.setUserId(user.getId());
-        application.setResumeId(resume.getId());
+        application.setResumeId(resolveResumeId(user.getId(), request));
         application.setCoverMessage(StringUtils.hasText(request != null ? request.getCoverMessage() : null)
                 ? request.getCoverMessage().trim()
                 : null);
@@ -261,6 +259,18 @@ public class StudentEnterpriseActionService {
             return "签到成功，但秩点未发放：" + creditMessage;
         }
         return "签到成功，感谢参与！";
+    }
+
+    private Long resolveResumeId(Long userId, ApplyJobRequest request) {
+        if (request != null && Boolean.FALSE.equals(request.getAttachResume())) {
+            return null;
+        }
+        if (request != null && request.getResumeId() != null) {
+            profileResumeService.getMyResume(request.getResumeId());
+            return request.getResumeId();
+        }
+        UserResume resume = profileResumeService.ensureDefaultResume(userId);
+        return resume.getId();
     }
 
     private void ensureCapacityAvailable(Activity activity) {

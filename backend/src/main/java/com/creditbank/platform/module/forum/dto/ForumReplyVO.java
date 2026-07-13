@@ -14,6 +14,8 @@ public class ForumReplyVO {
     private Long userId;
     private String authorName;
     private Long parentId;
+    /** 被回复楼层作者昵称（parentId > 0 时有值） */
+    private String parentAuthorName;
     private String content;
     private Integer likeCount;
     private Integer status;

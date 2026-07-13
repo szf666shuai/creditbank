@@ -5,6 +5,7 @@ import PageShell from '@/components/common/PageShell.vue'
 import { useAuthStore } from '@/stores/auth'
 import { getEnterpriseDashboardApi, type EnterpriseDashboard } from '@/api/enterprise-dashboard'
 import { getErrorMessage, unwrapApi } from '@/utils/api'
+import UiIcon from '@/components/ui/UiIcon.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -19,23 +20,23 @@ const statCards = computed(() => {
   const data = dashboard.value
   if (!data) return []
   return [
-    { key: 'jobs', label: '在招职位', value: data.openJobCount, icon: '💼', color: '#2094f3', path: '/profile/enterprise/jobs' },
-    { key: 'ongoing', label: '进行中活动', value: data.ongoingActivityCount, icon: '🎯', color: '#52c41a', path: '/profile/enterprise/activities' },
-    { key: 'registering', label: '报名中活动', value: data.registeringActivityCount, icon: '📅', color: '#13c2c2', path: '/profile/enterprise/activities' },
-    { key: 'applications', label: '待处理投递', value: data.pendingApplicationCount, icon: '📥', color: '#fa8c16', path: '/profile/enterprise/applications' },
-    { key: 'interviews', label: '待回复面试', value: data.pendingInterviewCount, icon: '🤝', color: '#722ed1', path: '/profile/enterprise/interviews' },
-    { key: 'materials', label: '企业资料', value: data.materialCount, icon: '📁', color: '#eb2f96', path: '/profile/enterprise/materials' },
+    { key: 'jobs', label: '在招职位', value: data.openJobCount, icon: 'job', color: '#2094f3', path: '/profile/enterprise/jobs' },
+    { key: 'ongoing', label: '进行中活动', value: data.ongoingActivityCount, icon: 'activity', color: '#52c41a', path: '/profile/enterprise/activities' },
+    { key: 'registering', label: '报名中活动', value: data.registeringActivityCount, icon: 'calendar', color: '#13c2c2', path: '/profile/enterprise/activities' },
+    { key: 'applications', label: '待处理投递', value: data.pendingApplicationCount, icon: 'applications', color: '#fa8c16', path: '/profile/enterprise/applications' },
+    { key: 'interviews', label: '待回复面试', value: data.pendingInterviewCount, icon: 'interview', color: '#722ed1', path: '/profile/enterprise/interviews' },
+    { key: 'materials', label: '企业资料', value: data.materialCount, icon: 'folder', color: '#eb2f96', path: '/profile/enterprise/materials' },
   ]
 })
 
 const quickEntries = [
-  { label: '发布职位', desc: '新增招聘岗位', icon: '➕', path: '/profile/enterprise/jobs', color: '#2094f3' },
-  { label: '发布活动', desc: '创建企业活动', icon: '🎪', path: '/profile/enterprise/activities', color: '#52c41a' },
-  { label: '投递管理', desc: '查看简历投递', icon: '📋', path: '/profile/enterprise/applications', color: '#fa8c16' },
-  { label: '面试邀请', desc: '管理面试安排', icon: '💬', path: '/profile/enterprise/interviews', color: '#722ed1' },
-  { label: '活动邀请', desc: '邀请学员参加活动', icon: '🎟️', path: '/profile/enterprise/activity-invitations', color: '#13c2c2' },
-  { label: '企业资料', desc: '发布学习资料', icon: '📎', path: '/profile/enterprise/materials', color: '#eb2f96' },
-  { label: '机构信息', desc: '维护企业简介', icon: '🏢', path: '/profile/enterprise/org', color: '#2f54eb' },
+  { label: '发布职位', desc: '新增招聘岗位', icon: 'plus', path: '/profile/enterprise/jobs', color: '#2094f3' },
+  { label: '发布活动', desc: '创建企业活动', icon: 'activity', path: '/profile/enterprise/activities', color: '#52c41a' },
+  { label: '投递管理', desc: '查看简历投递', icon: 'applications', path: '/profile/enterprise/applications', color: '#fa8c16' },
+  { label: '面试邀请', desc: '管理面试安排', icon: 'interview', path: '/profile/enterprise/interviews', color: '#722ed1' },
+  { label: '活动邀请', desc: '邀请学员参加活动', icon: 'invite', path: '/profile/enterprise/activity-invitations', color: '#13c2c2' },
+  { label: '企业资料', desc: '发布学习资料', icon: 'material', path: '/profile/enterprise/materials', color: '#eb2f96' },
+  { label: '机构信息', desc: '维护企业简介', icon: 'enterprise', path: '/profile/enterprise/org', color: '#2f54eb' },
 ]
 
 function go(path: string) {
@@ -104,7 +105,7 @@ onMounted(loadDashboard)
         @click="go(card.path)"
       >
         <div class="page-stat-icon" :style="{ background: card.color + '18', color: card.color }">
-          {{ card.icon }}
+          <UiIcon :name="card.icon" :size="22" :color="card.color" />
         </div>
         <div class="stat-content">
           <div class="page-stat-value">{{ card.value }}</div>
@@ -124,7 +125,7 @@ onMounted(loadDashboard)
           @click="go(item.path)"
         >
           <span class="page-quick-icon" :style="{ background: item.color + '18', color: item.color }">
-            {{ item.icon }}
+            <UiIcon :name="item.icon" :size="22" :color="item.color" />
           </span>
           <span class="page-quick-title">{{ item.label }}</span>
           <span class="page-quick-desc">{{ item.desc }}</span>
@@ -145,13 +146,13 @@ onMounted(loadDashboard)
 
 .workbench-header h1 {
   font-size: 26px;
-  color: var(--color-text);
+  color: #e0f2fe;
   margin-bottom: 8px;
 }
 
 .workbench-header p {
   font-size: 14px;
-  color: var(--color-text-muted);
+  color: rgba(148, 163, 184, 0.9);
 }
 
 .org-alert {

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import UiIcon from '@/components/ui/UiIcon.vue'
+
 defineProps<{
   title: string
   icon?: string
@@ -9,7 +11,7 @@ defineProps<{
 <template>
   <div class="home-section-header">
     <div class="header-left">
-      <span v-if="icon" class="header-icon">{{ icon }}</span>
+      <UiIcon v-if="icon" class="header-icon" :name="icon" :size="24" />
       <h2 class="header-title">{{ title }}</h2>
     </div>
     <router-link v-if="moreTo" :to="moreTo" class="header-more">
@@ -33,7 +35,6 @@ defineProps<{
 }
 
 .header-icon {
-  font-size: 20px;
   line-height: 1;
 }
 

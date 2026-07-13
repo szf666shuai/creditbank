@@ -42,6 +42,15 @@ class AuthInterceptorTests {
         assertEquals(8L, UserContext.getUserId());
     }
 
+    @Test
+    void learningResourcesAllowsGuestsWhenTokenInvalid() {
+        HttpServletRequest request = learningResourcesRequest("Bearer bad-token");
+        when(jwtUtil.getUserId("bad-token")).thenThrow(new RuntimeException("expired"));
+
+        assertTrue(authInterceptor.preHandle(request, response, new Object()));
+        assertNull(UserContext.getUserId());
+    }
+
     private HttpServletRequest learningResourcesRequest(String authorization) {
         HttpServletRequest request = mock(HttpServletRequest.class);
         when(request.getMethod()).thenReturn("GET");

@@ -6,16 +6,21 @@
 }
 
 .page-card {
-  background: var(--color-white);
-  border: 1px solid var(--color-border);
+  background: rgba(8, 20, 40, 0.42);
+  border: 1px solid rgba(125, 211, 252, 0.16);
   border-radius: 12px;
   padding: 24px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.16);
+  color: #e2e8f0;
 }
 
 .page-card--plain {
   background: transparent;
   border: none;
   padding: 0;
+  box-shadow: none;
+  backdrop-filter: none;
 }
 
 .page-header {
@@ -29,12 +34,12 @@
 .page-header__main h1 {
   font-size: 24px;
   margin-bottom: 6px;
-  color: var(--color-text);
+  color: #e0f2fe;
 }
 
 .page-header__main p {
   font-size: 14px;
-  color: var(--color-text-muted);
+  color: rgba(186, 230, 253, 0.82);
   line-height: 1.5;
 }
 
@@ -54,9 +59,15 @@
   overflow-x: auto;
 }
 
+/* 取消 fixed 列后，宽表格在侧栏布局下统一横向滚动，避免操作列与时间列重叠 */
+.page-body .el-table {
+  min-width: 960px;
+}
+
 .page-table-wrap {
   width: 100%;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .page-toolbar {
@@ -162,16 +173,19 @@
   align-items: center;
   gap: 14px;
   padding: 20px;
-  background: var(--color-white);
-  border: 1px solid var(--color-border);
+  background: rgba(8, 20, 40, 0.38);
+  border: 1px solid rgba(125, 211, 252, 0.14);
   border-radius: 12px;
   cursor: pointer;
   text-align: left;
-  transition: box-shadow 0.2s, transform 0.2s;
+  transition: box-shadow 0.2s, transform 0.2s, border-color 0.2s;
+  backdrop-filter: blur(10px);
+  color: #e2e8f0;
 }
 
 .page-stat-card:hover {
-  box-shadow: 0 8px 24px rgba(32, 148, 243, 0.1);
+  border-color: rgba(56, 189, 248, 0.4);
+  box-shadow: 0 10px 24px rgba(14, 165, 233, 0.12);
   transform: translateY(-2px);
 }
 
@@ -189,7 +203,7 @@
 .page-stat-value {
   font-size: 26px;
   font-weight: 600;
-  color: var(--color-text);
+  color: #e0f2fe;
   line-height: 1.2;
 }
 
@@ -197,19 +211,19 @@
   font-size: 14px;
   font-weight: 400;
   margin-left: 2px;
-  color: var(--color-text-secondary);
+  color: rgba(148, 163, 184, 0.9);
 }
 
 .page-stat-label {
   font-size: 13px;
-  color: var(--color-text-muted);
+  color: rgba(186, 230, 253, 0.82);
   margin-top: 4px;
 }
 
 /* 快捷入口 */
 .page-quick-section h2 {
   font-size: 18px;
-  color: var(--color-text);
+  color: #e0f2fe;
   margin-bottom: 16px;
 }
 
@@ -225,16 +239,18 @@
   align-items: flex-start;
   gap: 8px;
   padding: 18px;
-  background: var(--color-white);
-  border: 1px solid var(--color-border);
+  background: rgba(8, 20, 40, 0.38);
+  border: 1px solid rgba(125, 211, 252, 0.14);
   border-radius: 12px;
   cursor: pointer;
   text-align: left;
-  transition: box-shadow 0.2s, transform 0.2s;
+  transition: box-shadow 0.2s, transform 0.2s, border-color 0.2s;
+  backdrop-filter: blur(10px);
 }
 
 .page-quick-card:hover {
-  box-shadow: 0 8px 24px rgba(32, 148, 243, 0.1);
+  border-color: rgba(56, 189, 248, 0.4);
+  box-shadow: 0 10px 24px rgba(14, 165, 233, 0.12);
   transform: translateY(-2px);
 }
 
@@ -251,12 +267,12 @@
 .page-quick-title {
   font-size: 15px;
   font-weight: 600;
-  color: var(--color-text);
+  color: #e0f2fe;
 }
 
 .page-quick-desc {
   font-size: 12px;
-  color: var(--color-text-muted);
+  color: rgba(186, 230, 253, 0.78);
 }
 
 /* 摘要卡片行 */
@@ -268,7 +284,8 @@
 }
 
 .page-summary-card {
-  background: var(--color-primary-light);
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(125, 211, 252, 0.16);
   border-radius: 10px;
   padding: 16px;
   text-align: center;
@@ -277,29 +294,43 @@
 .page-summary-value {
   font-size: 24px;
   font-weight: 700;
-  color: var(--color-primary);
+  color: #7dd3fc;
 }
 
 .page-summary-value.is-success {
-  color: #52c41a;
+  color: #4ade80;
 }
 
 .page-summary-value.is-danger {
-  color: #fa541c;
+  color: #fb7185;
 }
 
 .page-summary-label {
   margin-top: 6px;
   font-size: 13px;
-  color: var(--color-text-secondary);
+  color: rgba(186, 230, 253, 0.82);
 }
 
 .page-text-muted {
-  color: var(--color-text-muted);
+  color: rgba(186, 230, 253, 0.78);
+}
+
+.profile-data-table,
+.admin-data-table {
+  min-width: 960px;
+}
+
+.page-table-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: nowrap;
+  gap: 4px;
+  white-space: nowrap;
 }
 
 .page-link {
-  color: var(--color-primary);
+  color: #38bdf8;
   text-decoration: none;
 }
 

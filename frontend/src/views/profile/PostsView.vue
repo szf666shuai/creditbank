@@ -139,7 +139,7 @@ onMounted(fetchPosts)
       <el-table-column label="发布时间" width="170">
         <template #default="{ row }">{{ formatTime(row.createTime) }}</template>
       </el-table-column>
-      <el-table-column label="操作" width="90" align="center" fixed="right">
+      <el-table-column label="操作" width="90" align="center">
         <template #default="{ row }">
           <el-button type="danger" link @click="handleDeletePost(row)">删除</el-button>
         </template>
@@ -160,7 +160,7 @@ onMounted(fetchPosts)
       <el-table-column label="回复时间" width="170">
         <template #default="{ row }">{{ formatTime(row.createTime) }}</template>
       </el-table-column>
-      <el-table-column label="操作" width="90" align="center" fixed="right">
+      <el-table-column label="操作" width="90" align="center">
         <template #default="{ row }">
           <el-button type="danger" link @click="handleDeleteReply(row)">删除</el-button>
         </template>

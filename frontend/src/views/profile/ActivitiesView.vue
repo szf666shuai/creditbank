@@ -218,7 +218,7 @@ onMounted(() => {
         <el-table-column label="报名时间" width="150">
           <template #default="{ row }">{{ formatTime(row.createTime) }}</template>
         </el-table-column>
-        <el-table-column label="操作" width="100" fixed="right">
+        <el-table-column label="操作" width="100">
           <template #default="{ row }">
             <el-button
               v-if="canCheckIn(row)"
@@ -260,7 +260,7 @@ onMounted(() => {
             <el-tag :type="inviteStatusTagType(row.status)" size="small">{{ row.statusName }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="160" fixed="right">
+        <el-table-column label="操作" width="160">
           <template #default="{ row }">
             <template v-if="row.status === 0">
               <el-button

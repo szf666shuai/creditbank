@@ -123,15 +123,43 @@ public class ForumService {
                         .eq(ForumReply::getPostId, postId)
                         .eq(ForumReply::getStatus, NORMAL)
                         .orderByAsc(ForumReply::getCreateTime));
-        Map<Long, String> userNames = loadUserNames(result.getRecords().stream()
+        List<Long> authorIds = result.getRecords().stream()
                 .map(ForumReply::getUserId)
                 .distinct()
-                .toList());
+                .collect(Collectors.toList());
+        List<Long> parentIds = result.getRecords().stream()
+                .map(ForumReply::getParentId)
+                .filter(id -> id != null && id > 0)
+                .distinct()
+                .toList();
+        Map<Long, ForumReply> parentMap = parentIds.isEmpty()
+                ? Map.of()
+                : forumReplyMapper.selectList(new LambdaQueryWrapper<ForumReply>().in(ForumReply::getId, parentIds))
+                .stream()
+                .collect(Collectors.toMap(ForumReply::getId, r -> r, (a, b) -> a));
+        parentMap.values().stream()
+                .map(ForumReply::getUserId)
+                .filter(id -> id != null && !authorIds.contains(id))
+                .forEach(authorIds::add);
+        Map<Long, String> userNames = loadUserNames(authorIds);
         Long currentUserId = UserContext.getUserId();
 
         return PageResult.of(
                 result.getRecords().stream()
-                        .map(reply -> toReplyVO(reply, userNames.get(reply.getUserId()), currentUserId))
+                        .map(reply -> {
+                            String parentAuthor = null;
+                            if (reply.getParentId() != null && reply.getParentId() > 0) {
+                                ForumReply parent = parentMap.get(reply.getParentId());
+                                if (parent != null) {
+                                    parentAuthor = displayName(userNames.get(parent.getUserId()), parent.getUserId());
+                                }
+                            }
+                            return toReplyVO(
+                                    reply,
+                                    userNames.get(reply.getUserId()),
+                                    parentAuthor,
+                                    currentUserId);
+                        })
                         .toList(),
                 result.getTotal(),
                 result.getCurrent(),
@@ -197,7 +225,15 @@ public class ForumService {
         post.setReplyCount(defaultCount(post.getReplyCount()) + 1);
         forumPostMapper.updateById(post);
 
-        return toReplyVO(reply, authSupport.requireLoginUser().getRealName(), userId);
+        String parentAuthor = null;
+        if (parentId > 0) {
+            ForumReply parent = forumReplyMapper.selectById(parentId);
+            if (parent != null) {
+                parentAuthor = loadUserNames(List.of(parent.getUserId())).get(parent.getUserId());
+                parentAuthor = displayName(parentAuthor, parent.getUserId());
+            }
+        }
+        return toReplyVO(reply, authSupport.requireLoginUser().getRealName(), parentAuthor, userId);
     }
 
     @Transactional
@@ -300,13 +336,14 @@ public class ForumService {
                 .build();
     }
 
-    private ForumReplyVO toReplyVO(ForumReply reply, String authorName, Long currentUserId) {
+    private ForumReplyVO toReplyVO(ForumReply reply, String authorName, String parentAuthorName, Long currentUserId) {
         return ForumReplyVO.builder()
                 .id(reply.getId())
                 .postId(reply.getPostId())
                 .userId(reply.getUserId())
                 .authorName(displayName(authorName, reply.getUserId()))
                 .parentId(reply.getParentId())
+                .parentAuthorName(parentAuthorName)
                 .content(reply.getContent())
                 .likeCount(defaultCount(reply.getLikeCount()))
                 .status(reply.getStatus())

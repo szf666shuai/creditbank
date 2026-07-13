@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { ArrowDown, ChatDotRound, HomeFilled, Search } from '@element-plus/icons-vue'
 import { useLayout } from '@/composables/useLayout'
@@ -11,6 +11,7 @@ import { searchCategories } from '@/config/search-categories'
 import { BRAND_NAME, BRAND_NAME_EN, BRAND_SITE } from '@/config/brand'
 import { getRoleTheme, resolveHeaderThemeVariant } from '@/config/role-theme'
 import BrandLogo from '@/components/brand/BrandLogo.vue'
+import type { SearchItem } from '@/api/search'
 
 const {
   siteNav,
@@ -30,6 +31,7 @@ const route = useRoute()
 const messageStore = useMessageStore()
 const authStore = useAuthStore()
 const unreadCount = computed(() => messageStore.unreadCount)
+const hasUnread = computed(() => unreadCount.value > 0)
 
 const isHomePage = computed(() => route.name === 'home')
 
@@ -110,10 +112,45 @@ function onSearchBlur() {
   window.setTimeout(() => hideSuggest(), 150)
 }
 
+let unreadTimer: number | undefined
+
+function startUnreadPolling() {
+  stopUnreadPolling()
+  messageStore.refreshUnreadCount()
+  unreadTimer = window.setInterval(() => {
+    if (authStore.isLoggedIn) {
+      messageStore.refreshUnreadCount()
+    }
+  }, 30000)
+}
+
+function stopUnreadPolling() {
+  if (unreadTimer) {
+    clearInterval(unreadTimer)
+    unreadTimer = undefined
+  }
+}
+
+watch(
+  () => authStore.isLoggedIn,
+  (loggedIn) => {
+    if (loggedIn) {
+      startUnreadPolling()
+    } else {
+      stopUnreadPolling()
+      messageStore.reset()
+    }
+  },
+)
+
 onMounted(() => {
   if (isLoggedIn.value) {
-    messageStore.refreshUnreadCount()
+    startUnreadPolling()
   }
+})
+
+onUnmounted(() => {
+  stopUnreadPolling()
 })
 </script>
 
@@ -158,6 +195,7 @@ onMounted(() => {
             v-else
             trigger="hover"
             placement="bottom-start"
+            popper-class="app-header-dropdown"
             :show-timeout="80"
             :hide-timeout="150"
           >
@@ -251,15 +289,20 @@ onMounted(() => {
 
         <!-- 已登录：消息 + 个人中心 -->
         <template v-else>
-          <router-link to="/profile/messages" class="message-entry" title="消息中心">
-            <el-badge :value="unreadCount" :hidden="unreadCount <= 0" :max="99">
-              <el-icon :size="20"><ChatDotRound /></el-icon>
-            </el-badge>
+          <router-link
+            to="/profile/messages"
+            class="message-entry"
+            :class="{ 'has-unread': hasUnread }"
+            :title="hasUnread ? `消息中心（${unreadCount} 条未读）` : '消息中心'"
+          >
+            <el-icon :size="20"><ChatDotRound /></el-icon>
+            <span v-if="hasUnread" class="message-dot" aria-hidden="true" />
           </router-link>
 
           <el-dropdown
             trigger="hover"
             placement="bottom-end"
+            popper-class="app-header-dropdown"
           >
             <span class="nav-item profile-trigger">
               <span class="profile-name">{{ displayName }}</span>
@@ -383,9 +426,10 @@ onMounted(() => {
   color: var(--header-text);
 }
 
-.app-header.is-themed .message-entry:hover {
+.app-header.is-themed .message-entry:hover,
+.app-header.is-themed .message-entry.has-unread {
   background: rgba(255, 255, 255, 0.1);
-  color: var(--header-accent-strong);
+  color: #7dd3fc;
 }
 
 .app-header.is-themed .auth-btns {
@@ -762,6 +806,7 @@ onMounted(() => {
 }
 
 .message-entry {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -771,11 +816,29 @@ onMounted(() => {
   color: var(--color-text-secondary);
   text-decoration: none;
   transition: background 0.2s, color 0.2s;
+  overflow: visible;
+  flex-shrink: 0;
 }
 
 .message-entry:hover {
   background: var(--color-primary-light);
   color: var(--color-primary);
+}
+
+.message-entry.has-unread {
+  color: #7dd3fc;
+}
+
+.message-dot {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #f43f5e;
+  border: 1.5px solid rgba(8, 18, 36, 0.95);
+  pointer-events: none;
 }
 
 
@@ -810,5 +873,60 @@ onMounted(() => {
   .search-category {
     width: 76px;
   }
+}
+</style>
+
+<style>
+/* 导航 / 个人中心下拉：teleport 到 body */
+.app-header-dropdown.el-popper,
+.app-header-dropdown {
+  --el-dropdown-menuItem-hover-fill: rgba(56, 189, 248, 0.16);
+  --el-dropdown-menuItem-hover-color: #e0f2fe;
+  border: 1px solid rgba(125, 211, 252, 0.28) !important;
+  border-radius: 12px !important;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(56, 189, 248, 0.14), transparent 50%),
+    rgba(8, 18, 36, 0.96) !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4) !important;
+  backdrop-filter: blur(14px);
+  overflow: hidden;
+}
+
+.app-header-dropdown .el-dropdown-menu {
+  background: transparent;
+  border: none;
+  padding: 6px;
+  box-shadow: none;
+}
+
+.app-header-dropdown .el-dropdown-menu__item {
+  color: rgba(226, 232, 240, 0.9);
+  border-radius: 8px;
+  margin: 2px 0;
+  line-height: 1.4;
+  padding: 10px 14px;
+}
+
+.app-header-dropdown .el-dropdown-menu__item:not(.is-disabled):hover,
+.app-header-dropdown .el-dropdown-menu__item:focus {
+  background: rgba(56, 189, 248, 0.16);
+  color: #e0f2fe;
+}
+
+.app-header-dropdown .el-dropdown-menu__item.is-disabled {
+  color: rgba(148, 163, 184, 0.55);
+}
+
+.app-header-dropdown .el-dropdown-menu__item--divided {
+  border-top-color: rgba(147, 197, 253, 0.16);
+}
+
+.app-header-dropdown .el-dropdown-menu__item--divided::before {
+  background: transparent;
+}
+
+.app-header-dropdown .el-popper__arrow::before {
+  background: rgba(8, 18, 36, 0.96) !important;
+  border: 1px solid rgba(125, 211, 252, 0.28) !important;
 }
 </style>

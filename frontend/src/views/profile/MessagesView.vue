@@ -125,7 +125,7 @@ onMounted(async () => {
       <el-table-column label="时间" width="150">
         <template #default="{ row }">{{ formatTime(row.createTime) }}</template>
       </el-table-column>
-      <el-table-column label="操作" width="80" fixed="right">
+      <el-table-column label="操作" width="80">
         <template #default="{ row }">
           <el-button link type="primary" @click.stop="openDetail(row)">查看</el-button>
         </template>
@@ -156,6 +156,6 @@ onMounted(async () => {
 
 .unread {
   font-weight: 600;
-  color: var(--color-text);
+  color: #e0f2fe;
 }
 </style>
