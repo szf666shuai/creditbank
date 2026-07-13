@@ -45,7 +45,7 @@ function drawCertificate() {
 
   ctx.fillStyle = '#f8fbff'
   ctx.fillRect(0, 0, width, height)
-  ctx.strokeStyle = '#2094f3'
+  ctx.strokeStyle = '#22c55e'
   ctx.lineWidth = 8
   ctx.strokeRect(28, 28, width - 56, height - 56)
   ctx.strokeStyle = '#b9dcfb'

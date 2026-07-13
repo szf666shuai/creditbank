@@ -25,7 +25,7 @@ const typeRail = computed(() =>
 )
 
 const typeAccent: Record<number, string> = {
-  1: '#38bdf8',
+  1: '#22c55e',
   2: '#34d399',
   3: '#a78bfa',
   4: '#fb923c',
@@ -181,7 +181,7 @@ onMounted(fetchOrgs)
         >
           <div
             class="partner-logo"
-            :style="{ color: typeAccent[org.type] || '#38bdf8' }"
+            :style="{ color: typeAccent[org.type] || '#22c55e' }"
           >
             <img v-if="org.logo" :src="org.logo" :alt="org.name" />
             <el-icon v-else :size="28"><component :is="typeIcon(org.type)" /></el-icon>
@@ -219,30 +219,36 @@ onMounted(fetchOrgs)
 
 .hero-banner {
   position: relative;
-  min-height: min(46vh, 420px);
+  min-height: min(42vh, 380px);
   display: grid;
   place-items: center;
   overflow: hidden;
   margin-bottom: 28px;
+  background: var(--hero-gradient);
+  border-bottom: 1px solid var(--color-border-neutral);
 }
 
 .hero-banner__media {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(120deg, rgba(15, 23, 42, 0.2), transparent 40%),
+    linear-gradient(120deg, rgba(240, 253, 250, 0.55), transparent 45%),
     url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1800&q=80')
       center / cover no-repeat;
   transform: scale(1.04);
-  filter: saturate(0.85) contrast(1.05);
+  filter: saturate(0.9) contrast(1.02);
+  opacity: 0.55;
 }
 
 .hero-banner__veil {
   position: absolute;
   inset: 0;
-  background:
-    linear-gradient(180deg, rgba(8, 15, 30, 0.35) 0%, rgba(8, 15, 30, 0.72) 100%),
-    radial-gradient(ellipse at 50% 20%, rgba(56, 189, 248, 0.18), transparent 55%);
+  background: linear-gradient(
+    180deg,
+    rgba(240, 253, 250, 0.55) 0%,
+    rgba(240, 253, 250, 0.82) 72%,
+    rgba(240, 253, 250, 0.95) 100%
+  );
 }
 
 .hero-banner__content {
@@ -251,7 +257,7 @@ onMounted(fetchOrgs)
   max-width: 820px;
   padding: 48px 24px;
   text-align: center;
-  color: #f8fafc;
+  color: var(--color-foreground);
 }
 
 .hero-kicker,
@@ -260,7 +266,7 @@ onMounted(fetchOrgs)
   font-size: 12px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: rgba(186, 230, 253, 0.88);
+  color: var(--color-primary);
   font-weight: 700;
 }
 
@@ -268,7 +274,9 @@ onMounted(fetchOrgs)
   margin: 0 0 14px;
   font-size: clamp(34px, 5vw, 52px);
   line-height: 1.15;
-  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.35);
+  font-family: var(--font-heading);
+  text-shadow: none;
+  color: var(--color-foreground);
 }
 
 .hero-copy {
@@ -276,8 +284,8 @@ onMounted(fetchOrgs)
   max-width: 640px;
   line-height: 1.85;
   font-size: 16px;
-  color: rgba(241, 245, 249, 0.9);
-  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.35);
+  color: var(--color-muted-foreground);
+  text-shadow: none;
 }
 
 .hero-stats {
@@ -292,11 +300,12 @@ onMounted(fetchOrgs)
   display: block;
   font-size: 28px;
   line-height: 1.1;
+  color: var(--color-primary-dark);
 }
 
 .hero-stats span {
   font-size: 12px;
-  color: rgba(186, 230, 253, 0.75);
+  color: var(--color-muted-foreground);
 }
 
 .enterprise-inner {
@@ -311,14 +320,15 @@ onMounted(fetchOrgs)
   gap: 16px;
   align-items: end;
   margin-bottom: 18px;
-  color: rgba(226, 232, 240, 0.78);
+  color: var(--color-muted-foreground);
 }
 
 .section-head h2 {
   margin: 0;
-  color: #f8fafc;
+  color: var(--color-foreground);
   font-size: 28px;
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.35);
+  font-family: var(--font-heading);
+  text-shadow: none;
 }
 
 .section-head p {
@@ -344,21 +354,22 @@ onMounted(fetchOrgs)
 }
 
 .type-chip {
-  border: 1px solid rgba(148, 163, 184, 0.28);
-  background: rgba(15, 23, 42, 0.35);
-  color: rgba(226, 232, 240, 0.82);
+  border: 1px solid var(--color-border-neutral);
+  background: var(--color-card);
+  color: var(--color-muted-foreground);
   border-radius: 999px;
   padding: 8px 16px;
   cursor: pointer;
   font-size: 13px;
-  backdrop-filter: blur(8px);
+  box-shadow: var(--shadow-sm);
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
 }
 
 .type-chip:hover,
 .type-chip.active {
-  border-color: rgba(56, 189, 248, 0.55);
-  color: #e0f2fe;
-  background: rgba(14, 165, 233, 0.22);
+  border-color: var(--color-primary);
+  color: var(--color-on-primary);
+  background: var(--color-primary);
   font-weight: 600;
 }
 
@@ -379,20 +390,19 @@ onMounted(fetchOrgs)
   align-items: center;
   min-height: 108px;
   padding: 16px 18px;
-  border-radius: 14px;
+  border-radius: 16px;
   text-decoration: none;
   color: inherit;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  backdrop-filter: blur(12px);
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.16);
-  transition: transform 0.18s, background 0.18s, border-color 0.18s;
+  background: #fff;
+  border: 2.5px solid var(--nb-ink, var(--color-border-neutral));
+  box-shadow: var(--nb-shadow-sm, var(--shadow-sm));
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
 }
 
 .partner-card:hover {
-  transform: translateY(-3px);
-  background: rgba(255, 255, 255, 0.16);
-  border-color: rgba(125, 211, 252, 0.4);
+  transform: translate(2px, 2px);
+  border-color: var(--nb-ink, var(--color-border));
+  box-shadow: 1px 1px 0 0 var(--nb-ink, #1a202c);
 }
 
 .partner-logo {
@@ -403,8 +413,9 @@ onMounted(fetchOrgs)
   flex-shrink: 0;
   display: grid;
   place-items: center;
-  background: rgba(15, 23, 42, 0.45);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: var(--nb-blue, var(--color-muted));
+  border: 2.5px solid var(--nb-ink, var(--color-border-neutral));
+  box-shadow: 2px 2px 0 0 var(--nb-ink, #1a202c);
 }
 
 .partner-logo img {
@@ -420,22 +431,23 @@ onMounted(fetchOrgs)
 .partner-body h3 {
   margin: 0 0 4px;
   font-size: 15px;
-  color: #f8fafc;
+  color: var(--color-foreground);
   line-height: 1.35;
+  font-family: var(--font-heading);
 }
 
 .partner-type {
   display: inline-block;
   margin-bottom: 6px;
   font-size: 12px;
-  color: #7dd3fc;
+  color: var(--color-primary);
 }
 
 .partner-body p {
   margin: 0;
   font-size: 12px;
   line-height: 1.55;
-  color: rgba(226, 232, 240, 0.68);
+  color: var(--color-muted-foreground);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -448,8 +460,10 @@ onMounted(fetchOrgs)
 
 .page-pagination :deep(.el-pagination) {
   --el-pagination-bg-color: transparent;
-  --el-pagination-button-bg-color: rgba(255, 255, 255, 0.08);
-  --el-pagination-text-color: #e2e8f0;
+  --el-pagination-button-bg-color: var(--color-card);
+  --el-pagination-text-color: var(--color-foreground);
+  --el-pagination-button-color: var(--color-foreground);
+  --el-pagination-hover-color: var(--color-primary);
   justify-content: center;
 }
 

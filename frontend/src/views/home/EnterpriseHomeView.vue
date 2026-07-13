@@ -173,22 +173,22 @@ onMounted(loadDashboard)
 
 <style scoped>
 .enterprise-home {
-  --role-primary: #2094f3;
-  --role-primary-dark: #93c5fd;
-  --role-primary-soft: #60a5fa;
-  --role-surface: rgba(6, 18, 36, 0.58);
-  --role-surface-strong: rgba(8, 26, 50, 0.74);
-  --role-surface-card: rgba(10, 32, 58, 0.68);
-  --role-border: rgba(32, 148, 243, 0.28);
-  --role-text: #eff6ff;
-  --role-text-muted: #93b8d8;
-  --role-text-on-hero: #fff;
-  --role-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+  --role-primary: #22c55e;
+  --role-primary-dark: #16a34a;
+  --role-primary-soft: #86efac;
+  --role-surface: #ffffff;
+  --role-surface-strong: #ffffff;
+  --role-surface-card: #ffffff;
+  --role-border: var(--nb-ink, #1a202c);
+  --role-text: var(--nb-ink, #1a202c);
+  --role-text-muted: #64748b;
+  --role-text-on-hero: var(--nb-ink, #1a202c);
+  --role-shadow: var(--nb-shadow-lg, 6px 6px 0 0 #1a202c);
 
   position: relative;
   min-height: calc(100vh - var(--header-height));
   padding-bottom: 48px;
-  background: transparent;
+  background: var(--nb-cream, #fff9f0);
 }
 
 .role-home-content {
@@ -206,44 +206,51 @@ onMounted(loadDashboard)
   position: relative;
   overflow: hidden;
   padding: 32px 36px;
-  border-radius: 20px;
+  border-radius: 24px;
   color: var(--role-text-on-hero);
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 55%),
-    linear-gradient(120deg, #0d4d8a 0%, #1565c0 42%, #2094f3 72%, #60a5fa 100%);
+  background: #fff;
+  border: 2.5px solid var(--nb-ink, #1a202c);
   box-shadow: var(--role-shadow);
-  border: 1px solid rgba(147, 197, 253, 0.28);
-  backdrop-filter: blur(12px);
+  backdrop-filter: none;
 }
 
 .hero-inner::after {
   content: '';
   position: absolute;
-  width: 220px;
-  height: 220px;
-  top: -80px;
-  right: -40px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.22) 0%, transparent 68%);
+  width: 160px;
+  height: 160px;
+  top: -50px;
+  right: -24px;
+  border-radius: 24px;
+  background: var(--nb-blue, #bee3f8);
+  border: 2.5px solid var(--nb-ink, #1a202c);
+  opacity: 0.6;
+  transform: rotate(12deg);
 }
 
 .hero-badge {
   display: inline-block;
   margin-bottom: 12px;
-  padding: 4px 12px;
+  padding: 5px 12px;
   border-radius: 999px;
   font-size: 12px;
+  font-weight: 800;
   letter-spacing: 0.06em;
-  background: rgba(255, 255, 255, 0.14);
-  border: 1px solid rgba(255, 255, 255, 0.24);
-  backdrop-filter: blur(4px);
+  background: var(--nb-yellow, #fef08a);
+  border: 2px solid var(--nb-ink, #1a202c);
+  box-shadow: 2px 2px 0 0 var(--nb-ink, #1a202c);
+  color: var(--nb-ink, #1a202c);
+  backdrop-filter: none;
 }
 
 .hero-inner h1 {
   position: relative;
   margin: 0 0 10px;
+  font-family: var(--font-heading);
   font-size: 32px;
+  font-weight: 900;
   line-height: 1.25;
+  color: var(--nb-ink, #1a202c);
 }
 
 .hero-desc {
@@ -251,7 +258,8 @@ onMounted(loadDashboard)
   margin: 0;
   max-width: 560px;
   line-height: 1.8;
-  opacity: 0.92;
+  color: var(--role-text-muted);
+  opacity: 1;
 }
 
 .section-inner {
@@ -274,22 +282,25 @@ onMounted(loadDashboard)
 .overview-card {
   padding: 18px;
   border-radius: 16px;
-  background: var(--role-surface-strong);
-  border: 1px solid var(--role-border);
-  box-shadow: var(--role-shadow);
-  backdrop-filter: blur(12px);
+  background: #fff;
+  border: 2.5px solid var(--nb-ink, #1a202c);
+  box-shadow: var(--nb-shadow-sm, 3px 3px 0 0 #1a202c);
+  backdrop-filter: none;
 }
 
 .overview-label {
   display: block;
   color: var(--role-text-muted);
   font-size: 13px;
+  font-weight: 700;
   margin-bottom: 8px;
 }
 
 .overview-card strong {
   font-size: 30px;
-  color: var(--role-primary-dark);
+  font-family: var(--font-heading);
+  font-weight: 900;
+  color: var(--nb-green-deep, #16a34a);
 }
 
 .overview-card p {
@@ -307,10 +318,10 @@ onMounted(loadDashboard)
 .feed-panel {
   padding: 20px;
   border-radius: 16px;
-  background: var(--role-surface);
-  border: 1px solid var(--role-border);
-  box-shadow: var(--role-shadow);
-  backdrop-filter: blur(12px);
+  background: #fff;
+  border: 2.5px solid var(--nb-ink, #1a202c);
+  box-shadow: var(--nb-shadow, 4px 4px 0 0 #1a202c);
+  backdrop-filter: none;
 }
 
 .feed-panel.full-width {
@@ -323,7 +334,7 @@ onMounted(loadDashboard)
   align-items: center;
   margin-bottom: 14px;
   padding-bottom: 10px;
-  border-bottom: 1px solid rgba(32, 148, 243, 0.18);
+  border-bottom: 2px solid color-mix(in srgb, var(--nb-ink, #1a202c) 14%, transparent);
 }
 
 .panel-head h2 {

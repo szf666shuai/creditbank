@@ -288,21 +288,24 @@ watch(
   grid-template-columns: 44px minmax(0, 1fr);
   gap: 12px;
   padding: 16px;
-  border-radius: 12px;
-  background: #f7f9fc;
-  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  background: var(--nb-cream, #fff9f0);
+  border: 2.5px solid var(--nb-ink, #1a202c);
+  box-shadow: var(--nb-shadow-sm, 3px 3px 0 0 #1a202c);
 }
 
 .editor-avatar,
 .comment-avatar {
   width: 40px;
   height: 40px;
-  border-radius: 50%;
+  border-radius: 12px;
   display: grid;
   place-items: center;
-  background: linear-gradient(135deg, #00a1d6, #6bcbff);
+  background: var(--nb-green, #22c55e);
+  border: 2px solid var(--nb-ink, #1a202c);
   color: #fff;
-  font-weight: 700;
+  font-weight: 800;
+  box-shadow: 2px 2px 0 0 var(--nb-ink, #1a202c);
 }
 
 .comment-avatar.small {
@@ -391,7 +394,7 @@ watch(
 }
 
 .reply-to {
-  color: #00a1d6;
+  color: #22c55e;
 }
 
 .comment-body p {

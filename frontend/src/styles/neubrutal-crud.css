@@ -1,0 +1,333 @@
+/**
+ * Neo-brutal CRUD chrome for profile / enterprise / admin
+ * Covers Element Plus buttons, tables, tags, pagination, toolbars
+ */
+
+/* —— Buttons —— */
+.page-shell .el-button,
+.profile-main .el-button,
+.enterprise-form-dialog .el-button,
+.compose-message-dialog .el-button {
+  --el-button-font-weight: 800;
+  border-radius: 999px !important;
+  border-width: 2px !important;
+  border-style: solid !important;
+  border-color: var(--nb-ink, #1a202c) !important;
+  font-family: var(--font-heading);
+  box-shadow: 2px 2px 0 0 var(--nb-ink, #1a202c);
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease !important;
+}
+
+.page-shell .el-button:hover,
+.profile-main .el-button:hover,
+.enterprise-form-dialog .el-button:hover,
+.compose-message-dialog .el-button:hover {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0 0 var(--nb-ink, #1a202c);
+}
+
+.page-shell .el-button:active,
+.profile-main .el-button:active {
+  transform: translate(2px, 2px);
+  box-shadow: 0 0 0 0 var(--nb-ink, #1a202c);
+}
+
+.page-shell .el-button--primary,
+.profile-main .el-button--primary,
+.enterprise-form-dialog .el-button--primary,
+.compose-message-dialog .el-button--primary {
+  --el-button-bg-color: var(--nb-green, #22c55e) !important;
+  --el-button-border-color: var(--nb-ink, #1a202c) !important;
+  --el-button-text-color: #fff !important;
+  --el-button-hover-bg-color: var(--nb-green-deep, #16a34a) !important;
+  --el-button-hover-border-color: var(--nb-ink, #1a202c) !important;
+  --el-button-hover-text-color: #fff !important;
+  --el-button-active-bg-color: var(--nb-green-deep, #16a34a) !important;
+  background-color: var(--nb-green, #22c55e) !important;
+  color: #fff !important;
+}
+
+.page-shell .el-button--primary.is-plain,
+.profile-main .el-button--primary.is-plain {
+  --el-button-bg-color: #fff !important;
+  --el-button-text-color: var(--nb-ink, #1a202c) !important;
+  --el-button-hover-bg-color: #bbf7d0 !important;
+  --el-button-hover-text-color: var(--nb-ink, #1a202c) !important;
+  background: #fff !important;
+  color: var(--nb-ink, #1a202c) !important;
+}
+
+.page-shell .el-button--default,
+.profile-main .el-button--default,
+.enterprise-form-dialog .el-button--default {
+  --el-button-bg-color: #fff !important;
+  --el-button-text-color: var(--nb-ink, #1a202c) !important;
+  --el-button-hover-bg-color: var(--nb-yellow, #fef08a) !important;
+  --el-button-hover-text-color: var(--nb-ink, #1a202c) !important;
+  background: #fff !important;
+  color: var(--nb-ink, #1a202c) !important;
+}
+
+.page-shell .el-button--success,
+.profile-main .el-button--success {
+  --el-button-bg-color: #bbf7d0 !important;
+  --el-button-text-color: var(--nb-ink, #1a202c) !important;
+  --el-button-hover-bg-color: #86efac !important;
+  background: #bbf7d0 !important;
+  color: var(--nb-ink, #1a202c) !important;
+}
+
+.page-shell .el-button--warning,
+.profile-main .el-button--warning {
+  --el-button-bg-color: var(--nb-yellow, #fef08a) !important;
+  --el-button-text-color: var(--nb-ink, #1a202c) !important;
+  --el-button-hover-bg-color: #fde047 !important;
+  background: var(--nb-yellow, #fef08a) !important;
+  color: var(--nb-ink, #1a202c) !important;
+}
+
+.page-shell .el-button--danger,
+.profile-main .el-button--danger {
+  --el-button-bg-color: var(--nb-pink, #fecdd3) !important;
+  --el-button-text-color: var(--nb-ink, #1a202c) !important;
+  --el-button-hover-bg-color: #fda4af !important;
+  background: var(--nb-pink, #fecdd3) !important;
+  color: var(--nb-ink, #1a202c) !important;
+}
+
+.page-shell .el-button--info,
+.profile-main .el-button--info {
+  --el-button-bg-color: var(--nb-blue, #bee3f8) !important;
+  --el-button-text-color: var(--nb-ink, #1a202c) !important;
+  background: var(--nb-blue, #bee3f8) !important;
+  color: var(--nb-ink, #1a202c) !important;
+}
+
+/* Link / text buttons in table ops — keep compact, still ink-forward */
+.page-shell .el-button.is-link,
+.profile-main .el-button.is-link,
+.page-shell .el-button.is-text,
+.profile-main .el-button.is-text {
+  border-width: 0 !important;
+  box-shadow: none !important;
+  border-radius: 8px !important;
+  padding: 4px 8px !important;
+  font-weight: 800;
+  transform: none !important;
+}
+
+.page-shell .el-button.is-link:hover,
+.profile-main .el-button.is-link:hover,
+.page-shell .el-button.is-text:hover,
+.profile-main .el-button.is-text:hover {
+  background: #bbf7d0 !important;
+  color: var(--nb-ink, #1a202c) !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.page-shell .el-button.is-link.el-button--primary,
+.profile-main .el-button.is-link.el-button--primary {
+  color: var(--nb-green-deep, #16a34a) !important;
+}
+
+.page-shell .el-button.is-link.el-button--danger,
+.profile-main .el-button.is-link.el-button--danger {
+  color: #be123c !important;
+}
+
+.page-shell .el-button.is-disabled,
+.profile-main .el-button.is-disabled {
+  opacity: 0.55;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+/* —— Tables —— */
+.page-shell .el-table,
+.profile-main .el-table,
+.page-table-wrap .el-table {
+  --el-table-border-color: var(--nb-ink, #1a202c);
+  --el-table-header-bg-color: var(--nb-cream, #fff9f0);
+  --el-table-row-hover-bg-color: #bbf7d0;
+  --el-table-current-row-bg-color: #dcfce7;
+  --el-table-header-text-color: var(--nb-ink, #1a202c);
+  --el-table-text-color: var(--nb-ink, #1a202c);
+  --el-table-bg-color: #fff;
+  --el-table-tr-bg-color: #fff;
+  background: #fff;
+  border: 2.5px solid var(--nb-ink, #1a202c) !important;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: var(--nb-shadow-sm, 3px 3px 0 0 #1a202c);
+}
+
+.page-shell .el-table::before,
+.profile-main .el-table::before,
+.page-shell .el-table::after,
+.profile-main .el-table::after {
+  display: none;
+}
+
+.page-shell .el-table .el-table__inner-wrapper::before,
+.profile-main .el-table .el-table__inner-wrapper::before {
+  background-color: var(--nb-ink, #1a202c);
+  height: 2px;
+}
+
+.page-shell .el-table th.el-table__cell,
+.profile-main .el-table th.el-table__cell {
+  background: var(--nb-cream, #fff9f0) !important;
+  color: var(--nb-ink, #1a202c) !important;
+  font-family: var(--font-heading);
+  font-weight: 800 !important;
+  border-bottom: 2px solid var(--nb-ink, #1a202c) !important;
+}
+
+.page-shell .el-table td.el-table__cell,
+.profile-main .el-table td.el-table__cell {
+  border-bottom-color: color-mix(in srgb, var(--nb-ink, #1a202c) 18%, transparent) !important;
+  color: var(--nb-ink, #1a202c);
+}
+
+.page-shell .el-table--striped .el-table__body tr.el-table__row--striped td.el-table__cell,
+.profile-main .el-table--striped .el-table__body tr.el-table__row--striped td.el-table__cell {
+  background: var(--nb-cream, #fff9f0) !important;
+}
+
+.page-shell .el-table--border .el-table__cell,
+.profile-main .el-table--border .el-table__cell {
+  border-right-color: color-mix(in srgb, var(--nb-ink, #1a202c) 18%, transparent) !important;
+}
+
+.page-shell .el-table--border .el-table__inner-wrapper:after,
+.page-shell .el-table--border:before,
+.page-shell .el-table--border:after,
+.page-shell .el-table__border-left-patch,
+.profile-main .el-table--border .el-table__inner-wrapper:after,
+.profile-main .el-table--border:before,
+.profile-main .el-table--border:after {
+  background-color: var(--nb-ink, #1a202c) !important;
+}
+
+.page-shell .el-table--enable-row-hover .el-table__body tr:hover > td.el-table__cell,
+.profile-main .el-table--enable-row-hover .el-table__body tr:hover > td.el-table__cell {
+  background: #bbf7d0 !important;
+}
+
+/* —— Tags —— */
+.page-shell .el-tag,
+.profile-main .el-tag {
+  border: 2px solid var(--nb-ink, #1a202c) !important;
+  border-radius: 999px !important;
+  font-weight: 800;
+  background: #fff !important;
+  color: var(--nb-ink, #1a202c) !important;
+}
+
+.page-shell .el-tag--success,
+.profile-main .el-tag--success {
+  background: #bbf7d0 !important;
+}
+
+.page-shell .el-tag--warning,
+.profile-main .el-tag--warning {
+  background: var(--nb-yellow, #fef08a) !important;
+}
+
+.page-shell .el-tag--danger,
+.profile-main .el-tag--danger {
+  background: var(--nb-pink, #fecdd3) !important;
+}
+
+.page-shell .el-tag--info,
+.profile-main .el-tag--info {
+  background: var(--nb-blue, #bee3f8) !important;
+}
+
+.page-shell .el-tag--primary,
+.profile-main .el-tag--primary {
+  background: #dcfce7 !important;
+}
+
+/* —— Toolbar inputs —— */
+.page-toolbar .el-input__wrapper,
+.page-toolbar .el-select__wrapper,
+.page-shell .page-toolbar .el-input__wrapper,
+.profile-main .page-toolbar .el-input__wrapper,
+.profile-main .page-toolbar .el-select__wrapper {
+  background: #fff !important;
+  box-shadow: none !important;
+  border: 2px solid var(--nb-ink, #1a202c) !important;
+  border-radius: 12px !important;
+}
+
+.page-toolbar .el-input__wrapper.is-focus,
+.page-toolbar .el-select__wrapper.is-focused,
+.profile-main .page-toolbar .el-input__wrapper.is-focus,
+.profile-main .page-toolbar .el-select__wrapper.is-focused {
+  box-shadow: 3px 3px 0 0 var(--nb-ink, #1a202c) !important;
+}
+
+/* —— Pagination —— */
+.page-shell .el-pagination,
+.profile-main .el-pagination,
+.page-pagination .el-pagination {
+  --el-pagination-button-bg-color: #fff;
+  --el-pagination-hover-color: var(--nb-ink, #1a202c);
+  --el-pagination-button-color: var(--nb-ink, #1a202c);
+  font-weight: 700;
+}
+
+.page-shell .el-pagination button,
+.page-shell .el-pager li,
+.profile-main .el-pagination button,
+.profile-main .el-pager li {
+  border: 2px solid var(--nb-ink, #1a202c) !important;
+  border-radius: 10px !important;
+  background: #fff !important;
+  color: var(--nb-ink, #1a202c) !important;
+  box-shadow: 2px 2px 0 0 var(--nb-ink, #1a202c);
+  margin: 0 3px !important;
+  font-weight: 800 !important;
+}
+
+.page-shell .el-pager li.is-active,
+.profile-main .el-pager li.is-active {
+  background: #bbf7d0 !important;
+  color: var(--nb-ink, #1a202c) !important;
+}
+
+.page-shell .el-pagination button:hover,
+.page-shell .el-pager li:hover,
+.profile-main .el-pagination button:hover,
+.profile-main .el-pager li:hover {
+  color: var(--nb-ink, #1a202c) !important;
+  background: var(--nb-yellow, #fef08a) !important;
+}
+
+/* —— MessageBox (teleported) —— */
+.el-message-box {
+  border: 2.5px solid var(--nb-ink, #1a202c) !important;
+  border-radius: 18px !important;
+  box-shadow: var(--nb-shadow-lg, 6px 6px 0 0 #1a202c) !important;
+  background: #fff !important;
+}
+
+.el-message-box__title {
+  font-family: var(--font-heading);
+  font-weight: 900 !important;
+  color: var(--nb-ink, #1a202c) !important;
+}
+
+.el-message-box__btns .el-button {
+  border-radius: 999px !important;
+  border: 2px solid var(--nb-ink, #1a202c) !important;
+  font-weight: 800 !important;
+  box-shadow: 2px 2px 0 0 var(--nb-ink, #1a202c);
+}
+
+.el-message-box__btns .el-button--primary {
+  background: var(--nb-green, #22c55e) !important;
+  color: #fff !important;
+}

@@ -665,7 +665,7 @@ onMounted(() => {
 .course-player-page {
   padding: 24px 16px 56px;
   background: transparent;
-  min-height: calc(100vh - 120px);
+  min-height: calc(100vh - var(--header-height));
 }
 
 .section-inner {
@@ -685,34 +685,45 @@ onMounted(() => {
   font-size: 14px;
 }
 
+.back-link:hover {
+  color: var(--color-primary-dark);
+}
+
 .player-header {
   display: flex;
   justify-content: space-between;
   gap: 20px;
   margin-bottom: 18px;
+  padding: 18px 20px;
+  border-radius: 16px;
+  background: #fff;
+  border: 2.5px solid var(--nb-ink, var(--color-border-neutral));
+  box-shadow: var(--nb-shadow, var(--shadow-sm));
 }
 
 .eyebrow {
   margin: 0 0 6px;
-  color: #00a1d6;
+  color: var(--color-primary);
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .player-header h1 {
   margin: 0 0 10px;
-  font-size: 28px;
+  font-size: clamp(22px, 3vw, 28px);
   line-height: 1.3;
-  color: #f5f8ff;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+  color: var(--color-foreground);
+  font-family: var(--font-heading);
+  text-shadow: none;
 }
 
 .header-meta {
   display: flex;
   flex-wrap: wrap;
   gap: 14px;
-  color: rgba(232, 240, 255, 0.72);
+  color: var(--color-muted-foreground);
   font-size: 13px;
 }
 
@@ -737,7 +748,7 @@ onMounted(() => {
 }
 
 .video-attribution {
-  color: rgba(232, 240, 255, 0.65);
+  color: var(--color-muted-foreground);
   font-size: 12px;
 }
 
@@ -747,16 +758,32 @@ onMounted(() => {
 }
 
 .interaction-card {
-  background: rgba(255, 255, 255, 0.94);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 14px;
+  background: #fff;
+  border: 2.5px solid var(--nb-ink, var(--color-border-neutral));
+  border-radius: 16px;
   padding: 8px 18px 18px;
-  backdrop-filter: blur(10px);
+  box-shadow: var(--nb-shadow, var(--shadow-md));
+}
+
+.player-tabs :deep(.el-tabs__item) {
+  color: var(--color-muted-foreground);
+}
+
+.player-tabs :deep(.el-tabs__item.is-active) {
+  color: var(--color-primary);
+}
+
+.player-tabs :deep(.el-tabs__active-bar) {
+  background-color: var(--color-primary);
+}
+
+.player-tabs :deep(.el-tabs__nav-wrap::after) {
+  background-color: var(--color-border-neutral);
 }
 
 .intro-panel p {
   line-height: 1.8;
-  color: var(--color-text-secondary);
+  color: var(--color-muted-foreground);
 }
 
 .intro-highlights {
@@ -769,25 +796,28 @@ onMounted(() => {
 .intro-highlights div {
   padding: 14px;
   border-radius: 12px;
-  background: #f7f9fc;
-  border: 1px solid var(--color-border);
+  background: var(--nb-cream, var(--color-background));
+  border: 2px solid var(--nb-ink, var(--color-border-neutral));
+  box-shadow: 2px 2px 0 0 var(--nb-ink, #1a202c);
 }
 
 .intro-highlights span {
   display: block;
-  color: var(--color-text-muted);
+  color: var(--color-muted-foreground);
   font-size: 12px;
   margin-bottom: 6px;
 }
 
 .intro-highlights strong {
-  color: var(--color-text);
+  color: var(--color-foreground);
   font-size: 14px;
 }
 
 .player-sidebar {
   position: sticky;
   top: 88px;
+  display: grid;
+  gap: 12px;
 }
 
 .sidebar-card {
@@ -795,10 +825,9 @@ onMounted(() => {
   gap: 14px;
   padding: 18px;
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.94);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
-  backdrop-filter: blur(10px);
+  background: var(--color-card);
+  border: 2.5px solid var(--nb-ink, var(--color-border-neutral));
+  box-shadow: var(--nb-shadow, var(--shadow-md));
 }
 
 .sidebar-title {
@@ -807,11 +836,13 @@ onMounted(() => {
   gap: 8px;
   font-size: 16px;
   font-weight: 700;
+  color: var(--color-foreground);
+  font-family: var(--font-heading);
 }
 
 .sidebar-tip {
   margin: 0;
-  color: var(--color-text-secondary);
+  color: var(--color-muted-foreground);
   font-size: 13px;
   line-height: 1.7;
 }
@@ -821,7 +852,7 @@ onMounted(() => {
 }
 
 .episode-card {
-  margin-bottom: 12px;
+  margin-bottom: 0;
 }
 
 .episode-item {
@@ -829,47 +860,63 @@ onMounted(() => {
   gap: 6px;
   width: 100%;
   padding: 12px;
-  border: 1px solid var(--color-border);
-  border-radius: 10px;
-  background: #f8fbff;
+  border: 2px solid var(--nb-ink, var(--color-border-neutral));
+  border-radius: 12px;
+  background: #fff;
   cursor: pointer;
   text-align: left;
+  box-shadow: 2px 2px 0 0 var(--nb-ink, #1a202c);
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+}
+
+.episode-item + .episode-item {
+  margin-top: 8px;
+}
+
+.episode-item:hover {
+  border-color: var(--nb-ink, var(--color-border));
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0 0 var(--nb-ink, #1a202c);
 }
 
 .episode-item.active {
-  border-color: #00a1d6;
-  background: #eef9ff;
+  border-color: var(--nb-ink, var(--color-primary));
+  background: #bbf7d0;
 }
 
 .episode-index {
-  color: var(--color-text-muted);
+  color: var(--color-muted-foreground);
   font-size: 12px;
 }
 
 .episode-item strong {
   font-size: 14px;
-  color: var(--color-text);
+  color: var(--color-foreground);
 }
 
 .checkin-box {
   display: grid;
   gap: 10px;
-  padding-top: 4px;
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--color-background);
+  border: 1px solid var(--color-border-neutral);
 }
 
 .checkin-meta {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: var(--color-text-secondary);
+  color: var(--color-muted-foreground);
   font-size: 13px;
 }
 
 .purchase-paywall {
   aspect-ratio: 16 / 9;
   border-radius: 14px;
-  background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
-  border: 1px solid rgba(0, 161, 214, 0.25);
+  background: var(--hero-gradient);
+  border: 2.5px solid var(--nb-ink, var(--color-border-neutral));
+  box-shadow: var(--nb-shadow, var(--shadow-md));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -879,23 +926,25 @@ onMounted(() => {
 .paywall-inner {
   max-width: 480px;
   text-align: center;
-  color: #e8f4ff;
+  color: var(--color-foreground);
 }
 
 .paywall-icon {
   font-size: 48px;
-  color: #f59e0b;
+  color: var(--color-accent);
   margin-bottom: 16px;
 }
 
 .paywall-inner h2 {
   margin: 0 0 12px;
   font-size: 22px;
+  font-family: var(--font-heading);
+  color: var(--color-foreground);
 }
 
 .paywall-inner p {
   margin: 0 0 24px;
-  color: #94b8cc;
+  color: var(--color-muted-foreground);
   line-height: 1.7;
   font-size: 14px;
 }
@@ -914,7 +963,7 @@ onMounted(() => {
 .hash {
   margin-top: 12px;
   font-size: 12px;
-  color: var(--color-text-muted);
+  color: var(--color-muted-foreground);
   word-break: break-all;
 }
 

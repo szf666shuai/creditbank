@@ -92,14 +92,13 @@ onMounted(() => {
 .profile-sidebar {
   width: 220px;
   flex-shrink: 0;
-  background: rgba(8, 20, 40, 0.42);
-  border: 1px solid rgba(125, 211, 252, 0.18);
-  border-radius: 12px;
+  background: #fff;
+  border: 2.5px solid var(--nb-ink, var(--color-border-neutral));
+  border-radius: 18px;
   padding: 20px 12px;
   position: sticky;
   top: calc(var(--header-height) + 16px);
-  backdrop-filter: blur(14px);
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+  box-shadow: var(--nb-shadow, var(--shadow-md));
 }
 
 .sidebar-user {
@@ -108,21 +107,22 @@ onMounted(() => {
   gap: 12px;
   padding: 0 8px 16px;
   margin-bottom: 8px;
-  border-bottom: 1px solid rgba(125, 211, 252, 0.14);
+  border-bottom: 2px solid color-mix(in srgb, var(--nb-ink, #1a202c) 14%, transparent);
 }
 
 .sidebar-avatar {
   width: 40px;
   height: 40px;
-  border-radius: 50%;
-  background: rgba(56, 189, 248, 0.2);
-  color: #7dd3fc;
+  border-radius: 12px;
+  background: var(--nb-pink, var(--color-primary-light));
+  color: var(--nb-ink, var(--color-primary-dark));
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 600;
+  font-weight: 800;
   flex-shrink: 0;
-  border: 1px solid rgba(125, 211, 252, 0.28);
+  border: 2.5px solid var(--nb-ink, var(--color-border));
+  box-shadow: 2px 2px 0 0 var(--nb-ink, #1a202c);
 }
 
 .sidebar-meta {
@@ -133,7 +133,7 @@ onMounted(() => {
 .sidebar-name {
   font-size: 14px;
   font-weight: 600;
-  color: #e0f2fe;
+  color: var(--color-foreground);
   margin-bottom: 6px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -148,7 +148,7 @@ onMounted(() => {
 
 .nav-divider {
   height: 1px;
-  background: rgba(125, 211, 252, 0.14);
+  background: var(--color-border-neutral);
   margin: 8px 8px;
 }
 
@@ -157,22 +157,31 @@ onMounted(() => {
   align-items: center;
   gap: 10px;
   padding: 10px 12px;
-  border-radius: 8px;
+  border-radius: 12px;
   text-decoration: none;
-  color: rgba(186, 230, 253, 0.78);
+  color: var(--color-muted-foreground);
   font-size: 14px;
-  transition: background 0.2s, color 0.2s;
+  font-weight: 700;
+  border: 2px solid transparent;
+  transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
 }
 
 .nav-item:hover {
-  background: rgba(56, 189, 248, 0.14);
-  color: #7dd3fc;
+  background: var(--nb-yellow, #fef08a);
+  color: var(--nb-ink, #1a202c);
+  border-color: var(--nb-ink, #1a202c);
 }
 
 .nav-item.active {
-  background: rgba(56, 189, 248, 0.2);
-  color: #e0f2fe;
-  font-weight: 600;
+  background: #bbf7d0;
+  color: var(--nb-ink, #1a202c);
+  font-weight: 800;
+  border-color: var(--nb-ink, #1a202c);
+  box-shadow: 2px 2px 0 0 var(--nb-ink, #1a202c);
+}
+
+.nav-item.active :deep(.ui-icon) {
+  color: var(--nb-ink, #1a202c);
 }
 
 .nav-icon {
@@ -195,27 +204,25 @@ onMounted(() => {
   min-width: 0;
 }
 
-/* 个人中心内容区：去掉大片白底，统一半透明冷色 */
+/* 与公开页统一：Neo-brutal 白卡片 */
 .profile-main :deep(.page-card) {
-  background: rgba(8, 20, 40, 0.42);
-  border: 1px solid rgba(125, 211, 252, 0.16);
-  backdrop-filter: blur(12px);
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.16);
-  color: #e2e8f0;
+  background: #fff;
+  border: 2.5px solid var(--nb-ink, var(--color-border-neutral));
+  box-shadow: var(--nb-shadow, var(--shadow-md));
+  color: var(--color-card-foreground);
 }
 
 .profile-main :deep(.page-card--plain) {
   background: transparent;
   border: none;
   box-shadow: none;
-  backdrop-filter: none;
 }
 
 .profile-main :deep(.page-header__main h1),
 .profile-main :deep(.page-stat-value),
 .profile-main :deep(.page-quick-title),
 .profile-main :deep(.page-quick-section h2) {
-  color: #e0f2fe;
+  color: var(--color-foreground);
 }
 
 .profile-main :deep(.page-header__main p),
@@ -224,155 +231,146 @@ onMounted(() => {
 .profile-main :deep(.page-quick-desc),
 .profile-main :deep(.page-text-muted),
 .profile-main :deep(.page-summary-label) {
-  color: rgba(186, 230, 253, 0.82);
+  color: var(--color-muted-foreground);
 }
 
 .profile-main :deep(.page-stat-card),
 .profile-main :deep(.page-quick-card) {
-  background: rgba(8, 20, 40, 0.38);
-  border: 1px solid rgba(125, 211, 252, 0.14);
-  color: #e2e8f0;
-  backdrop-filter: blur(10px);
+  background: #fff;
+  border: 2.5px solid var(--nb-ink, var(--color-border-neutral));
+  color: var(--color-card-foreground);
+  box-shadow: var(--nb-shadow-sm, var(--shadow-sm));
 }
 
 .profile-main :deep(.page-stat-card:hover),
 .profile-main :deep(.page-quick-card:hover) {
-  border-color: rgba(56, 189, 248, 0.4);
-  box-shadow: 0 10px 24px rgba(14, 165, 233, 0.12);
+  border-color: var(--nb-ink, var(--color-border));
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 0 var(--nb-ink, #1a202c);
 }
 
 .profile-main :deep(.page-summary-card) {
-  background: rgba(56, 189, 248, 0.12);
-  border: 1px solid rgba(125, 211, 252, 0.16);
+  background: var(--nb-blue, var(--color-primary-light));
+  border: 2.5px solid var(--nb-ink, var(--color-border));
 }
 
 .profile-main :deep(.page-summary-value) {
-  color: #7dd3fc;
+  color: var(--nb-green-deep, var(--color-primary-dark));
 }
 
 .profile-main :deep(.el-card) {
-  background: rgba(8, 20, 40, 0.42);
-  border: 1px solid rgba(125, 211, 252, 0.16);
-  color: #e2e8f0;
-  backdrop-filter: blur(10px);
+  background: #fff;
+  border: 2.5px solid var(--nb-ink, var(--color-border-neutral));
+  color: var(--color-card-foreground);
+  box-shadow: var(--nb-shadow-sm, var(--shadow-sm));
 }
 
 .profile-main :deep(.el-card__header) {
-  border-bottom-color: rgba(125, 211, 252, 0.12);
-  color: #e0f2fe;
+  border-bottom-color: var(--color-border-neutral);
+  color: var(--color-foreground);
 }
 
-/* 表格：修复斑马纹/悬停白底导致浅色字看不清 */
+/* 表格/表单 — Neo-brutal（细节由 neubrutal-crud.css 接管） */
 .profile-main :deep(.el-table) {
-  --el-table-bg-color: transparent;
-  --el-table-tr-bg-color: transparent;
-  --el-table-header-bg-color: rgba(14, 32, 58, 0.72);
-  --el-table-row-hover-bg-color: rgba(56, 189, 248, 0.18);
-  --el-table-current-row-bg-color: rgba(56, 189, 248, 0.16);
-  --el-table-text-color: #eef6ff;
-  --el-table-header-text-color: #dbeafe;
-  --el-table-border-color: rgba(125, 211, 252, 0.16);
-  --el-fill-color-lighter: rgba(56, 189, 248, 0.08);
-  --el-fill-color-light: rgba(56, 189, 248, 0.12);
-  --el-bg-color: transparent;
-  background: transparent;
-  color: #eef6ff;
+  --el-table-bg-color: #fff;
+  --el-table-tr-bg-color: #fff;
+  --el-table-header-bg-color: var(--nb-cream, #fff9f0);
+  --el-table-row-hover-bg-color: #bbf7d0;
+  --el-table-current-row-bg-color: #dcfce7;
+  --el-table-text-color: var(--nb-ink, #1a202c);
+  --el-table-header-text-color: var(--nb-ink, #1a202c);
+  --el-table-border-color: var(--nb-ink, #1a202c);
+  --el-fill-color-lighter: var(--nb-cream, #fff9f0);
+  --el-fill-color-light: var(--nb-cream, #fff9f0);
+  --el-bg-color: #fff;
+  background: #fff;
+  color: var(--nb-ink, #1a202c);
 }
 
 .profile-main :deep(.el-table th.el-table__cell) {
-  background: rgba(14, 32, 58, 0.72) !important;
-  color: #dbeafe !important;
-  font-weight: 600;
+  background: var(--nb-cream, #fff9f0) !important;
+  color: var(--nb-ink, #1a202c) !important;
+  font-weight: 800;
 }
 
 .profile-main :deep(.el-table td.el-table__cell) {
   background: transparent !important;
-  color: #eef6ff;
+  color: var(--nb-ink, #1a202c);
 }
 
 .profile-main :deep(.el-table--striped .el-table__body tr.el-table__row--striped td.el-table__cell) {
-  background: rgba(56, 189, 248, 0.1) !important;
+  background: var(--nb-cream, #fff9f0) !important;
 }
 
 .profile-main :deep(.el-table--enable-row-hover .el-table__body tr:hover > td.el-table__cell) {
-  background: rgba(56, 189, 248, 0.2) !important;
-  color: #f8fbff !important;
+  background: #bbf7d0 !important;
+  color: var(--nb-ink, #1a202c) !important;
 }
 
 .profile-main :deep(.el-table__body tr.current-row > td.el-table__cell) {
-  background: rgba(56, 189, 248, 0.18) !important;
+  background: #dcfce7 !important;
 }
 
 .profile-main :deep(.el-table__fixed),
 .profile-main :deep(.el-table__fixed-right) {
-  background: transparent;
+  background: #fff;
 }
 
 .profile-main :deep(.el-table__fixed-right-patch),
 .profile-main :deep(.el-table__fixed-header-wrapper th.el-table__cell),
 .profile-main :deep(.el-table__fixed-body-wrapper td.el-table__cell) {
-  background: rgba(10, 24, 48, 0.92) !important;
+  background: #fff !important;
 }
 
 .profile-main :deep(.el-table .cell) {
   color: inherit;
 }
 
-.profile-main :deep(.el-table .el-tag) {
-  border-color: transparent;
-}
-
-.profile-main :deep(.el-table .el-tag--info) {
-  --el-tag-bg-color: rgba(148, 163, 184, 0.22);
-  --el-tag-text-color: #e2e8f0;
-  --el-tag-border-color: rgba(148, 163, 184, 0.28);
-}
-
 .profile-main :deep(.el-tabs__item) {
-  color: rgba(186, 230, 253, 0.72);
+  color: var(--color-muted-foreground);
+  font-weight: 700;
 }
 
 .profile-main :deep(.el-tabs__item.is-active),
 .profile-main :deep(.el-tabs__item:hover) {
-  color: #7dd3fc;
+  color: var(--nb-ink, #1a202c);
 }
 
 .profile-main :deep(.el-tabs__nav-wrap::after) {
-  background-color: rgba(125, 211, 252, 0.16);
+  background-color: color-mix(in srgb, var(--nb-ink, #1a202c) 18%, transparent);
 }
 
 .profile-main :deep(.el-tabs__active-bar) {
-  background-color: #38bdf8;
+  background-color: var(--nb-green, #22c55e);
+  height: 3px;
 }
 
 .profile-main :deep(.page-toolbar) {
-  color: #e2e8f0;
-}
-
-.profile-main :deep(.page-toolbar .el-button.is-plain),
-.profile-main :deep(.page-toolbar .el-button--default) {
-  --el-button-bg-color: rgba(8, 20, 40, 0.55);
-  --el-button-border-color: rgba(125, 211, 252, 0.3);
-  --el-button-text-color: #e0f2fe;
-  --el-button-hover-bg-color: rgba(56, 189, 248, 0.18);
-  --el-button-hover-border-color: rgba(56, 189, 248, 0.5);
-  --el-button-hover-text-color: #f0f9ff;
+  color: var(--color-foreground);
+  gap: 10px;
 }
 
 .profile-main :deep(.el-descriptions) {
-  --el-descriptions-table-border: rgba(125, 211, 252, 0.14);
-  --el-text-color-primary: #e2e8f0;
-  --el-fill-color-blank: rgba(8, 20, 40, 0.35);
-  --el-fill-color-light: rgba(15, 23, 42, 0.45);
-  --el-text-color-regular: #cbd5e1;
+  --el-descriptions-table-border: var(--nb-ink, #1a202c);
+  --el-text-color-primary: var(--nb-ink, #1a202c);
+  --el-fill-color-blank: #fff;
+  --el-fill-color-light: var(--nb-cream, #fff9f0);
+  --el-text-color-regular: var(--color-muted-foreground);
 }
 
 .profile-main :deep(.el-input__wrapper),
 .profile-main :deep(.el-textarea__inner),
 .profile-main :deep(.el-select__wrapper),
 .profile-main :deep(.el-date-editor.el-input__wrapper) {
-  background: rgba(8, 20, 40, 0.55) !important;
-  box-shadow: 0 0 0 1px rgba(125, 211, 252, 0.28) inset !important;
+  background: #fff !important;
+  box-shadow: none !important;
+  border: 2px solid var(--nb-ink, #1a202c) !important;
+  border-radius: 12px !important;
+}
+
+.profile-main :deep(.el-input__wrapper.is-focus),
+.profile-main :deep(.el-select__wrapper.is-focused) {
+  box-shadow: 3px 3px 0 0 var(--nb-ink, #1a202c) !important;
 }
 
 .profile-main :deep(.el-input__inner),
@@ -381,30 +379,30 @@ onMounted(() => {
 .profile-main :deep(.el-select__selected-item),
 .profile-main :deep(.el-range-input),
 .profile-main :deep(.el-range-separator) {
-  color: #e2e8f0 !important;
+  color: var(--color-foreground) !important;
 }
 
 .profile-main :deep(.el-input__inner::placeholder),
 .profile-main :deep(.el-textarea__inner::placeholder),
 .profile-main :deep(.el-select__placeholder) {
-  color: rgba(148, 163, 184, 0.85) !important;
+  color: var(--color-muted-foreground) !important;
 }
 
 .profile-main :deep(.el-pagination) {
   --el-pagination-bg-color: transparent;
-  --el-pagination-button-bg-color: rgba(8, 20, 40, 0.45);
-  --el-pagination-button-color: #e0f2fe;
-  --el-pagination-hover-color: #7dd3fc;
-  --el-text-color-regular: #cbd5e1;
-  color: #cbd5e1;
+  --el-pagination-button-bg-color: var(--color-card);
+  --el-pagination-button-color: var(--color-foreground);
+  --el-pagination-hover-color: var(--color-primary);
+  --el-text-color-regular: var(--color-muted-foreground);
+  color: var(--color-muted-foreground);
 }
 
 .profile-main :deep(.el-empty__description p) {
-  color: rgba(186, 230, 253, 0.75);
+  color: var(--color-muted-foreground);
 }
 
 .profile-main :deep(.el-loading-mask) {
-  background-color: rgba(8, 20, 40, 0.45);
+  background-color: color-mix(in srgb, var(--color-background) 70%, white);
 }
 
 @media (max-width: 768px) {

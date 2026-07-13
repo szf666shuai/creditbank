@@ -134,11 +134,10 @@ onMounted(loadData)
 <style scoped>
 .learning-strip {
   padding: 22px;
-  border-radius: 18px;
-  background: var(--role-surface, rgba(6, 22, 38, 0.58));
-  border: 1px solid var(--role-border, rgba(0, 161, 214, 0.28));
-  box-shadow: var(--role-shadow, 0 12px 40px rgba(0, 0, 0, 0.35));
-  backdrop-filter: blur(12px);
+  border-radius: var(--radius-lg);
+  background: var(--color-card);
+  border: 1px solid var(--color-border-neutral);
+  box-shadow: var(--shadow-md);
 }
 
 .strip-head {
@@ -153,20 +152,22 @@ onMounted(loadData)
   margin: 0 0 6px;
   font-size: 12px;
   letter-spacing: 0.08em;
-  color: var(--role-primary-soft, #22d3ee);
+  color: var(--color-primary);
   text-transform: uppercase;
+  font-weight: 600;
 }
 
 .strip-head h2 {
   margin: 0 0 8px;
-  font-size: 24px;
-  color: var(--role-text, #e8f8ff);
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  color: var(--color-foreground);
 }
 
 .strip-hint {
   margin: 0;
-  color: var(--role-text-muted, #8ec8de);
-  font-size: 13px;
+  color: var(--color-muted-foreground);
+  font-size: 0.875rem;
   line-height: 1.6;
   max-width: 520px;
 }
@@ -176,30 +177,31 @@ onMounted(loadData)
   display: grid;
   gap: 4px;
   padding: 14px 18px;
-  border-radius: 14px;
-  background: var(--role-surface-card, rgba(10, 36, 58, 0.68));
-  border: 1px solid var(--role-border, rgba(0, 161, 214, 0.28));
+  border-radius: var(--radius-md);
+  background: var(--color-primary-light);
+  border: 1px solid var(--color-border);
   text-align: right;
 }
 
 .credit-pill span {
   font-size: 12px;
-  color: var(--role-text-muted, #8ec8de);
+  color: var(--color-muted-foreground);
 }
 
 .credit-pill strong {
-  font-size: 28px;
-  color: var(--role-primary-dark, #67e8f9);
+  font-size: 1.75rem;
+  color: var(--color-primary-dark);
   line-height: 1.1;
 }
 
 .text-link {
   border: none;
   background: transparent;
-  color: var(--role-primary-soft, #22d3ee);
+  color: var(--color-primary);
   font-size: 12px;
   cursor: pointer;
   justify-self: end;
+  font-weight: 600;
 }
 
 .course-row {
@@ -214,16 +216,16 @@ onMounted(loadData)
   grid-template-columns: 88px 1fr;
   gap: 12px;
   padding: 12px;
-  border-radius: 14px;
-  background: var(--role-surface-card, rgba(10, 36, 58, 0.68));
-  border: 1px solid rgba(0, 161, 214, 0.16);
+  border-radius: var(--radius-md);
+  background: var(--color-background);
+  border: 1px solid var(--color-border-neutral);
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .course-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 161, 214, 0.18);
+  box-shadow: var(--shadow-md);
 }
 
 .course-cover {
@@ -231,7 +233,7 @@ onMounted(loadData)
   height: 66px;
   border-radius: 10px;
   overflow: hidden;
-  background: rgba(8, 30, 52, 0.8);
+  background: var(--color-muted);
 }
 
 .course-cover img {
@@ -245,13 +247,13 @@ onMounted(loadData)
   height: 100%;
   display: grid;
   place-items: center;
-  font-size: 28px;
+  color: var(--color-primary);
 }
 
 .course-body h3 {
   margin: 0 0 4px;
   font-size: 14px;
-  color: var(--role-text, #e8f8ff);
+  color: var(--color-foreground);
   line-height: 1.4;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -262,14 +264,15 @@ onMounted(loadData)
 .course-body p {
   margin: 0 0 8px;
   font-size: 12px;
-  color: var(--role-text-muted, #8ec8de);
+  color: var(--color-muted-foreground);
 }
 
 .progress-label {
   display: block;
   margin-top: 6px;
   font-size: 11px;
-  color: var(--role-primary-soft, #22d3ee);
+  color: var(--color-primary);
+  font-weight: 600;
 }
 
 .more-card {
@@ -278,35 +281,27 @@ onMounted(loadData)
   justify-items: start;
   gap: 8px;
   padding: 16px;
-  border-radius: 14px;
-  border: 1px dashed rgba(0, 161, 214, 0.35);
-  background: var(--role-surface-strong, rgba(8, 30, 52, 0.74));
+  border-radius: var(--radius-md);
+  border: 1px dashed var(--color-border);
+  background: var(--color-primary-light);
   cursor: pointer;
   text-align: left;
 }
 
 .more-card span {
   font-size: 12px;
-  color: var(--role-text-muted, #8ec8de);
+  color: var(--color-muted-foreground);
 }
 
 .more-card strong {
-  font-size: 18px;
-  color: var(--role-primary-dark, #67e8f9);
+  font-size: 1.125rem;
+  color: var(--color-primary-dark);
 }
 
 .strip-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-}
-
-.strip-actions :deep(.el-button--primary.is-plain) {
-  --el-button-text-color: var(--role-primary-soft, #22d3ee);
-  --el-button-border-color: rgba(0, 161, 214, 0.45);
-  --el-button-hover-text-color: var(--role-primary-dark, #67e8f9);
-  --el-button-hover-border-color: #00a1d6;
-  --el-button-hover-bg-color: rgba(0, 161, 214, 0.12);
 }
 
 @media (max-width: 900px) {

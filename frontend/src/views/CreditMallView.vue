@@ -268,11 +268,11 @@ onUnmounted(stopBannerTimer)
         </div>
         <div class="mall-topbar__actions">
           <button type="button" class="top-action" @click="router.push('/credit/orders')">
-            <UiIcon name="ticket" :size="18" color="#7dd3fc" />
+            <UiIcon name="ticket" :size="18" />
             订单
           </button>
           <button type="button" class="top-action cart-btn" @click="cartDrawerVisible = true">
-            <UiIcon name="cart" :size="18" color="#7dd3fc" />
+            <UiIcon name="cart" :size="18" />
             兑换篮
             <em v-if="cartCount">{{ cartCount > 99 ? '99+' : cartCount }}</em>
           </button>
@@ -414,7 +414,7 @@ onUnmounted(stopBannerTimer)
                   <em v-if="product.priceMoney > 0">+¥{{ formatAmount(product.priceMoney) }}</em>
                 </div>
                 <button type="button" class="add-btn" :aria-label="`加入兑换篮 ${product.name}`" @click="addToCart(product)">
-                  <UiIcon name="cart" :size="16" color="#031525" />
+                  <UiIcon name="cart" :size="16" />
                 </button>
               </div>
               <small class="stock">剩 {{ product.stock }} 件</small>
@@ -427,7 +427,7 @@ onUnmounted(stopBannerTimer)
     <!-- 悬浮兑换篮 -->
     <button type="button" class="float-cart" aria-label="打开兑换篮" @click="cartDrawerVisible = true">
       <span class="float-cart__icon">
-        <UiIcon name="cart" :size="22" color="#031525" />
+        <UiIcon name="cart" :size="22" />
       </span>
       <span class="float-cart__label">兑换篮</span>
       <em v-if="cartCount">{{ cartCount > 99 ? '99+' : cartCount }}</em>
@@ -442,7 +442,7 @@ onUnmounted(stopBannerTimer)
     >
       <template #header>
         <div class="drawer-head">
-          <p class="drawer-kicker">Exchange Basket</p>
+          <p class="drawer-kicker">兑换篮</p>
           <h2>
             兑换篮
             <span v-if="cartCount">（{{ cartCount }}）</span>
@@ -514,7 +514,7 @@ onUnmounted(stopBannerTimer)
             :disabled="orderLoading || !cart.length"
             @click="submitOrder"
           >
-            <UiIcon name="wallet" :size="18" color="#031525" />
+            <UiIcon name="wallet" :size="18" />
             {{ orderLoading ? '提交中…' : '去结算' }}
           </button>
         </template>
@@ -530,7 +530,7 @@ onUnmounted(stopBannerTimer)
     >
       <template #header>
         <div class="drawer-head">
-          <p class="drawer-kicker">Payment</p>
+          <p class="drawer-kicker">订单支付</p>
           <h2>{{ paymentResultNo ? '支付结果' : '订单支付' }}</h2>
         </div>
       </template>
@@ -598,9 +598,6 @@ onUnmounted(stopBannerTimer)
 
 <style scoped>
 .mall-page {
-  --mall-accent: #38bdf8;
-  --mall-accent-deep: #0ea5e9;
-  --mall-accent-soft: rgba(56, 189, 248, 0.18);
   padding: 16px 16px 72px;
   background: transparent;
   min-height: calc(100vh - var(--header-height));
@@ -622,18 +619,19 @@ onUnmounted(stopBannerTimer)
 .brand-mini {
   display: grid;
   gap: 2px;
-  color: #e0f2fe;
+  color: var(--color-foreground);
 }
 
 .brand-mini strong {
   font-size: 22px;
   letter-spacing: 0.02em;
-  color: #f8fafc;
+  color: var(--color-foreground);
+  font-family: var(--font-heading);
 }
 
 .brand-mini span {
   font-size: 12px;
-  color: rgba(186, 230, 253, 0.7);
+  color: var(--color-muted-foreground);
 }
 
 .mall-search {
@@ -642,11 +640,11 @@ onUnmounted(stopBannerTimer)
   max-width: 640px;
   width: 100%;
   margin: 0 auto;
-  border: 1px solid rgba(56, 189, 248, 0.45);
+  border: 1px solid var(--color-border-neutral);
   border-radius: 999px;
   overflow: hidden;
-  background: rgba(8, 20, 40, 0.45);
-  backdrop-filter: blur(10px);
+  background: var(--color-card);
+  box-shadow: var(--shadow-sm);
 }
 
 .mall-search :deep(.el-input__wrapper) {
@@ -656,29 +654,30 @@ onUnmounted(stopBannerTimer)
 }
 
 .mall-search :deep(.el-input__inner) {
-  color: #e0f2fe;
+  color: var(--color-foreground);
 }
 
 .mall-search :deep(.el-input__inner::placeholder) {
-  color: rgba(148, 163, 184, 0.75);
+  color: var(--color-muted-foreground);
 }
 
 .mall-search :deep(.el-input__prefix) {
-  color: #7dd3fc;
+  color: var(--color-primary);
 }
 
 .mall-search__btn {
   border: none;
   min-width: 88px;
   padding: 0 18px;
-  background: linear-gradient(135deg, #38bdf8, #0284c7);
-  color: #031525;
+  background: var(--color-primary);
+  color: var(--color-on-primary);
   font-weight: 700;
   cursor: pointer;
+  transition: background 0.2s;
 }
 
 .mall-search__btn:hover {
-  background: linear-gradient(135deg, #7dd3fc, #0ea5e9);
+  background: var(--color-primary-dark);
 }
 
 .mall-topbar__actions {
@@ -693,10 +692,17 @@ onUnmounted(stopBannerTimer)
   gap: 6px;
   padding: 8px 12px;
   border-radius: 999px;
-  border: 1px solid rgba(125, 211, 252, 0.28);
-  background: rgba(8, 20, 40, 0.35);
-  color: #e0f2fe;
+  border: 1px solid var(--color-border-neutral);
+  background: var(--color-card);
+  color: var(--color-foreground);
   cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.top-action:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary-dark);
 }
 
 .top-action em {
@@ -707,8 +713,8 @@ onUnmounted(stopBannerTimer)
   height: 18px;
   padding: 0 5px;
   border-radius: 999px;
-  background: var(--mall-accent);
-  color: #031525;
+  background: var(--color-accent);
+  color: var(--color-on-accent);
   font-size: 11px;
   font-style: normal;
   font-weight: 700;
@@ -729,10 +735,10 @@ onUnmounted(stopBannerTimer)
   flex-direction: column;
   gap: 2px;
   padding: 10px 8px;
-  border-radius: 12px;
-  background: rgba(8, 20, 40, 0.38);
-  border: 1px solid rgba(125, 211, 252, 0.16);
-  backdrop-filter: blur(12px);
+  border-radius: 14px;
+  background: var(--color-card);
+  border: 1px solid var(--color-border-neutral);
+  box-shadow: var(--shadow-md);
 }
 
 .cat-panel__item {
@@ -744,29 +750,28 @@ onUnmounted(stopBannerTimer)
   border: none;
   border-radius: 8px;
   background: transparent;
-  color: rgba(226, 232, 240, 0.88);
+  color: var(--color-foreground);
   text-align: left;
   cursor: pointer;
   font-size: 14px;
+  transition: background 0.15s, color 0.15s;
 }
 
 .cat-panel__item:hover,
 .cat-panel__item.active {
-  background: var(--mall-accent-soft);
-  color: #7dd3fc;
+  background: var(--color-primary-light);
+  color: var(--color-primary-dark);
   font-weight: 600;
 }
 
 .banner-stage {
   position: relative;
-  border-radius: 12px;
+  border-radius: 14px;
   overflow: hidden;
   min-height: 320px;
-  background:
-    radial-gradient(ellipse at 20% 20%, rgba(56, 189, 248, 0.35), transparent 50%),
-    linear-gradient(135deg, #0b1f3a 0%, #0c4a6e 55%, #075985 100%);
-  border: 1px solid rgba(125, 211, 252, 0.22);
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
+  background: var(--hero-gradient);
+  border: 1px solid var(--color-border-neutral);
+  box-shadow: var(--shadow-md);
 }
 
 .banner-slide {
@@ -797,26 +802,27 @@ onUnmounted(stopBannerTimer)
   flex-direction: column;
   justify-content: flex-end;
   padding: 28px;
-  background: linear-gradient(180deg, transparent 30%, rgba(3, 18, 40, 0.78));
-  color: #f0f9ff;
+  background: linear-gradient(180deg, transparent 28%, rgba(26, 32, 44, 0.78));
+  color: #fff;
 }
 
 .banner-kicker {
   margin: 0 0 8px;
   font-size: 13px;
-  color: #7dd3fc;
-  font-weight: 700;
+  color: #bbf7d0;
+  font-weight: 800;
 }
 
 .banner-slide__mask h2 {
   margin: 0 0 8px;
   font-size: clamp(24px, 3vw, 34px);
   line-height: 1.25;
+  font-family: var(--font-heading);
 }
 
 .banner-slide__mask p {
   margin: 0;
-  color: rgba(186, 230, 253, 0.9);
+  color: rgba(240, 253, 250, 0.92);
 }
 
 .banner-dots {
@@ -834,14 +840,15 @@ onUnmounted(stopBannerTimer)
   height: 8px;
   border: none;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.45);
   cursor: pointer;
   padding: 0;
+  transition: width 0.2s, background 0.2s;
 }
 
 .banner-dot.active {
   width: 22px;
-  background: #7dd3fc;
+  background: var(--color-secondary);
 }
 
 .cat-icons {
@@ -850,7 +857,6 @@ onUnmounted(stopBannerTimer)
   gap: 10px;
   margin-bottom: 18px;
   padding: 6px 0;
-  background: transparent;
 }
 
 .cat-icon {
@@ -869,26 +875,28 @@ onUnmounted(stopBannerTimer)
   border-radius: 50%;
   display: grid;
   place-items: center;
-  font-size: 22px;
-  background: rgba(8, 20, 40, 0.45);
-  border: 1px solid rgba(125, 211, 252, 0.25);
-  backdrop-filter: blur(8px);
+  background: var(--color-card);
+  border: 1px solid var(--color-border-neutral);
+  box-shadow: var(--shadow-sm);
+  color: var(--color-primary);
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
 }
 
 .cat-icon.active .cat-icon__circle {
-  background: linear-gradient(180deg, #38bdf8, #0284c7);
-  border-color: transparent;
-  box-shadow: 0 6px 14px rgba(14, 165, 233, 0.35);
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-md);
+  color: var(--color-on-primary);
 }
 
 .cat-icon.active .cat-icon__circle :deep(.ui-icon) {
-  color: #031525 !important;
+  color: var(--color-on-primary) !important;
 }
 
 .cat-icon em {
   font-style: normal;
   font-size: 12px;
-  color: rgba(186, 230, 253, 0.8);
+  color: var(--color-muted-foreground);
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -896,20 +904,13 @@ onUnmounted(stopBannerTimer)
 }
 
 .cat-icon.active em {
-  color: #7dd3fc;
+  color: var(--color-primary-dark);
   font-weight: 700;
 }
 
 .deal-section,
 .shelf-section {
   margin-bottom: 20px;
-}
-
-.deal-section {
-  padding: 14px 4px;
-  background: transparent;
-  border: none;
-  box-shadow: none;
 }
 
 .deal-head,
@@ -925,12 +926,13 @@ onUnmounted(stopBannerTimer)
 .shelf-head h3 {
   margin: 0;
   font-size: 20px;
-  color: #e0f2fe;
+  color: var(--color-foreground);
+  font-family: var(--font-heading);
 }
 
 .deal-head span,
 .shelf-head span {
-  color: rgba(148, 163, 184, 0.85);
+  color: var(--color-muted-foreground);
   font-size: 13px;
 }
 
@@ -943,9 +945,13 @@ onUnmounted(stopBannerTimer)
 .more-link {
   border: none;
   background: transparent;
-  color: #7dd3fc;
+  color: var(--color-primary);
   cursor: pointer;
   font-size: 13px;
+}
+
+.more-link:hover {
+  color: var(--color-primary-dark);
 }
 
 .deal-track {
@@ -958,25 +964,26 @@ onUnmounted(stopBannerTimer)
 }
 
 .deal-card {
-  background: rgba(8, 20, 40, 0.42);
-  border: 1px solid rgba(125, 211, 252, 0.16);
-  border-radius: 10px;
+  background: var(--color-card);
+  border: 1px solid var(--color-border-neutral);
+  border-radius: 12px;
   padding: 8px;
   cursor: pointer;
-  backdrop-filter: blur(10px);
-  transition: transform 0.15s, border-color 0.15s;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
 }
 
 .deal-card:hover {
   transform: translateY(-2px);
-  border-color: rgba(56, 189, 248, 0.45);
+  border-color: var(--color-border);
+  box-shadow: var(--shadow-md);
 }
 
 .deal-card__cover {
   aspect-ratio: 1;
   border-radius: 8px;
   overflow: hidden;
-  background: rgba(15, 23, 42, 0.6);
+  background: var(--color-muted);
   margin-bottom: 8px;
 }
 
@@ -990,14 +997,14 @@ onUnmounted(stopBannerTimer)
 .cover-fallback {
   display: grid;
   place-items: center;
-  color: #64748b;
+  color: var(--nb-ink, var(--color-foreground));
   font-size: 28px;
-  background: linear-gradient(135deg, #0f172a, #1e3a5f);
+  background: linear-gradient(135deg, var(--nb-blue, #bee3f8), var(--nb-pink, #fecdd3));
 }
 
 .deal-price {
   display: block;
-  color: #38bdf8;
+  color: var(--color-accent);
   font-size: 18px;
   line-height: 1.2;
 }
@@ -1005,13 +1012,13 @@ onUnmounted(stopBannerTimer)
 .deal-price small {
   font-size: 11px;
   margin-right: 2px;
-  color: #7dd3fc;
+  color: var(--color-primary);
 }
 
 .deal-card p {
   margin: 4px 0 8px;
   font-size: 13px;
-  color: rgba(226, 232, 240, 0.9);
+  color: var(--color-foreground);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -1024,15 +1031,16 @@ onUnmounted(stopBannerTimer)
   border: none;
   border-radius: 999px;
   padding: 6px 0;
-  background: linear-gradient(135deg, #38bdf8, #0284c7);
-  color: #031525;
+  background: var(--color-primary);
+  color: var(--color-on-primary);
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
+  transition: background 0.2s;
 }
 
 .deal-add:hover {
-  filter: brightness(1.08);
+  background: var(--color-primary-dark);
 }
 
 .product-grid {
@@ -1042,17 +1050,18 @@ onUnmounted(stopBannerTimer)
 }
 
 .product-card {
-  background: rgba(8, 20, 40, 0.42);
-  border: 1px solid rgba(125, 211, 252, 0.14);
-  border-radius: 10px;
+  background: var(--color-card);
+  border: 1px solid var(--color-border-neutral);
+  border-radius: 12px;
   overflow: hidden;
-  backdrop-filter: blur(10px);
-  transition: transform 0.15s, border-color 0.15s;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
 }
 
 .product-card:hover {
   transform: translateY(-3px);
-  border-color: rgba(56, 189, 248, 0.4);
+  border-color: var(--color-border);
+  box-shadow: var(--shadow-md);
 }
 
 .product-cover {
@@ -1063,7 +1072,7 @@ onUnmounted(stopBannerTimer)
   border: none;
   padding: 0;
   cursor: pointer;
-  background: rgba(15, 23, 42, 0.7);
+  background: var(--color-muted);
 }
 
 .product-cover img {
@@ -1079,8 +1088,8 @@ onUnmounted(stopBannerTimer)
   top: 8px;
   padding: 2px 8px;
   border-radius: 4px;
-  background: rgba(14, 165, 233, 0.9);
-  color: #031525;
+  background: var(--color-primary);
+  color: var(--color-on-primary);
   font-size: 11px;
   font-weight: 600;
 }
@@ -1093,19 +1102,20 @@ onUnmounted(stopBannerTimer)
   margin: 0 0 6px;
   font-size: 14px;
   line-height: 1.4;
-  color: #e2e8f0;
+  color: var(--color-foreground);
   cursor: pointer;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   min-height: 40px;
+  font-family: var(--font-heading);
 }
 
 .product-body p {
   margin: 0 0 10px;
   font-size: 12px;
-  color: rgba(148, 163, 184, 0.9);
+  color: var(--color-muted-foreground);
   display: -webkit-box;
   -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
@@ -1120,7 +1130,7 @@ onUnmounted(stopBannerTimer)
 }
 
 .price {
-  color: #38bdf8;
+  color: var(--color-accent);
   display: flex;
   align-items: baseline;
   gap: 3px;
@@ -1135,11 +1145,11 @@ onUnmounted(stopBannerTimer)
 .price em {
   font-size: 12px;
   font-style: normal;
-  color: #7dd3fc;
+  color: var(--color-primary);
 }
 
 .price em {
-  color: rgba(148, 163, 184, 0.85);
+  color: var(--color-muted-foreground);
   margin-left: 2px;
 }
 
@@ -1148,26 +1158,27 @@ onUnmounted(stopBannerTimer)
   height: 34px;
   border: none;
   border-radius: 50%;
-  background: linear-gradient(135deg, #38bdf8, #0284c7);
-  color: #031525;
+  background: var(--color-primary);
+  color: var(--color-on-primary);
   display: grid;
   place-items: center;
   cursor: pointer;
+  transition: background 0.2s;
 }
 
 .add-btn :deep(.ui-icon),
 .add-btn :deep(svg) {
-  color: #031525;
+  color: var(--color-on-primary);
 }
 
 .add-btn:hover {
-  filter: brightness(1.1);
+  background: var(--color-primary-dark);
 }
 
 .stock {
   display: block;
   margin-top: 6px;
-  color: rgba(148, 163, 184, 0.7);
+  color: var(--color-muted-foreground);
   font-size: 11px;
 }
 
@@ -1178,20 +1189,22 @@ onUnmounted(stopBannerTimer)
   z-index: 40;
   width: 72px;
   height: 72px;
-  border: 1px solid rgba(125, 211, 252, 0.35);
-  border-radius: 20px;
-  background:
-    radial-gradient(circle at 30% 20%, rgba(125, 211, 252, 0.35), transparent 55%),
-    linear-gradient(160deg, rgba(8, 28, 48, 0.95), rgba(3, 21, 37, 0.98));
-  color: #7dd3fc;
-  box-shadow: 0 14px 32px rgba(2, 132, 199, 0.35);
+  border: 1px solid var(--color-border-neutral);
+  border-radius: 16px;
+  background: var(--color-card);
+  color: var(--color-primary);
+  box-shadow: var(--shadow-lg);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 2px;
   cursor: pointer;
-  backdrop-filter: blur(12px);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.float-cart:hover {
+  transform: translateY(-2px);
 }
 
 .float-cart__icon {
@@ -1200,19 +1213,19 @@ onUnmounted(stopBannerTimer)
   width: 34px;
   height: 34px;
   border-radius: 12px;
-  background: linear-gradient(135deg, #38bdf8, #0284c7);
-  color: #031525;
+  background: var(--color-primary);
+  color: var(--color-on-primary);
 }
 
 .float-cart__icon :deep(.ui-icon),
 .float-cart__icon :deep(svg) {
-  color: #031525;
+  color: var(--color-on-primary);
 }
 
 .float-cart__label {
   font-size: 11px;
   font-weight: 700;
-  color: #bae6fd;
+  color: var(--color-foreground);
 }
 
 .float-cart em {
@@ -1223,25 +1236,26 @@ onUnmounted(stopBannerTimer)
   height: 18px;
   padding: 0 4px;
   border-radius: 999px;
-  background: #f43f5e;
-  color: #fff;
+  background: var(--color-accent);
+  color: var(--color-on-accent);
   font-style: normal;
   font-weight: 700;
   font-size: 11px;
   display: grid;
   place-items: center;
-  border: 1.5px solid rgba(3, 21, 37, 0.9);
+  border: 1.5px solid var(--color-card);
 }
 
 .drawer-head h2 {
   margin: 0;
   font-size: 18px;
-  color: #e0f2fe;
+  color: var(--color-foreground);
   font-weight: 700;
+  font-family: var(--font-heading);
 }
 
 .drawer-head h2 span {
-  color: #7dd3fc;
+  color: var(--color-primary);
   font-weight: 650;
 }
 
@@ -1250,7 +1264,7 @@ onUnmounted(stopBannerTimer)
   font-size: 11px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: rgba(125, 211, 252, 0.9);
+  color: var(--color-primary);
   font-weight: 700;
 }
 
@@ -1268,7 +1282,7 @@ onUnmounted(stopBannerTimer)
   align-items: center;
   justify-content: center;
   gap: 10px;
-  color: rgba(186, 230, 253, 0.72);
+  color: var(--color-muted-foreground);
 }
 
 .cart-empty p {
@@ -1290,8 +1304,8 @@ onUnmounted(stopBannerTimer)
   gap: 12px;
   padding: 12px;
   border-radius: 14px;
-  background: rgba(8, 24, 48, 0.5);
-  border: 1px solid rgba(125, 211, 252, 0.16);
+  background: var(--color-background);
+  border: 1px solid var(--color-border-neutral);
 }
 
 .cart-line__cover {
@@ -1301,9 +1315,9 @@ onUnmounted(stopBannerTimer)
   overflow: hidden;
   display: grid;
   place-items: center;
-  background: rgba(8, 18, 36, 0.7);
-  border: 1px solid rgba(125, 211, 252, 0.18);
-  color: #38bdf8;
+  background: var(--color-muted);
+  border: 1px solid var(--color-border-neutral);
+  color: var(--color-primary);
 }
 
 .cart-line__cover img {
@@ -1319,14 +1333,14 @@ onUnmounted(stopBannerTimer)
 .cart-line__info strong {
   display: block;
   font-size: 14px;
-  color: #e0f2fe;
+  color: var(--color-foreground);
   line-height: 1.4;
 }
 
 .cart-line__info > span {
   display: block;
   margin-top: 4px;
-  color: #7dd3fc;
+  color: var(--color-primary);
   font-size: 12px;
 }
 
@@ -1344,14 +1358,14 @@ onUnmounted(stopBannerTimer)
   gap: 4px;
   border: 0;
   background: transparent;
-  color: rgba(252, 165, 165, 0.9);
+  color: var(--color-destructive);
   cursor: pointer;
   font-size: 12px;
   padding: 0;
 }
 
 .remove-btn:hover {
-  color: #fecaca;
+  opacity: 0.85;
 }
 
 .cart-total {
@@ -1359,25 +1373,25 @@ onUnmounted(stopBannerTimer)
   gap: 8px;
   padding: 14px;
   border-radius: 14px;
-  background: rgba(8, 24, 48, 0.55);
-  border: 1px solid rgba(56, 189, 248, 0.22);
+  background: var(--color-primary-light);
+  border: 1px solid var(--color-border);
 }
 
 .cart-total > div {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  color: rgba(186, 230, 253, 0.78);
+  color: var(--color-muted-foreground);
 }
 
 .cart-total strong {
-  color: #38bdf8;
+  color: var(--color-accent);
   font-size: 22px;
 }
 
 .cart-total .muted strong {
   font-size: 14px;
-  color: #e2e8f0;
+  color: var(--color-foreground);
 }
 
 .checkout-btn,
@@ -1393,13 +1407,14 @@ onUnmounted(stopBannerTimer)
   cursor: pointer;
   font-size: 14px;
   font-weight: 650;
+  transition: background 0.2s, border-color 0.2s, filter 0.2s;
 }
 
 .checkout-btn {
   width: 100%;
-  background: linear-gradient(135deg, #38bdf8, #0284c7);
-  color: #031525;
-  box-shadow: 0 12px 28px rgba(14, 165, 233, 0.28);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  box-shadow: var(--shadow-md);
 }
 
 .checkout-btn.compact {
@@ -1407,7 +1422,7 @@ onUnmounted(stopBannerTimer)
 }
 
 .checkout-btn:hover:not(:disabled) {
-  filter: brightness(1.06);
+  background: var(--color-primary-dark);
 }
 
 .checkout-btn:disabled {
@@ -1418,17 +1433,18 @@ onUnmounted(stopBannerTimer)
 
 .checkout-btn :deep(.ui-icon),
 .checkout-btn :deep(svg) {
-  color: #031525;
+  color: var(--color-on-primary);
 }
 
 .ghost-btn {
   background: transparent;
-  color: #bae6fd;
-  border: 1px solid rgba(125, 211, 252, 0.28);
+  color: var(--color-foreground);
+  border: 1px solid var(--color-border-neutral);
 }
 
 .ghost-btn:hover {
-  background: rgba(56, 189, 248, 0.12);
+  background: var(--color-primary-light);
+  border-color: var(--color-primary);
 }
 
 .payment-sheet {
@@ -1438,7 +1454,7 @@ onUnmounted(stopBannerTimer)
 }
 
 .payment-order-no {
-  color: rgba(186, 230, 253, 0.75);
+  color: var(--color-muted-foreground);
   font-size: 13px;
 }
 
@@ -1447,9 +1463,9 @@ onUnmounted(stopBannerTimer)
   flex-direction: column;
   gap: 10px;
   padding: 14px;
-  background: rgba(8, 24, 48, 0.55);
+  background: var(--color-background);
   border-radius: 12px;
-  border: 1px solid rgba(125, 211, 252, 0.16);
+  border: 1px solid var(--color-border-neutral);
 }
 
 .payment-items div,
@@ -1457,20 +1473,20 @@ onUnmounted(stopBannerTimer)
   display: flex;
   justify-content: space-between;
   gap: 16px;
-  color: rgba(226, 232, 240, 0.9);
+  color: var(--color-foreground);
 }
 
 .payment-total strong {
-  color: #38bdf8;
+  color: var(--color-accent);
   font-size: 20px;
 }
 
 .tip-banner {
   padding: 12px 14px;
   border-radius: 12px;
-  background: rgba(14, 165, 233, 0.12);
-  border: 1px solid rgba(56, 189, 248, 0.28);
-  color: rgba(186, 230, 253, 0.88);
+  background: var(--color-primary-light);
+  border: 1px solid var(--color-border);
+  color: var(--color-foreground);
   font-size: 13px;
   line-height: 1.6;
 }
@@ -1479,19 +1495,19 @@ onUnmounted(stopBannerTimer)
   padding: 18px;
   border-radius: 14px;
   text-align: center;
-  background: rgba(8, 28, 24, 0.55);
-  border: 1px solid rgba(52, 211, 153, 0.28);
+  background: color-mix(in srgb, #16a34a 10%, white);
+  border: 1px solid color-mix(in srgb, #16a34a 28%, transparent);
 }
 
 .pay-success h4 {
   margin: 0 0 6px;
-  color: #a7f3d0;
+  color: #15803d;
   font-size: 18px;
 }
 
 .pay-success p {
   margin: 0;
-  color: rgba(167, 243, 208, 0.78);
+  color: #166534;
   font-size: 13px;
   word-break: break-all;
 }
@@ -1508,9 +1524,9 @@ onUnmounted(stopBannerTimer)
   margin: 0;
   padding: 10px 12px;
   border-radius: 10px;
-  border: 1px dashed rgba(56, 189, 248, 0.4);
-  background: rgba(56, 189, 248, 0.1);
-  color: #7dd3fc;
+  border: 1px dashed var(--color-border);
+  background: var(--color-primary-light);
+  color: var(--color-primary-dark);
   font: inherit;
   font-size: 12px;
   cursor: pointer;
@@ -1518,7 +1534,7 @@ onUnmounted(stopBannerTimer)
 }
 
 .redemption-code:hover {
-  background: rgba(56, 189, 248, 0.18);
+  border-color: var(--color-primary);
 }
 
 @media (max-width: 960px) {
@@ -1543,46 +1559,43 @@ onUnmounted(stopBannerTimer)
 
 <style>
 .mall-cart-drawer.el-drawer {
-  background:
-    radial-gradient(ellipse at 80% 0%, rgba(56, 189, 248, 0.16), transparent 42%),
-    rgba(8, 16, 28, 0.96);
-  border-left: 1px solid rgba(125, 211, 252, 0.28);
-  box-shadow: -18px 0 48px rgba(0, 0, 0, 0.35);
-  backdrop-filter: blur(16px);
+  background: var(--color-card);
+  border-left: 1px solid var(--color-border-neutral);
+  box-shadow: var(--shadow-lg);
 }
 
 .mall-cart-drawer .el-drawer__header {
   margin-bottom: 12px;
   padding: 18px 20px 12px;
-  border-bottom: 1px solid rgba(147, 197, 253, 0.14);
-  color: #e0f2fe;
+  border-bottom: 1px solid var(--color-border-neutral);
+  color: var(--color-foreground);
 }
 
 .mall-cart-drawer .el-drawer__close-btn,
 .mall-cart-drawer .el-drawer__close-btn .el-icon {
-  color: rgba(186, 230, 253, 0.78);
+  color: var(--color-muted-foreground);
 }
 
 .mall-cart-drawer .el-drawer__body {
   padding: 16px 20px 24px;
-  color: #e2e8f0;
+  color: var(--color-foreground);
 }
 
 .mall-cart-drawer .el-textarea__inner {
-  background: rgba(8, 20, 40, 0.55);
-  border: 1px solid rgba(125, 211, 252, 0.28);
+  background: var(--color-background);
+  border: 1px solid var(--color-border-neutral);
   box-shadow: none;
-  color: #e0f2fe;
+  color: var(--color-foreground);
   border-radius: 12px;
 }
 
 .mall-cart-drawer .el-textarea__inner::placeholder {
-  color: rgba(147, 197, 253, 0.42);
+  color: var(--color-muted-foreground);
 }
 
 .mall-cart-drawer .el-input__count {
   background: transparent;
-  color: rgba(147, 197, 253, 0.5);
+  color: var(--color-muted-foreground);
 }
 
 .mall-cart-drawer .el-input-number {
@@ -1590,41 +1603,39 @@ onUnmounted(stopBannerTimer)
 }
 
 .mall-cart-drawer .el-input-number .el-input__wrapper {
-  background: rgba(8, 20, 40, 0.55);
-  box-shadow: 0 0 0 1px rgba(125, 211, 252, 0.28) inset;
+  background: var(--color-background);
+  box-shadow: 0 0 0 1px var(--color-border-neutral) inset;
 }
 
 .mall-cart-drawer .el-input-number .el-input__inner {
-  color: #e0f2fe;
+  color: var(--color-foreground);
 }
 
 .mall-pay-dialog.el-dialog {
-  background:
-    radial-gradient(ellipse at 12% 0%, rgba(56, 189, 248, 0.16), transparent 42%),
-    rgba(8, 18, 36, 0.96);
-  border: 1px solid rgba(125, 211, 252, 0.28);
+  background: var(--color-card);
+  border: 1px solid var(--color-border-neutral);
   border-radius: 16px;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+  box-shadow: var(--shadow-lg);
 }
 
 .mall-pay-dialog .el-dialog__header {
   margin-right: 0;
   padding: 16px 20px 12px;
-  border-bottom: 1px solid rgba(147, 197, 253, 0.14);
+  border-bottom: 1px solid var(--color-border-neutral);
 }
 
 .mall-pay-dialog .el-dialog__headerbtn .el-dialog__close {
-  color: rgba(186, 230, 253, 0.78);
+  color: var(--color-muted-foreground);
 }
 
 .mall-pay-dialog .el-dialog__body {
   padding: 16px 20px;
-  color: #e2e8f0;
+  color: var(--color-foreground);
 }
 
 .mall-pay-dialog .el-dialog__footer {
   padding: 12px 20px 18px;
-  border-top: 1px solid rgba(147, 197, 253, 0.14);
+  border-top: 1px solid var(--color-border-neutral);
   display: flex;
   justify-content: flex-end;
   gap: 10px;

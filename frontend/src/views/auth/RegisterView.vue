@@ -85,7 +85,8 @@ async function handleRegister() {
       <p class="auth-sub">{{ BRAND_FULL }}</p>
 
       <div class="role-select">
-        <div
+        <button
+          type="button"
           class="role-item"
           :class="{ active: form.roleType === ROLE_STUDENT }"
           @click="form.roleType = ROLE_STUDENT"
@@ -93,8 +94,9 @@ async function handleRegister() {
           <UiIcon class="role-icon" name="school" :size="32" />
           <span class="role-name">学员注册</span>
           <span class="role-desc">学习课程、获取秩点</span>
-        </div>
-        <div
+        </button>
+        <button
+          type="button"
           class="role-item"
           :class="{ active: form.roleType === ROLE_ENTERPRISE }"
           @click="form.roleType = ROLE_ENTERPRISE"
@@ -102,7 +104,7 @@ async function handleRegister() {
           <UiIcon class="role-icon" name="enterprise" :size="32" />
           <span class="role-name">企业注册</span>
           <span class="role-desc">发布招聘、活动与课程</span>
-        </div>
+        </button>
       </div>
 
       <el-form label-position="top" @submit.prevent="handleRegister">

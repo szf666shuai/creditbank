@@ -214,22 +214,22 @@ onMounted(loadHomeData)
 
 <style scoped>
 .admin-home {
-  --role-primary: #7c3aed;
-  --role-primary-dark: #d8b4fe;
-  --role-primary-soft: #a78bfa;
-  --role-surface: rgba(14, 10, 32, 0.58);
-  --role-surface-strong: rgba(20, 14, 42, 0.74);
-  --role-surface-card: rgba(26, 18, 52, 0.68);
-  --role-border: rgba(124, 58, 237, 0.28);
-  --role-text: #f5f0ff;
-  --role-text-muted: #b8a8d8;
-  --role-text-on-hero: #fff;
-  --role-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+  --role-primary: #22c55e;
+  --role-primary-dark: #16a34a;
+  --role-primary-soft: #86efac;
+  --role-surface: #ffffff;
+  --role-surface-strong: #ffffff;
+  --role-surface-card: #ffffff;
+  --role-border: var(--nb-ink, #1a202c);
+  --role-text: var(--nb-ink, #1a202c);
+  --role-text-muted: #64748b;
+  --role-text-on-hero: var(--nb-ink, #1a202c);
+  --role-shadow: var(--nb-shadow-lg, 6px 6px 0 0 #1a202c);
 
   position: relative;
   min-height: calc(100vh - var(--header-height));
   padding-bottom: 48px;
-  background: transparent;
+  background: var(--nb-cream, #fff9f0);
 }
 
 .role-home-content {
@@ -247,43 +247,50 @@ onMounted(loadHomeData)
   position: relative;
   overflow: hidden;
   padding: 32px 36px;
-  border-radius: 20px;
+  border-radius: 24px;
   color: var(--role-text-on-hero);
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, transparent 55%),
-    linear-gradient(120deg, #2b1f4d 0%, #5b2c83 38%, #7c3aed 70%, #a78bfa 100%);
+  background: #fff;
   box-shadow: var(--role-shadow);
-  border: 1px solid rgba(216, 180, 254, 0.26);
-  backdrop-filter: blur(12px);
+  border: 2.5px solid var(--nb-ink, #1a202c);
+  backdrop-filter: none;
 }
 
 .hero-inner::after {
   content: '';
   position: absolute;
-  width: 200px;
-  height: 200px;
-  top: -70px;
-  right: -30px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.18) 0%, transparent 68%);
+  width: 160px;
+  height: 160px;
+  top: -50px;
+  right: -24px;
+  border-radius: 24px;
+  background: var(--nb-purple, #ddd6fe);
+  border: 2.5px solid var(--nb-ink, #1a202c);
+  opacity: 0.65;
+  transform: rotate(12deg);
 }
 
 .hero-badge {
   display: inline-block;
   margin-bottom: 12px;
-  padding: 4px 12px;
+  padding: 5px 12px;
   border-radius: 999px;
   font-size: 12px;
+  font-weight: 800;
   letter-spacing: 0.06em;
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  backdrop-filter: blur(4px);
+  background: var(--nb-pink, #fecdd3);
+  border: 2px solid var(--nb-ink, #1a202c);
+  box-shadow: 2px 2px 0 0 var(--nb-ink, #1a202c);
+  color: var(--nb-ink, #1a202c);
+  backdrop-filter: none;
 }
 
 .hero-inner h1 {
   position: relative;
   margin: 0 0 10px;
+  font-family: var(--font-heading);
   font-size: 32px;
+  font-weight: 900;
+  color: var(--nb-ink, #1a202c);
 }
 
 .hero-desc {
@@ -291,7 +298,8 @@ onMounted(loadHomeData)
   margin: 0;
   max-width: 640px;
   line-height: 1.8;
-  opacity: 0.92;
+  color: var(--role-text-muted);
+  opacity: 1;
 }
 
 .section-inner {
@@ -310,10 +318,10 @@ onMounted(loadHomeData)
 .headline-card {
   padding: 18px;
   border-radius: 16px;
-  background: var(--role-surface-strong);
-  border: 1px solid var(--role-border);
+  background: #fff;
+  border: 2.5px solid var(--nb-ink, #1a202c);
   box-shadow: var(--role-shadow);
-  backdrop-filter: blur(12px);
+  backdrop-filter: none;
 }
 
 .headline-card span {
@@ -334,10 +342,10 @@ onMounted(loadHomeData)
   padding: 20px;
   border-radius: 16px;
   margin-bottom: 16px;
-  background: var(--role-surface);
-  border: 1px solid var(--role-border);
+  background: #fff;
+  border: 2.5px solid var(--nb-ink, #1a202c);
   box-shadow: var(--role-shadow);
-  backdrop-filter: blur(12px);
+  backdrop-filter: none;
 }
 
 .panel-head {
@@ -372,7 +380,7 @@ onMounted(loadHomeData)
   border-radius: 14px;
   text-align: left;
   cursor: pointer;
-  background: var(--role-surface-card);
+  background: #fff;
   border: 1px solid rgba(124, 58, 237, 0.2);
   transition: transform 0.2s, box-shadow 0.2s;
 }
@@ -426,7 +434,7 @@ onMounted(loadHomeData)
   align-items: flex-start;
   padding: 12px 14px;
   border-radius: 12px;
-  background: var(--role-surface-card);
+  background: #fff;
   border: 1px solid rgba(124, 58, 237, 0.16);
 }
 
@@ -452,7 +460,7 @@ onMounted(loadHomeData)
 .platform-item {
   padding: 14px 16px;
   border-radius: 12px;
-  background: var(--role-surface-card);
+  background: #fff;
   border: 1px solid rgba(124, 58, 237, 0.16);
 }
 

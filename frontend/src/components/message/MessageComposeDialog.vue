@@ -184,115 +184,117 @@ async function handleSubmit() {
   font-size: 11px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: rgba(125, 211, 252, 0.9);
-  font-weight: 700;
+  color: var(--nb-green-deep, #16a34a);
+  font-weight: 800;
 }
 
 .compose-title {
   margin: 0;
   font-size: 18px;
   line-height: 1.35;
-  color: #e0f2fe;
-  font-weight: 700;
+  color: var(--nb-ink, #1a202c);
+  font-weight: 900;
+  font-family: var(--font-heading);
 }
 
 .compose-btn {
-  --el-button-bg-color: rgba(56, 189, 248, 0.16);
-  --el-button-border-color: rgba(56, 189, 248, 0.35);
-  --el-button-text-color: #e0f2fe;
-  --el-button-hover-bg-color: rgba(56, 189, 248, 0.28);
-  --el-button-hover-border-color: rgba(56, 189, 248, 0.5);
-  --el-button-hover-text-color: #f0f9ff;
+  --el-button-bg-color: #fff;
+  --el-button-border-color: var(--nb-ink, #1a202c);
+  --el-button-text-color: var(--nb-ink, #1a202c);
+  --el-button-hover-bg-color: var(--nb-yellow, #fef08a);
+  --el-button-hover-border-color: var(--nb-ink, #1a202c);
+  --el-button-hover-text-color: var(--nb-ink, #1a202c);
 }
 
 .compose-btn--primary {
-  --el-button-bg-color: rgba(37, 99, 235, 0.92);
-  --el-button-border-color: rgba(37, 99, 235, 1);
-  --el-button-text-color: #eff6ff;
-  --el-button-hover-bg-color: rgba(29, 78, 216, 0.95);
-  --el-button-hover-border-color: rgba(29, 78, 216, 1);
+  --el-button-bg-color: var(--nb-green, #22c55e);
+  --el-button-border-color: var(--nb-ink, #1a202c);
+  --el-button-text-color: #fff;
+  --el-button-hover-bg-color: var(--nb-green-deep, #16a34a);
+  --el-button-hover-border-color: var(--nb-ink, #1a202c);
 }
 
 .compose-btn--ghost {
-  --el-button-bg-color: transparent;
-  --el-button-border-color: rgba(186, 230, 253, 0.28);
-  --el-button-text-color: rgba(226, 232, 240, 0.88);
+  --el-button-bg-color: #fff;
+  --el-button-border-color: var(--nb-ink, #1a202c);
+  --el-button-text-color: var(--nb-ink, #1a202c);
 }
 </style>
 
 <style>
 .compose-message-dialog.el-dialog {
-  background:
-    radial-gradient(ellipse at 12% 0%, rgba(56, 189, 248, 0.18), transparent 42%),
-    rgba(8, 18, 36, 0.96);
-  border: 1px solid rgba(125, 211, 252, 0.28);
-  border-radius: 16px;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(16px);
+  background: #fff;
+  border: 2.5px solid var(--nb-ink, #1a202c);
+  border-radius: 18px;
+  box-shadow: var(--nb-shadow-lg, 6px 6px 0 0 #1a202c);
+  backdrop-filter: none;
 }
 
 .compose-message-dialog .el-dialog__header {
   margin-right: 0;
   padding: 16px 20px 12px;
-  border-bottom: 1px solid rgba(147, 197, 253, 0.14);
+  border-bottom: 2px solid color-mix(in srgb, var(--nb-ink, #1a202c) 14%, transparent);
 }
 
 .compose-message-dialog .el-dialog__headerbtn .el-dialog__close {
-  color: rgba(186, 230, 253, 0.78);
+  color: var(--color-muted-foreground, #64748b);
 }
 
 .compose-message-dialog .el-dialog__body {
   padding: 16px 20px 8px;
-  color: #e2e8f0;
+  color: var(--nb-ink, #1a202c);
 }
 
 .compose-message-dialog .el-dialog__footer {
   padding: 12px 20px 18px;
-  border-top: 1px solid rgba(147, 197, 253, 0.14);
+  border-top: 2px solid color-mix(in srgb, var(--nb-ink, #1a202c) 14%, transparent);
 }
 
 .compose-message-dialog .el-form-item__label {
-  color: rgba(186, 230, 253, 0.88) !important;
+  color: var(--nb-ink, #1a202c) !important;
+  font-weight: 700;
 }
 
 .compose-message-dialog .el-input__wrapper,
 .compose-message-dialog .el-textarea__inner,
 .compose-message-dialog .el-select__wrapper {
-  background: rgba(8, 20, 40, 0.55) !important;
-  box-shadow: 0 0 0 1px rgba(125, 211, 252, 0.28) inset !important;
-  border-radius: 10px;
+  background: var(--nb-cream, #fff9f0) !important;
+  box-shadow: none !important;
+  border: 2px solid var(--nb-ink, #1a202c) !important;
+  border-radius: 12px !important;
 }
 
 .compose-message-dialog .el-input__inner,
 .compose-message-dialog .el-textarea__inner,
 .compose-message-dialog .el-select__placeholder,
 .compose-message-dialog .el-select__selected-item {
-  color: #e0f2fe !important;
+  color: var(--nb-ink, #1a202c) !important;
 }
 
 .compose-message-dialog .el-input__inner::placeholder,
 .compose-message-dialog .el-textarea__inner::placeholder {
-  color: rgba(147, 197, 253, 0.45) !important;
+  color: var(--color-muted-foreground, #64748b) !important;
 }
 
 .compose-message-dialog .el-textarea__inner {
   box-shadow: none !important;
-  border: 1px solid rgba(125, 211, 252, 0.28);
+  border: 2px solid var(--nb-ink, #1a202c);
 }
 
 .compose-select-dropdown.el-select__popper,
 .compose-select-dropdown {
-  background: rgba(8, 18, 36, 0.96) !important;
-  border: 1px solid rgba(125, 211, 252, 0.28) !important;
+  background: #fff !important;
+  border: 2.5px solid var(--nb-ink, #1a202c) !important;
+  box-shadow: var(--nb-shadow, 4px 4px 0 0 #1a202c) !important;
 }
 
 .compose-select-dropdown .el-select-dropdown__item {
-  color: rgba(226, 232, 240, 0.9);
+  color: var(--nb-ink, #1a202c);
 }
 
 .compose-select-dropdown .el-select-dropdown__item.is-hovering,
 .compose-select-dropdown .el-select-dropdown__item:hover {
-  background: rgba(56, 189, 248, 0.16);
-  color: #e0f2fe;
+  background: #bbf7d0;
+  color: var(--nb-ink, #1a202c);
 }
 </style>

@@ -16,7 +16,7 @@ export const identityRecommends: IdentityRecommend[] = [
   {
     title: '在校学员',
     icon: 'school',
-    color: '#2094f3',
+    color: '#0d9488',
     tags: [
       { label: '积分查询', path: '/credit' },
       { label: '学习档案', path: '/profile/learning' },
@@ -28,7 +28,7 @@ export const identityRecommends: IdentityRecommend[] = [
   {
     title: '在职学员',
     icon: 'job',
-    color: '#1890ff',
+    color: '#0f766e',
     tags: [
       { label: '微专业', path: '/resources' },
       { label: '技能提升', path: '/resources' },
@@ -40,7 +40,7 @@ export const identityRecommends: IdentityRecommend[] = [
   {
     title: '加盟机构',
     icon: 'enterprise',
-    color: '#13c2c2',
+    color: '#2dd4bf',
     tags: [
       { label: '机构入驻', path: '/register' },
       { label: '加盟企业', path: '/enterprise' },
@@ -52,7 +52,7 @@ export const identityRecommends: IdentityRecommend[] = [
   {
     title: '社会公众',
     icon: 'view',
-    color: '#0ea5e9',
+    color: '#0284c7',
     tags: [
       { label: '公开课程', path: '/resources' },
       { label: '学习论坛', path: '/forum' },

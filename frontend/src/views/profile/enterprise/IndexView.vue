@@ -146,13 +146,13 @@ onMounted(loadDashboard)
 
 .workbench-header h1 {
   font-size: 26px;
-  color: #e0f2fe;
+  color: #1a202c;
   margin-bottom: 8px;
 }
 
 .workbench-header p {
   font-size: 14px;
-  color: rgba(148, 163, 184, 0.9);
+  color: var(--color-muted-foreground);
 }
 
 .org-alert {

@@ -153,20 +153,10 @@ onMounted(loadHomeData)
 
 .discovery-block {
   padding: 20px 22px;
-  border-radius: 18px;
-  background: var(--role-surface, rgba(6, 22, 38, 0.58));
-  border: 1px solid var(--role-border, rgba(0, 161, 214, 0.28));
-  box-shadow: var(--role-shadow, 0 12px 40px rgba(0, 0, 0, 0.35));
-  backdrop-filter: blur(12px);
-}
-
-.discovery-block :deep(.header-title) {
-  color: var(--role-primary-dark, #67e8f9);
-  text-shadow: none;
-}
-
-.discovery-block :deep(.header-more) {
-  color: var(--role-primary-soft, #22d3ee);
+  border-radius: var(--radius-lg);
+  background: var(--color-card);
+  border: 1px solid var(--color-border-neutral);
+  box-shadow: var(--shadow-md);
 }
 
 .card-grid {
@@ -185,7 +175,8 @@ onMounted(loadHomeData)
 .media-card {
   text-decoration: none;
   color: inherit;
-  transition: transform 0.15s;
+  transition: transform 0.15s ease;
+  cursor: pointer;
 }
 
 .media-card:hover {
@@ -196,7 +187,7 @@ onMounted(loadHomeData)
   aspect-ratio: 16 / 10;
   border-radius: 12px;
   overflow: hidden;
-  background: rgba(8, 30, 52, 0.8);
+  background: var(--color-muted);
 }
 
 .media-cover img {
@@ -210,15 +201,15 @@ onMounted(loadHomeData)
   height: 100%;
   display: grid;
   place-items: center;
-  font-size: 32px;
-  background: linear-gradient(135deg, rgba(8, 30, 52, 0.9), rgba(10, 36, 58, 0.8));
+  color: var(--color-primary);
+  background: var(--color-primary-light);
 }
 
 .media-card h3 {
   margin: 10px 0 4px;
   font-size: 14px;
   font-weight: 600;
-  color: var(--role-text, #e8f8ff);
+  color: var(--color-foreground);
   line-height: 1.45;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -228,11 +219,11 @@ onMounted(loadHomeData)
 
 .meta {
   font-size: 12px;
-  color: var(--role-text-muted, #8ec8de);
+  color: var(--color-muted-foreground);
 }
 
 .meta.highlight {
-  color: var(--role-primary-soft, #22d3ee);
+  color: var(--color-primary);
   font-weight: 600;
 }
 
@@ -240,17 +231,18 @@ onMounted(loadHomeData)
   display: flex;
   gap: 12px;
   padding: 14px;
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   text-decoration: none;
   color: inherit;
-  background: var(--role-surface-card, rgba(10, 36, 58, 0.68));
-  border: 1px solid rgba(0, 161, 214, 0.16);
-  transition: transform 0.15s, box-shadow 0.15s;
+  background: var(--color-background);
+  border: 1px solid var(--color-border-neutral);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  cursor: pointer;
 }
 
 .activity-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 161, 214, 0.18);
+  box-shadow: var(--shadow-md);
 }
 
 .activity-icon {
@@ -260,20 +252,20 @@ onMounted(loadHomeData)
   display: grid;
   place-items: center;
   border-radius: 12px;
-  background: rgba(0, 161, 214, 0.16);
-  font-size: 22px;
+  background: var(--color-primary-light);
+  color: var(--color-primary-dark);
 }
 
 .activity-card h3 {
   margin: 0 0 6px;
   font-size: 14px;
-  color: var(--role-text, #e8f8ff);
+  color: var(--color-foreground);
 }
 
 .activity-card p {
   margin: 0;
   font-size: 12px;
-  color: var(--role-text-muted, #8ec8de);
+  color: var(--color-muted-foreground);
 }
 
 @media (max-width: 900px) {

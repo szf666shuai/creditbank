@@ -55,23 +55,23 @@ const typeConfig: Record<
   job: {
     label: '招聘信息',
     title: '招聘信息',
-    description: '机构正式发布的岗位公告，可在详情中投递简历',
+    description: '机构正式发布的岗位公告，可在详情中投递简�?,
     icon: 'job',
-    accent: '#2563eb',
+    accent: '#0284c7',
   },
   activity: {
     label: '活动信息',
     title: '活动信息',
-    description: '机构正式发布的活动日程，可在详情中报名参加',
+    description: '机构正式发布的活动日程，可在详情中报名参�?,
     icon: 'activity',
-    accent: '#3b82f6',
+    accent: '#22c55e',
   },
   policy: {
     label: '政策资讯',
     title: '政策资讯',
     description: '平台与官方政策原文，与论坛讨论帖分开阅读',
     icon: 'news',
-    accent: '#1d4ed8',
+    accent: '#0f766e',
   },
 }
 
@@ -84,10 +84,10 @@ const heroSlides = [
   {
     badge: '汇聚',
     title: BRAND_NAME,
-    subtitle: '官方招聘 · 活动 · 政策一站发布',
+    subtitle: '官方招聘 · 活动 · 政策一站发�?,
   },
   {
-    badge: '互通',
+    badge: '互�?,
     title: '学习成果互认',
     subtitle: BRAND_SLOGAN,
   },
@@ -252,7 +252,7 @@ function ensureStudent() {
     return false
   }
   if (!authStore.isStudent) {
-    ElMessage.warning('仅学员可进行该操作')
+    ElMessage.warning('仅学员可进行该操�?)
     return false
   }
   return true
@@ -264,9 +264,9 @@ async function handleApply() {
   try {
     unwrapApi(await applyJobApi(detail.value.id, { coverMessage: coverMessage.value.trim() || undefined }))
     appliedJobIds.value = [...appliedJobIds.value, detail.value.id]
-    ElMessage.success('简历已发送')
+    ElMessage.success('简历已发�?)
   } catch (e) {
-    ElMessage.error(getErrorMessage(e, '投递失败'))
+    ElMessage.error(getErrorMessage(e, '投递失�?))
   } finally {
     actionLoading.value = false
   }
@@ -274,7 +274,7 @@ async function handleApply() {
 
 async function handleRegister() {
   if (!detail.value || !ensureStudent()) return
-  await ElMessageBox.confirm(`确定报名参加「${detail.value.title}」吗？`, '参加活动', {
+  await ElMessageBox.confirm(`确定报名参加�?{detail.value.title}」吗？`, '参加活动', {
     type: 'info',
     confirmButtonText: '确认参加',
     cancelButtonText: '取消',
@@ -361,7 +361,7 @@ onUnmounted(stopHeroTimer)
 
 <template>
   <div class="news-page" v-loading="hubLoading || loading">
-    <!-- 总览：科技蓝 Banner + 资讯动态 -->
+    <!-- 总览：科技�?Banner + 资讯动�?-->
     <template v-if="isHub">
       <section class="tech-banner">
         <div class="tech-banner__grid" aria-hidden="true" />
@@ -392,7 +392,7 @@ onUnmounted(stopHeroTimer)
           <aside class="news-panel">
             <div class="news-panel__mark" aria-hidden="true" />
             <div class="news-panel__head">
-              <h2>资讯动态</h2>
+              <h2>资讯动�?/h2>
               <button type="button" class="more-link" @click="openType('policy')">
                 更多 &gt;
               </button>
@@ -444,10 +444,10 @@ onUnmounted(stopHeroTimer)
         <section class="section-showcase">
           <header class="section-head">
             <div>
-              <p class="eyebrow">Channels</p>
-              <h2>栏目精选</h2>
+              <p class="eyebrow">资讯栏目</p>
+              <h2>栏目精�?/h2>
             </div>
-            <p>点击条目查看详情，或进入栏目浏览全部官方发布信息。</p>
+            <p>点击条目查看详情，或进入栏目浏览全部官方发布信息�?/p>
           </header>
 
           <div
@@ -470,7 +470,7 @@ onUnmounted(stopHeroTimer)
             <el-empty
               v-if="!sectionHighlights[type].length"
               :image-size="56"
-              description="该栏目暂无内容"
+              description="该栏目暂无内�?
             />
             <div v-else class="type-list">
               <button
@@ -504,7 +504,7 @@ onUnmounted(stopHeroTimer)
         </button>
         <div class="list-head__row">
           <div>
-            <p class="eyebrow">Channel</p>
+            <p class="eyebrow">栏目</p>
             <h1>{{ currentTitle }}</h1>
             <p class="list-desc">{{ currentDescription }}</p>
           </div>
@@ -664,7 +664,7 @@ onUnmounted(stopHeroTimer)
               </div>
               <div v-if="detail.maxParticipants">
                 <dt>人数上限</dt>
-                <dd>{{ detail.maxParticipants }} 人</dd>
+                <dd>{{ detail.maxParticipants }} �?/dd>
               </div>
               <div v-if="detail.creditReward">
                 <dt>秩点奖励</dt>
@@ -690,10 +690,10 @@ onUnmounted(stopHeroTimer)
           :loading="actionLoading"
           @click="handleApply"
         >
-          发送简历
+          发送简�?
         </el-button>
         <el-button v-else-if="detail?.type === 'job'" class="news-btn news-btn--done" disabled>
-          已投递
+          已投�?
         </el-button>
         <el-button
           v-if="detail?.type === 'activity' && canRegisterCurrentActivity"
@@ -708,7 +708,7 @@ onUnmounted(stopHeroTimer)
           class="news-btn news-btn--done"
           disabled
         >
-          已报名
+          已报�?
         </el-button>
       </template>
     </el-dialog>
@@ -725,22 +725,21 @@ onUnmounted(stopHeroTimer)
 .tech-banner {
   position: relative;
   overflow: hidden;
-  min-height: 360px;
+  min-height: 320px;
   margin-bottom: 28px;
-  background:
-    radial-gradient(circle at 12% 18%, rgba(59, 130, 246, 0.35), transparent 42%),
-    radial-gradient(circle at 88% 10%, rgba(14, 165, 233, 0.22), transparent 40%),
-    linear-gradient(135deg, #062a63 0%, #0a3d8f 46%, #0b4db4 100%);
+  background: var(--nb-cream, var(--color-background));
+  border-bottom: 2.5px solid var(--nb-ink, var(--color-border-neutral));
 }
 
 .tech-banner__grid {
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(147, 197, 253, 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(147, 197, 253, 0.08) 1px, transparent 1px);
+    linear-gradient(rgba(26, 32, 44, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(26, 32, 44, 0.06) 1px, transparent 1px);
   background-size: 42px 42px;
-  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.75), transparent 90%);
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.28), transparent 90%);
+  opacity: 0.55;
   pointer-events: none;
 }
 
@@ -748,10 +747,8 @@ onUnmounted(stopHeroTimer)
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 8% 82%, rgba(255, 255, 255, 0.12) 0 2px, transparent 3px),
-    radial-gradient(circle at 18% 70%, rgba(255, 255, 255, 0.1) 0 1.5px, transparent 2.5px),
-    radial-gradient(circle at 78% 78%, rgba(255, 255, 255, 0.12) 0 2px, transparent 3px),
-    radial-gradient(circle at 90% 60%, rgba(255, 255, 255, 0.08) 0 1px, transparent 2px);
+    radial-gradient(circle at 12% 70%, rgba(34, 197, 94, 0.14), transparent 28%),
+    radial-gradient(circle at 88% 30%, rgba(190, 227, 248, 0.5), transparent 32%);
   pointer-events: none;
 }
 
@@ -769,7 +766,7 @@ onUnmounted(stopHeroTimer)
 }
 
 .banner-left {
-  color: #fff;
+  color: var(--color-foreground);
   min-height: 220px;
   display: flex;
   flex-direction: column;
@@ -792,11 +789,13 @@ onUnmounted(stopHeroTimer)
   display: grid;
   place-items: center;
   padding: 10px 0;
-  border-radius: 6px;
+  border-radius: 12px;
   font-size: 14px;
-  font-weight: 700;
-  background: linear-gradient(180deg, #38bdf8, #2563eb);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+  font-weight: 800;
+  background: var(--nb-green, var(--color-primary));
+  color: #fff;
+  border: 2.5px solid var(--nb-ink, #1a202c);
+  box-shadow: var(--nb-shadow-sm, var(--shadow-md));
 }
 
 .slogan-copy h1 {
@@ -804,14 +803,16 @@ onUnmounted(stopHeroTimer)
   font-size: clamp(34px, 4.5vw, 48px);
   line-height: 1.2;
   font-weight: 800;
-  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.28);
+  text-shadow: none;
+  font-family: var(--font-heading);
+  color: var(--color-foreground);
 }
 
 .slogan-copy p {
   margin: 0;
   font-size: clamp(18px, 2vw, 24px);
   line-height: 1.5;
-  color: rgba(239, 246, 255, 0.92);
+  color: var(--color-text-secondary);
 }
 
 .banner-dots {
@@ -825,7 +826,7 @@ onUnmounted(stopHeroTimer)
   height: 8px;
   border: none;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.35);
+  background: rgba(13, 148, 136, 0.25);
   cursor: pointer;
   padding: 0;
   transition: width 0.2s, background 0.2s;
@@ -833,7 +834,7 @@ onUnmounted(stopHeroTimer)
 
 .banner-dot.active {
   width: 28px;
-  background: #fff;
+  background: var(--color-primary);
 }
 
 .news-panel {
@@ -841,10 +842,9 @@ onUnmounted(stopHeroTimer)
   overflow: hidden;
   border-radius: 8px;
   padding: 18px 18px 12px;
-  background: rgba(4, 28, 72, 0.55);
-  border: 1px solid rgba(147, 197, 253, 0.22);
-  backdrop-filter: blur(12px);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+  background: var(--color-card);
+  border: 1px solid var(--color-border-neutral);
+  box-shadow: var(--shadow-md);
   min-height: 260px;
 }
 
@@ -855,9 +855,9 @@ onUnmounted(stopHeroTimer)
   width: 180px;
   height: 180px;
   border-radius: 50%;
-  border: 2px solid rgba(147, 197, 253, 0.12);
+  border: 2px solid rgba(13, 148, 136, 0.12);
   background:
-    radial-gradient(circle at center, rgba(96, 165, 250, 0.18), transparent 62%);
+    radial-gradient(circle at center, rgba(45, 212, 191, 0.16), transparent 62%);
   pointer-events: none;
 }
 
@@ -866,7 +866,7 @@ onUnmounted(stopHeroTimer)
   position: absolute;
   inset: 18%;
   border-radius: 50%;
-  border: 2px solid rgba(147, 197, 253, 0.18);
+  border: 2px solid rgba(13, 148, 136, 0.18);
   opacity: 0.9;
 }
 
@@ -881,20 +881,21 @@ onUnmounted(stopHeroTimer)
 
 .news-panel__head h2 {
   margin: 0;
-  color: #fff;
+  color: var(--color-foreground);
   font-size: 20px;
+  font-family: var(--font-heading);
 }
 
 .more-link {
   border: none;
   background: transparent;
-  color: rgba(191, 219, 254, 0.9);
+  color: var(--color-primary);
   cursor: pointer;
   font-size: 13px;
 }
 
 .more-link:hover {
-  color: #fff;
+  color: var(--color-primary-dark);
 }
 
 .news-feed {
@@ -923,7 +924,7 @@ onUnmounted(stopHeroTimer)
 }
 
 .news-feed__item:hover {
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--color-primary-light);
 }
 
 .rank {
@@ -934,16 +935,16 @@ onUnmounted(stopHeroTimer)
   place-items: center;
   font-size: 12px;
   font-weight: 700;
-  color: #fff;
+  color: var(--color-foreground);
 }
 
-.rank-1 { background: #ef4444; }
-.rank-2 { background: #f97316; }
-.rank-3 { background: #3b82f6; }
-.rank-n { background: rgba(148, 163, 184, 0.55); }
+.rank-1 { background: var(--color-accent); color: var(--color-on-accent); }
+.rank-2 { background: var(--color-primary); color: var(--color-on-primary); }
+.rank-3 { background: var(--color-secondary); color: var(--color-on-secondary); }
+.rank-n { background: var(--color-muted); color: var(--color-muted-foreground); }
 
 .feed-title {
-  color: rgba(239, 246, 255, 0.95);
+  color: var(--color-foreground);
   font-size: 14px;
   line-height: 1.4;
   white-space: nowrap;
@@ -959,7 +960,7 @@ onUnmounted(stopHeroTimer)
 
 .eyebrow {
   margin: 0 0 8px;
-  color: #93c5fd;
+  color: var(--color-primary);
   font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
@@ -983,16 +984,19 @@ onUnmounted(stopHeroTimer)
   gap: 6px;
   padding: 8px 16px;
   border-radius: 999px;
-  border: 1px solid rgba(96, 165, 250, 0.35);
-  background: rgba(15, 23, 42, 0.35);
-  color: #dbeafe;
+  border: 1px solid var(--color-border-neutral);
+  background: var(--color-card);
+  color: var(--color-foreground);
   cursor: pointer;
-  backdrop-filter: blur(8px);
+  box-shadow: var(--shadow-sm);
+  transition: background 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s;
 }
 
 .channel-pill:hover {
-  background: rgba(37, 99, 235, 0.28);
-  border-color: rgba(147, 197, 253, 0.55);
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-on-primary);
+  box-shadow: var(--shadow-md);
 }
 
 .section-showcase {
@@ -1005,13 +1009,13 @@ onUnmounted(stopHeroTimer)
   justify-content: space-between;
   gap: 16px;
   align-items: end;
-  color: rgba(191, 219, 254, 0.78);
+  color: var(--color-muted-foreground);
   margin-bottom: 4px;
 }
 
 .section-head h2 {
   margin: 0;
-  color: #eff6ff;
+  color: var(--color-foreground);
   font-size: 28px;
 }
 
@@ -1022,9 +1026,10 @@ onUnmounted(stopHeroTimer)
 .type-block {
   padding: 18px 20px;
   border-radius: 14px;
-  background: rgba(8, 24, 56, 0.42);
-  border: 1px solid rgba(96, 165, 250, 0.18);
-  backdrop-filter: blur(12px);
+  background: var(--color-card);
+  border: 1px solid var(--color-border-neutral);
+  box-shadow: var(--shadow-md);
+  
 }
 
 .type-block__head {
@@ -1048,24 +1053,25 @@ onUnmounted(stopHeroTimer)
   display: grid;
   place-items: center;
   font-size: 22px;
-  background: color-mix(in srgb, var(--type-accent) 24%, transparent);
+  background: color-mix(in srgb, var(--type-accent) 14%, white);
+  color: var(--type-accent);
   border: 1px solid color-mix(in srgb, var(--type-accent) 40%, transparent);
 }
 
 .type-block__title h3 {
   margin: 0 0 4px;
-  color: #eff6ff;
+  color: var(--color-foreground);
   font-size: 18px;
 }
 
 .type-block__title p {
   margin: 0;
-  color: rgba(191, 219, 254, 0.68);
+  color: var(--color-muted-foreground);
   font-size: 13px;
 }
 
 .more-btn {
-  color: #93c5fd !important;
+  color: var(--color-primary) !important;
   font-weight: 600;
 }
 
@@ -1090,7 +1096,7 @@ onUnmounted(stopHeroTimer)
 }
 
 .type-row:hover {
-  background: rgba(59, 130, 246, 0.12);
+  background: var(--color-primary-light);
 }
 
 .type-row__rank {
@@ -1101,7 +1107,7 @@ onUnmounted(stopHeroTimer)
   place-items: center;
   font-size: 12px;
   font-weight: 700;
-  color: #fff;
+  color: var(--color-foreground);
 }
 
 .type-row__main {
@@ -1111,7 +1117,7 @@ onUnmounted(stopHeroTimer)
 }
 
 .type-row__main strong {
-  color: #eff6ff;
+  color: var(--color-foreground);
   font-size: 14px;
   white-space: nowrap;
   overflow: hidden;
@@ -1119,7 +1125,7 @@ onUnmounted(stopHeroTimer)
 }
 
 .type-row__main small {
-  color: rgba(147, 197, 253, 0.7);
+  color: var(--color-muted-foreground);
   font-size: 12px;
 }
 
@@ -1129,7 +1135,7 @@ onUnmounted(stopHeroTimer)
 
 .list-head {
   margin-bottom: 16px;
-  color: #eff6ff;
+  color: var(--color-foreground);
 }
 
 .back-link {
@@ -1139,7 +1145,7 @@ onUnmounted(stopHeroTimer)
   margin-bottom: 12px;
   border: none;
   background: transparent;
-  color: #93c5fd;
+  color: var(--color-primary);
   cursor: pointer;
 }
 
@@ -1157,7 +1163,7 @@ onUnmounted(stopHeroTimer)
 
 .list-desc {
   margin: 0;
-  color: rgba(191, 219, 254, 0.8);
+  color: var(--color-muted-foreground);
   line-height: 1.6;
 }
 
@@ -1168,27 +1174,27 @@ onUnmounted(stopHeroTimer)
 }
 
 .type-tab {
-  border: 1px solid rgba(96, 165, 250, 0.35);
-  background: rgba(8, 24, 56, 0.45);
-  color: #bfdbfe;
+  border: 1px solid var(--color-border-neutral);
+  background: var(--color-card);
+  color: var(--color-muted-foreground);
   border-radius: 4px;
   padding: 7px 12px;
   cursor: pointer;
 }
 
 .type-tab.active {
-  background: #2563eb;
-  border-color: #2563eb;
-  color: #fff;
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-on-primary);
 }
 
 .list-panel {
   padding: 18px;
   border-radius: 12px;
-  background: rgba(12, 20, 36, 0.42);
-  border: 1px solid rgba(147, 197, 253, 0.2);
-  backdrop-filter: blur(14px);
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.16);
+  background: var(--color-card);
+  border: 1px solid var(--color-border-neutral);
+  
+  box-shadow: var(--shadow-md);
 }
 
 .list-toolbar {
@@ -1203,13 +1209,13 @@ onUnmounted(stopHeroTimer)
 .info-card {
   display: flex;
   gap: 18px;
-  border-bottom: 1px solid rgba(147, 197, 253, 0.18);
+  border-bottom: 1px solid var(--color-border-neutral);
   padding: 16px 4px;
   cursor: pointer;
 }
 
 .info-card:hover {
-  background: rgba(59, 130, 246, 0.12);
+  background: var(--color-primary-light);
 }
 
 .info-date {
@@ -1218,8 +1224,8 @@ onUnmounted(stopHeroTimer)
   text-align: center;
   padding: 6px 0;
   border-radius: 8px;
-  background: rgba(59, 130, 246, 0.22);
-  color: #bfdbfe;
+  background: var(--color-primary-light);
+  color: var(--color-muted-foreground);
 }
 
 .info-date strong {
@@ -1229,7 +1235,7 @@ onUnmounted(stopHeroTimer)
 
 .info-date small {
   font-size: 12px;
-  color: #93c5fd;
+  color: var(--color-primary);
 }
 
 .info-main {
@@ -1247,12 +1253,12 @@ onUnmounted(stopHeroTimer)
 .info-title-line h3 {
   margin: 0;
   font-size: 16px;
-  color: #eff6ff;
+  color: var(--color-foreground);
 }
 
 .info-main p {
   margin: 0;
-  color: rgba(191, 219, 254, 0.78);
+  color: var(--color-muted-foreground);
   line-height: 1.6;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -1267,7 +1273,7 @@ onUnmounted(stopHeroTimer)
   flex-wrap: wrap;
   align-items: center;
   gap: 12px;
-  color: rgba(186, 230, 253, 0.78);
+  color: var(--color-muted-foreground);
   font-size: 12px;
   margin-top: 10px;
 }
@@ -1294,7 +1300,7 @@ onUnmounted(stopHeroTimer)
   font-size: 11px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: rgba(125, 211, 252, 0.9);
+  color: var(--color-primary);
   font-weight: 700;
 }
 
@@ -1302,7 +1308,7 @@ onUnmounted(stopHeroTimer)
   margin: 0;
   font-size: 18px;
   line-height: 1.4;
-  color: #e0f2fe;
+  color: var(--color-foreground);
   font-weight: 700;
 }
 
@@ -1315,16 +1321,16 @@ onUnmounted(stopHeroTimer)
   align-items: center;
   padding: 3px 10px;
   border-radius: 999px;
-  border: 1px solid rgba(125, 211, 252, 0.28);
-  background: rgba(56, 189, 248, 0.12);
-  color: #bae6fd;
+  border: 1px solid var(--color-border);
+  background: var(--color-primary-light);
+  color: var(--color-primary-dark);
   font-weight: 600;
 }
 
 .detail-chip--primary {
-  border-color: rgba(59, 130, 246, 0.45);
-  background: rgba(37, 99, 235, 0.28);
-  color: #dbeafe;
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+  color: var(--color-primary-dark);
 }
 
 .cover {
@@ -1333,7 +1339,7 @@ onUnmounted(stopHeroTimer)
   object-fit: cover;
   border-radius: 12px;
   margin: 16px 0;
-  border: 1px solid rgba(125, 211, 252, 0.18);
+  border: 1px solid var(--color-border-neutral);
 }
 
 .detail-section {
@@ -1341,7 +1347,7 @@ onUnmounted(stopHeroTimer)
 }
 
 .detail-section p {
-  color: rgba(226, 232, 240, 0.9);
+  color: var(--color-foreground);
   line-height: 1.8;
   white-space: pre-wrap;
   margin-bottom: 14px;
@@ -1349,7 +1355,7 @@ onUnmounted(stopHeroTimer)
 
 .detail-section h3 {
   font-size: 15px;
-  color: #e0f2fe;
+  color: var(--color-foreground);
   margin: 16px 0 8px;
 }
 
@@ -1361,20 +1367,20 @@ onUnmounted(stopHeroTimer)
 }
 
 .detail-grid div {
-  border: 1px solid rgba(125, 211, 252, 0.22);
+  border: 1px solid var(--color-border-neutral);
   border-radius: 12px;
   padding: 12px;
-  background: rgba(8, 24, 48, 0.45);
+  background: var(--color-background);
 }
 
 .detail-grid dt {
-  color: rgba(147, 197, 253, 0.72);
+  color: var(--color-muted-foreground);
   font-size: 12px;
   margin-bottom: 6px;
 }
 
 .detail-grid dd {
-  color: #f0f9ff;
+  color: var(--color-foreground);
   margin: 0;
   font-weight: 600;
 }
@@ -1384,35 +1390,36 @@ onUnmounted(stopHeroTimer)
 }
 
 .news-btn {
-  --el-button-bg-color: rgba(56, 189, 248, 0.16);
-  --el-button-border-color: rgba(56, 189, 248, 0.35);
-  --el-button-text-color: #e0f2fe;
-  --el-button-hover-bg-color: rgba(56, 189, 248, 0.28);
-  --el-button-hover-border-color: rgba(56, 189, 248, 0.5);
-  --el-button-hover-text-color: #f0f9ff;
+  --el-button-bg-color: var(--color-primary-light);
+  --el-button-border-color: var(--color-border);
+  --el-button-text-color: var(--color-primary-dark);
+  --el-button-hover-bg-color: #b2f5ea;
+  --el-button-hover-border-color: var(--color-primary);
+  --el-button-hover-text-color: var(--color-primary-dark);
 }
 
 .news-btn--primary {
-  --el-button-bg-color: rgba(37, 99, 235, 0.9);
-  --el-button-border-color: rgba(37, 99, 235, 1);
-  --el-button-text-color: #eff6ff;
-  --el-button-hover-bg-color: rgba(29, 78, 216, 0.95);
-  --el-button-hover-border-color: rgba(29, 78, 216, 1);
+  --el-button-bg-color: var(--color-primary);
+  --el-button-border-color: var(--color-primary);
+  --el-button-text-color: var(--color-on-primary);
+  --el-button-hover-bg-color: var(--color-primary-dark);
+  --el-button-hover-border-color: var(--color-primary-dark);
+  --el-button-hover-text-color: var(--color-on-primary);
 }
 
 .news-btn--ghost {
   --el-button-bg-color: transparent;
-  --el-button-border-color: rgba(186, 230, 253, 0.28);
-  --el-button-text-color: rgba(226, 232, 240, 0.88);
+  --el-button-border-color: var(--color-border-neutral);
+  --el-button-text-color: var(--color-foreground);
 }
 
 .news-btn--done {
-  --el-button-bg-color: rgba(34, 197, 94, 0.2);
-  --el-button-border-color: rgba(34, 197, 94, 0.4);
-  --el-button-text-color: #86efac;
-  --el-button-disabled-bg-color: rgba(34, 197, 94, 0.2);
-  --el-button-disabled-border-color: rgba(34, 197, 94, 0.4);
-  --el-button-disabled-text-color: #86efac;
+  --el-button-bg-color: color-mix(in srgb, #16a34a 14%, white);
+  --el-button-border-color: color-mix(in srgb, #16a34a 35%, transparent);
+  --el-button-text-color: #15803d;
+  --el-button-disabled-bg-color: color-mix(in srgb, #16a34a 14%, white);
+  --el-button-disabled-border-color: color-mix(in srgb, #16a34a 35%, transparent);
+  --el-button-disabled-text-color: #15803d;
 }
 
 @media (max-width: 960px) {
@@ -1435,59 +1442,55 @@ onUnmounted(stopHeroTimer)
 
 <style>
 .news-detail-dialog.el-dialog {
-  background:
-    radial-gradient(ellipse at 12% 0%, rgba(59, 130, 246, 0.22), transparent 42%),
-    radial-gradient(ellipse at 100% 18%, rgba(14, 165, 233, 0.12), transparent 46%),
-    rgba(8, 18, 36, 0.94);
-  border: 1px solid rgba(125, 211, 252, 0.28);
+  background: var(--color-card);
+  border: 1px solid var(--color-border-neutral);
   border-radius: 16px;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(18px);
+  box-shadow: var(--shadow-lg);
 }
 
 .news-detail-dialog .el-dialog__header {
   margin-right: 0;
   padding: 16px 20px 12px;
-  border-bottom: 1px solid rgba(147, 197, 253, 0.14);
+  border-bottom: 1px solid var(--color-border-neutral);
 }
 
 .news-detail-dialog .el-dialog__headerbtn .el-dialog__close {
-  color: rgba(186, 230, 253, 0.78);
+  color: var(--color-muted-foreground);
 }
 
 .news-detail-dialog .el-dialog__body {
   padding: 16px 20px;
-  color: #e2e8f0;
+  color: var(--color-foreground);
 }
 
 .news-detail-dialog .el-dialog__footer {
   padding: 12px 20px 18px;
-  border-top: 1px solid rgba(147, 197, 253, 0.14);
+  border-top: 1px solid var(--color-border-neutral);
 }
 
 .news-detail-dialog .el-textarea__inner {
-  background: rgba(8, 20, 40, 0.55);
-  border: 1px solid rgba(125, 211, 252, 0.28);
+  background: var(--color-background);
+  border: 1px solid var(--color-border-neutral);
   box-shadow: none;
-  color: #e0f2fe;
+  color: var(--color-foreground);
   border-radius: 12px;
 }
 
 .news-detail-dialog .el-textarea__inner:hover,
 .news-detail-dialog .el-textarea__inner:focus {
-  border-color: rgba(56, 189, 248, 0.5);
+  border-color: var(--color-primary);
 }
 
 .news-detail-dialog .el-textarea__inner::placeholder {
-  color: rgba(147, 197, 253, 0.45);
+  color: var(--color-muted-foreground);
 }
 
 .news-detail-dialog .el-input__count {
   background: transparent;
-  color: rgba(147, 197, 253, 0.5);
+  color: var(--color-muted-foreground);
 }
 
 .news-detail-dialog .el-loading-mask {
-  background: rgba(8, 18, 36, 0.45);
+  background: color-mix(in srgb, var(--color-background) 70%, white);
 }
 </style>

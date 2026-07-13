@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1920" />
+  <title>P2 · 产品闭环</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../shared/grammar.css" />
+  <link rel="stylesheet" href="../shared/themes-b-e.css" />
+</head>
+<body class="theme-a">
+  <div class="style-badge" style="background:rgba(26,22,48,0.06);color:var(--ink-muted);border:1px solid var(--line)">Style A · 纸感编辑</div>
+  <header class="top-nav">
+    <div class="brand">
+      <span class="brand-mark">秩</span>
+      星秩存册
+    </div>
+    <nav class="chapters">
+      <span class="ch"><span class="idx">00</span>封面</span>
+      <span class="ch"><span class="idx">01</span>背景</span>
+      <span class="ch active"><span class="idx">02</span>产品</span>
+      <span class="ch"><span class="idx">03</span>技术</span>
+      <span class="ch"><span class="idx">04</span>组织</span>
+      <span class="ch"><span class="idx">05</span>结语</span>
+    </nav>
+  </header>
+
+  <div class="content-page">
+    <div class="content-body">
+      <div class="content-left">
+        <p class="chapter-label">Chapter 02 · Product</p>
+        <h1 class="content-headline">一条链，<em>四个闭环</em></h1>
+        <p class="content-deck">按 → 逐层展开平台如何把「学习行为」变成「就业结果」——每次只讲一个焦点。</p>
+      </div>
+
+      <div class="spotlight-stage">
+        <div class="beat-stack">
+          <div class="beat-card active">
+            <div class="beat-num">01 / 04</div>
+            <p class="beat-quote">多机构加盟，课程与活动统一入库</p>
+            <p class="beat-detail">门户、商城、论坛、资讯——学员在一个平台完成全部学习入口。</p>
+          </div>
+          <div class="beat-card">
+            <div class="beat-num">02 / 04</div>
+            <p class="beat-quote">学习行为沉淀为秩点账户</p>
+            <p class="beat-detail">打卡、课程、活动参与实时计入，形成可兑换、可追踪的数字资产。</p>
+          </div>
+          <div class="beat-card">
+            <div class="beat-num">03 / 04</div>
+            <p class="beat-quote">诚信分约束兑换与面试准入</p>
+            <p class="beat-detail">秩点不是裸积分——诚信档案决定能换什么、能否进入招聘流程。</p>
+          </div>
+          <div class="beat-card">
+            <div class="beat-num">04 / 04</div>
+            <p class="beat-quote">企业端招聘到录用的完整闭环</p>
+            <p class="beat-detail">投递 → 视频面试（TRTC）→ 录用/拒绝，企业与学生两端状态同步。</p>
+            <button type="button" class="demo-play-btn" data-demo-open
+              data-demo-title="视频面试全流程"
+              data-demo-src="../assets/demos/interview-trtc.gif"
+              data-demo-caption="将录屏 GIF 放入 assets/demos/interview-trtc.gif 即可自动播放">
+              <span class="play-icon">▶</span>
+              观看操作演示
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="timeline-bar">
+      <div class="timeline-track"><div class="timeline-fill"></div></div>
+      <div class="timeline-nodes">
+        <div class="t-node lit"><div class="t-dot"></div><span class="t-label">学习</span></div>
+        <div class="t-node"><div class="t-dot"></div><span class="t-label">秩点</span></div>
+        <div class="t-node"><div class="t-dot"></div><span class="t-label">诚信</span></div>
+        <div class="t-node"><div class="t-dot"></div><span class="t-label">就业</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="beat-progress"><div class="beat-progress-fill"></div></div>
+  <div class="beat-hint show">点击或按 →  ·  1 / 4</div>
+  <script src="../shared/demo-theater.js"></script>
+  <script src="../shared/beat.js"></script>
+</body>
+</html>

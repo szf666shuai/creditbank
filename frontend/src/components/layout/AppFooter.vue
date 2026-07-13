@@ -6,6 +6,7 @@ import { useAuthStore } from '@/stores/auth'
 import {
   BRAND_EMAIL,
   BRAND_NAME,
+  BRAND_NAME_EN,
   BRAND_SLOGAN,
 } from '@/config/brand'
 import { getRoleTheme, resolveHeaderThemeVariant } from '@/config/role-theme'
@@ -34,13 +35,11 @@ const footerTheme = computed(() => getRoleTheme(footerVariant.value))
 
 const footerStyle = computed(() => ({
   '--footer-accent': footerTheme.value.primarySoft,
-  '--footer-accent-strong': footerTheme.value.primaryDark,
+  '--footer-accent-strong': footerTheme.value.primary,
   '--footer-border': footerTheme.value.border,
   '--footer-text': footerTheme.value.textMuted,
   '--footer-text-strong': footerTheme.value.text,
   '--footer-surface': footerTheme.value.surfaceStrong,
-  '--footer-bg-top': footerTheme.value.particleBg[0],
-  '--footer-bg-mid': footerTheme.value.particleBg[1],
 }))
 
 const quickLinks = computed(() =>
@@ -55,6 +54,30 @@ const footerNavLabel = computed(() =>
 )
 
 const guestReminderEnabled = computed(() => isGuestDailyReminderEnabled())
+
+const courseLinks = [
+  { label: '课程资源', path: '/resources' },
+  { label: '资讯动态', path: '/news' },
+  { label: '学习社区', path: '/forum' },
+]
+
+const companyLinks = [
+  { label: '企业机构', path: '/enterprise' },
+  { label: '秩点商城', path: '/credit' },
+  { label: '机构入驻', path: '/register' },
+]
+
+const supportLinks = computed(() => {
+  const base = [...quickLinks.value]
+  if (!authStore.isLoggedIn) {
+    return [
+      { label: '登录', path: '/login' },
+      { label: '免费注册', path: '/register' },
+      ...base.filter((l) => !['/resources', '/credit', '/enterprise', '/register'].includes(l.path)),
+    ]
+  }
+  return base
+})
 
 async function toggleGuestReminder() {
   try {
@@ -73,45 +96,79 @@ async function toggleGuestReminder() {
 
 <template>
   <footer class="app-footer" :style="footerStyle">
-    <div class="footer-glow" aria-hidden="true" />
-
     <div class="footer-main">
       <div class="footer-inner">
         <div class="footer-brand">
           <div class="brand-logo">
-            <BrandLogo :size="40" :variant="footerVariant" />
+            <div class="brand-logo-mark">
+              <BrandLogo :size="36" :variant="footerVariant" />
+            </div>
             <div>
               <div class="brand-name">{{ BRAND_NAME }}</div>
-              <div class="brand-slogan">{{ BRAND_SLOGAN }}</div>
+              <div class="brand-en">{{ BRAND_NAME_EN }}</div>
             </div>
           </div>
+          <p class="brand-slogan">{{ BRAND_SLOGAN }}</p>
           <a class="brand-email" :href="`mailto:${BRAND_EMAIL}`">{{ BRAND_EMAIL }}</a>
+          <div class="social-row" aria-hidden="true">
+            <span class="social-box">学</span>
+            <span class="social-box">档</span>
+            <span class="social-box">证</span>
+            <span class="social-box">商</span>
+          </div>
         </div>
 
-        <nav class="footer-nav" :aria-label="footerNavLabel">
-          <router-link
-            v-for="item in quickLinks"
-            :key="item.path"
-            :to="item.path"
-            class="footer-nav-link"
-          >
-            {{ item.label }}
-          </router-link>
-          <button
-            v-if="!authStore.isLoggedIn"
-            type="button"
-            class="footer-nav-link footer-reminder-btn"
-            @click="toggleGuestReminder"
-          >
-            {{ guestReminderEnabled ? '关闭每日提醒' : '开启每日学习提醒' }}
-          </button>
-        </nav>
+        <div class="footer-cols">
+          <nav class="footer-col" aria-label="课程">
+            <h4 class="col-title">课程</h4>
+            <router-link
+              v-for="item in courseLinks"
+              :key="item.path"
+              :to="item.path"
+              class="footer-nav-link"
+            >
+              {{ item.label }}
+            </router-link>
+          </nav>
+
+          <nav class="footer-col" aria-label="机构与服务">
+            <h4 class="col-title">服务</h4>
+            <router-link
+              v-for="item in companyLinks"
+              :key="item.path"
+              :to="item.path"
+              class="footer-nav-link"
+            >
+              {{ item.label }}
+            </router-link>
+          </nav>
+
+          <nav class="footer-col" :aria-label="footerNavLabel">
+            <h4 class="col-title">快捷入口</h4>
+            <router-link
+              v-for="item in supportLinks"
+              :key="item.path + item.label"
+              :to="item.path"
+              class="footer-nav-link"
+            >
+              {{ item.label }}
+            </router-link>
+            <button
+              v-if="!authStore.isLoggedIn"
+              type="button"
+              class="footer-nav-link footer-reminder-btn"
+              @click="toggleGuestReminder"
+            >
+              {{ guestReminderEnabled ? '关闭每日提醒' : '开启每日学习提醒' }}
+            </button>
+          </nav>
+        </div>
       </div>
     </div>
 
     <div class="footer-bottom">
       <div class="footer-bottom-inner">
-        <p class="copyright">© 2026 {{ BRAND_NAME }}</p>
+        <p class="copyright">© 2026 {{ BRAND_NAME }} · {{ BRAND_NAME_EN }}</p>
       </div>
     </div>
   </footer>
@@ -121,38 +178,21 @@ async function toggleGuestReminder() {
 .app-footer {
   position: relative;
   margin-top: auto;
-  border-top: 1px solid var(--footer-border);
-  background: linear-gradient(180deg, transparent 0%, var(--footer-bg-top) 18%, var(--footer-bg-mid) 100%);
-}
-
-.footer-glow {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: min(720px, 90%);
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    var(--footer-accent) 50%,
-    transparent 100%
-  );
-  opacity: 0.65;
+  border-top: 2.5px solid var(--nb-ink);
+  background: var(--nb-cream);
 }
 
 .footer-main {
-  padding: 32px 16px 28px;
+  padding: 48px 20px 36px;
 }
 
 .footer-inner {
   max-width: var(--content-max-width);
   margin: 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: minmax(220px, 1.2fr) 2fr;
+  gap: 40px 48px;
+  align-items: start;
 }
 
 .footer-brand {
@@ -163,68 +203,128 @@ async function toggleGuestReminder() {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 8px;
+  margin-bottom: 14px;
+}
+
+.brand-logo-mark {
+  width: 44px;
+  height: 44px;
+  border: 2.5px solid var(--nb-ink);
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--nb-pink);
+  box-shadow: var(--nb-shadow-sm);
+  display: grid;
+  place-items: center;
 }
 
 .brand-name {
-  font-size: 17px;
+  font-family: var(--font-heading);
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: var(--nb-ink);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.brand-en {
+  font-size: 0.7rem;
   font-weight: 700;
-  color: var(--footer-text-strong);
-  letter-spacing: 2px;
-  margin-bottom: 2px;
+  color: var(--footer-text);
+  margin-top: 2px;
 }
 
 .brand-slogan {
-  font-size: 12px;
-  color: var(--footer-accent-strong);
-  letter-spacing: 1px;
+  font-size: 0.875rem;
+  color: var(--footer-text);
+  line-height: 1.55;
+  margin: 0 0 12px;
+  max-width: 280px;
 }
 
 .brand-email {
-  font-size: 13px;
-  color: var(--footer-text);
+  display: inline-block;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--nb-ink);
   text-decoration: none;
-  transition: color 0.2s;
+  margin-bottom: 16px;
 }
 
 .brand-email:hover {
-  color: var(--footer-accent-strong);
+  color: var(--nb-green-deep);
 }
 
-.footer-nav {
+.social-row {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px 18px;
+  gap: 10px;
+}
+
+.social-box {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  background: #fff;
+  border: 2.5px solid var(--nb-ink);
+  border-radius: 12px;
+  box-shadow: var(--nb-shadow-sm);
+  font-family: var(--font-heading);
+  font-weight: 900;
+  font-size: 0.8rem;
+  color: var(--nb-ink);
+}
+
+.footer-cols {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.footer-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.col-title {
+  margin: 0 0 4px;
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  font-weight: 900;
+  color: var(--nb-ink);
 }
 
 .footer-nav-link {
-  font-size: 13px;
+  font-size: 0.875rem;
+  font-weight: 600;
   color: var(--footer-text);
   text-decoration: none;
-  transition: color 0.2s;
+  transition: color 0.15s ease;
+  cursor: pointer;
+  width: fit-content;
 }
 
 .footer-nav-link:hover {
-  color: var(--footer-accent-strong);
+  color: var(--nb-green-deep);
 }
 
 .footer-nav-link.router-link-active {
-  color: var(--footer-accent-strong);
+  color: var(--nb-ink);
+  font-weight: 800;
 }
 
 .footer-reminder-btn {
   border: none;
   background: transparent;
   padding: 0;
-  cursor: pointer;
-  font-family: inherit;
+  text-align: left;
+  font: inherit;
 }
 
 .footer-bottom {
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
-  background: rgba(0, 0, 0, 0.22);
-  padding: 14px 16px;
+  border-top: 2px solid color-mix(in srgb, var(--nb-ink) 18%, transparent);
+  padding: 16px 20px;
 }
 
 .footer-bottom-inner {
@@ -233,19 +333,26 @@ async function toggleGuestReminder() {
 }
 
 .copyright {
-  font-size: 12px;
-  color: var(--footer-text);
   margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--footer-text);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 860px) {
   .footer-inner {
-    flex-direction: column;
-    align-items: flex-start;
+    grid-template-columns: 1fr;
+    gap: 32px;
   }
 
-  .footer-nav {
-    gap: 8px 14px;
+  .footer-cols {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .footer-cols {
+    grid-template-columns: 1fr;
   }
 }
 </style>

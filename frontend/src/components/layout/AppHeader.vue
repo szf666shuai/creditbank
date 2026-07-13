@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { ArrowDown, ChatDotRound, HomeFilled, Search } from '@element-plus/icons-vue'
+import { ArrowDown, ChatDotRound, Close, HomeFilled, Menu, Search } from '@element-plus/icons-vue'
 import { useLayout } from '@/composables/useLayout'
 import { useHeaderScroll } from '@/composables/useHeaderScroll'
 import { useSearchSuggest } from '@/composables/useSearchSuggest'
 import { useMessageStore } from '@/stores/message'
 import { useAuthStore } from '@/stores/auth'
 import { searchCategories } from '@/config/search-categories'
-import { BRAND_NAME, BRAND_NAME_EN, BRAND_SITE } from '@/config/brand'
+import { BRAND_NAME, BRAND_NAME_EN } from '@/config/brand'
 import { getRoleTheme, resolveHeaderThemeVariant } from '@/config/role-theme'
 import BrandLogo from '@/components/brand/BrandLogo.vue'
 import type { SearchItem } from '@/api/search'
@@ -47,21 +47,49 @@ const headerVariant = computed(() =>
 
 const headerTheme = computed(() => getRoleTheme(headerVariant.value))
 
-const logoStyle = computed(() => ({
-  background: `linear-gradient(135deg, ${headerTheme.value.logoBgFrom} 0%, ${headerTheme.value.logoBgTo} 100%)`,
-  boxShadow: `0 4px 14px ${headerTheme.value.logoShadow}`,
-}))
-
 const headerStyle = computed(() => ({
   '--header-bg': headerTheme.value.headerBg,
   '--header-border': headerTheme.value.headerBorder,
   '--header-accent': headerTheme.value.primarySoft,
-  '--header-accent-strong': headerTheme.value.primaryDark,
+  '--header-accent-strong': headerTheme.value.primary,
+  '--header-accent-hover': headerTheme.value.primaryDark,
   '--header-text': headerTheme.value.text,
   '--header-text-muted': headerTheme.value.textMuted,
+  '--header-shadow': headerTheme.value.shadow,
 }))
 
 const { isHeaderVisible } = useHeaderScroll()
+const mobileNavOpen = ref(false)
+
+const mobileNavLinks = computed(() => {
+  const links: { label: string; path: string }[] = [{ label: '首页', path: '/' }]
+  for (const item of siteNav.value) {
+    if (item.icon) continue
+    if (item.path) links.push({ label: item.label, path: item.path })
+    for (const child of item.children ?? []) {
+      if (child.path) links.push({ label: child.label, path: child.path })
+    }
+  }
+  return links
+})
+
+function toggleMobileNav() {
+  mobileNavOpen.value = !mobileNavOpen.value
+}
+
+function closeMobileNav() {
+  mobileNavOpen.value = false
+}
+
+function goMobile(path: string) {
+  closeMobileNav()
+  navigate(path)
+}
+
+function isMobileLinkActive(path: string) {
+  if (path === '/') return route.path === '/'
+  return route.path === path || route.path.startsWith(`${path}/`)
+}
 
 const {
   suggestions,
@@ -143,14 +171,27 @@ watch(
   },
 )
 
+watch(
+  () => route.fullPath,
+  () => {
+    closeMobileNav()
+  },
+)
+
+function onGlobalKeydown(e: KeyboardEvent) {
+  if (e.key === 'Escape') closeMobileNav()
+}
+
 onMounted(() => {
   if (isLoggedIn.value) {
     startUnreadPolling()
   }
+  window.addEventListener('keydown', onGlobalKeydown)
 })
 
 onUnmounted(() => {
   stopUnreadPolling()
+  window.removeEventListener('keydown', onGlobalKeydown)
 })
 </script>
 
@@ -159,21 +200,35 @@ onUnmounted(() => {
     class="app-header is-themed"
     :style="headerStyle"
     :class="{
-      'is-hidden': !isHeaderVisible,
+      'is-hidden': !isHeaderVisible && !mobileNavOpen,
       'is-logged-in': isLoggedIn,
     }"
   >
     <div class="header-inner">
       <!-- Logo -->
-      <router-link to="/" class="logo" :style="logoStyle">
+      <router-link to="/" class="logo" :aria-label="BRAND_NAME" @click="closeMobileNav">
         <div class="logo-icon">
-          <BrandLogo :size="36" :variant="headerVariant" />
+          <BrandLogo :size="40" :variant="headerVariant" />
         </div>
         <div class="logo-text">
           <span class="logo-title">{{ BRAND_NAME }}</span>
-          <span class="logo-sub">{{ BRAND_NAME_EN }} · {{ BRAND_SITE }}</span>
+          <span class="logo-sub">{{ BRAND_NAME_EN }}</span>
         </div>
       </router-link>
+
+      <button
+        type="button"
+        class="mobile-nav-toggle"
+        :aria-expanded="mobileNavOpen"
+        aria-controls="mobile-nav-panel"
+        :aria-label="mobileNavOpen ? '关闭导航' : '打开导航'"
+        @click="toggleMobileNav"
+      >
+        <el-icon :size="20">
+          <Close v-if="mobileNavOpen" />
+          <Menu v-else />
+        </el-icon>
+      </button>
 
       <div class="header-main">
       <!-- 主导航 -->
@@ -284,7 +339,7 @@ onUnmounted(() => {
         <!-- 未登录 -->
         <div v-if="!isLoggedIn" class="auth-btns">
           <router-link to="/login" class="btn-login">登录</router-link>
-          <router-link to="/register" class="btn-register">注册</router-link>
+          <router-link to="/register" class="btn-register">免费开始</router-link>
         </div>
 
         <!-- 已登录：消息 + 个人中心 -->
@@ -328,6 +383,35 @@ onUnmounted(() => {
       </div>
       </div>
     </div>
+
+    <div
+      v-show="mobileNavOpen"
+      class="mobile-nav-scrim"
+      aria-hidden="true"
+      @click="closeMobileNav"
+    />
+    <nav
+      id="mobile-nav-panel"
+      class="mobile-nav-panel"
+      :class="{ 'is-open': mobileNavOpen }"
+      :aria-hidden="!mobileNavOpen"
+    >
+      <p class="mobile-nav-label">站点导航</p>
+      <button
+        v-for="link in mobileNavLinks"
+        :key="link.path + link.label"
+        type="button"
+        class="mobile-nav-link"
+        :class="{ active: isMobileLinkActive(link.path) }"
+        @click="goMobile(link.path)"
+      >
+        {{ link.label }}
+      </button>
+      <div v-if="!isLoggedIn" class="mobile-nav-auth">
+        <router-link to="/login" class="nb-btn nb-btn--cream" @click="closeMobileNav">登录</router-link>
+        <router-link to="/register" class="nb-btn nb-btn--primary" @click="closeMobileNav">免费开始</router-link>
+      </div>
+    </nav>
   </header>
 </template>
 
@@ -338,48 +422,63 @@ onUnmounted(() => {
   left: 0;
   right: 0;
   z-index: 1000;
-  background: var(--color-white);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 10px 16px 0;
   transform: translateY(0);
-  transition:
-    transform 0.32s ease,
-    background 0.35s ease,
-    border-color 0.35s ease,
-    box-shadow 0.35s ease;
+  transition: transform 0.32s ease;
 }
 
 .app-header.is-themed {
-  background: var(--header-bg);
-  border-bottom: 1px solid var(--header-border);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.22);
+  background: transparent;
+  border: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
 }
 
 .app-header.is-hidden {
-  transform: translateY(-100%);
+  transform: translateY(calc(-100% - 12px));
   pointer-events: none;
+}
+
+.header-inner {
+  display: flex;
+  align-items: center;
+  max-width: var(--content-max-width);
+  height: calc(var(--header-height) - 12px);
+  margin: 0 auto;
+  padding: 0 18px;
+  gap: 14px;
+  background: #fff;
+  border: 2.5px solid var(--nb-ink);
+  border-radius: 999px;
+  box-shadow: var(--nb-shadow);
 }
 
 .app-header.is-themed .nav-item {
   color: var(--header-text);
+  font-weight: 700;
 }
 
 .app-header.is-themed .nav-item:hover,
 .app-header.is-themed .nav-dropdown:hover {
-  color: var(--header-accent-strong);
-  background: rgba(255, 255, 255, 0.08);
+  color: var(--nb-ink);
+  background: var(--nb-yellow);
 }
 
 .app-header.is-themed .nav-item.active {
-  color: var(--header-accent-strong);
-  background: rgba(255, 255, 255, 0.14);
-  border-radius: 20px;
+  color: var(--nb-ink);
+  background: #bbf7d0;
+  font-weight: 800;
+  border-radius: 999px;
 }
 
 .app-header.is-themed .search-box {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: var(--nb-cream);
+  border: 2px solid var(--nb-ink);
+  box-shadow: none;
 }
 
 .app-header.is-themed .search-box input {
@@ -400,73 +499,81 @@ onUnmounted(() => {
 }
 
 .app-header.is-themed .search-btn:hover {
-  color: var(--header-accent-strong);
+  color: var(--nb-green-deep);
 }
 
 .app-header.is-themed .search-divider {
-  background: rgba(255, 255, 255, 0.16);
+  background: var(--nb-ink);
+  opacity: 0.2;
 }
 
 .app-header.is-themed .profile-trigger {
-  color: var(--header-accent-strong);
-  border-color: rgba(255, 255, 255, 0.22);
-  background: rgba(255, 255, 255, 0.06);
+  color: var(--nb-ink);
+  border: 2px solid var(--nb-ink);
+  background: #fff;
+  box-shadow: var(--nb-shadow-sm);
 }
 
 .app-header.is-themed .profile-trigger:hover {
-  background: rgba(255, 255, 255, 0.12);
+  background: var(--nb-blue);
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0 0 var(--nb-ink);
 }
 
 .app-header.is-themed .role-badge {
-  background: rgba(255, 255, 255, 0.12);
-  color: var(--header-accent-strong);
+  background: #bbf7d0;
+  color: var(--nb-ink);
+  border: 1.5px solid var(--nb-ink);
 }
 
 .app-header.is-themed .message-entry {
-  color: var(--header-text);
+  color: var(--nb-ink);
+  border: 2px solid var(--nb-ink);
+  background: #fff;
+  box-shadow: var(--nb-shadow-sm);
 }
 
 .app-header.is-themed .message-entry:hover,
 .app-header.is-themed .message-entry.has-unread {
-  background: rgba(255, 255, 255, 0.1);
-  color: #7dd3fc;
+  background: var(--nb-pink);
+  color: var(--nb-ink);
 }
 
 .app-header.is-themed .auth-btns {
-  background: linear-gradient(135deg, var(--header-accent), var(--header-accent-strong));
+  background: transparent;
+  gap: 10px;
+  padding: 0;
+  border: none;
+  box-shadow: none;
+}
+
+.app-header.is-themed .btn-login {
+  color: var(--nb-ink);
+  font-weight: 800;
+  text-decoration: none;
+  padding: 8px 4px;
+}
+
+.app-header.is-themed .btn-login:hover {
+  color: var(--nb-green-deep);
 }
 
 .app-header.is-themed .btn-register {
-  color: var(--header-accent-strong);
-  background: rgba(255, 255, 255, 0.92);
+  color: #fff;
+  background: var(--nb-green);
+  border: 2.5px solid var(--nb-ink);
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-weight: 800;
+  text-decoration: none;
+  box-shadow: var(--nb-shadow-sm);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
 }
 
 .app-header.is-themed .btn-register:hover {
-  background: #fff;
-}
-
-.header-inner {
-  display: flex;
-  align-items: center;
-  max-width: var(--content-max-width);
-  height: var(--header-height);
-  margin: 0 auto;
-  padding: 0 16px;
-  gap: 16px;
-}
-
-.header-main {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-left: auto;
-  min-width: 0;
-  flex: 1;
-  justify-content: flex-end;
-}
-
-.app-header.is-logged-in .header-main {
-  gap: 12px;
+  background: var(--nb-green-deep);
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 0 var(--nb-ink);
 }
 
 .logo {
@@ -475,46 +582,62 @@ onUnmounted(() => {
   gap: 10px;
   flex-shrink: 0;
   text-decoration: none;
-  padding: 8px 14px;
-  border-radius: 8px;
-  transition: background 0.35s ease, box-shadow 0.35s ease;
+  padding: 2px;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.logo:hover {
+  opacity: 0.95;
 }
 
 .logo-icon {
   width: 36px;
   height: 36px;
   flex-shrink: 0;
+  border: 2.5px solid var(--nb-ink);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--nb-pink);
+  box-shadow: 2px 2px 0 0 var(--nb-ink);
 }
 
+.logo-icon :deep(svg),
 .logo-icon svg {
   width: 100%;
   height: 100%;
+  display: block;
 }
 
 .logo-text {
   display: flex;
   flex-direction: column;
-  line-height: 1.2;
+  line-height: 1.15;
+  gap: 1px;
 }
 
 .logo-title {
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--color-white);
-  letter-spacing: 2px;
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+  font-weight: 900;
+  color: var(--nb-ink);
+  letter-spacing: -0.02em;
 }
 
 .logo-sub {
-  font-size: 10px;
-  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.65rem;
+  color: var(--header-text-muted);
+  font-weight: 600;
 }
 
-.app-header.is-logged-in .logo {
-  padding: 7px 12px;
-}
-
-.app-header.is-logged-in .logo-sub {
-  display: block;
+.header-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+  min-width: 0;
+  flex: 1;
+  justify-content: flex-end;
 }
 
 .main-nav {
@@ -540,9 +663,9 @@ onUnmounted(() => {
   color: var(--color-text);
   text-decoration: none;
   white-space: nowrap;
-  border-radius: 4px;
+  border-radius: 999px;
   cursor: pointer;
-  transition: color 0.2s, background 0.2s;
+  transition: color 0.2s ease, background 0.2s ease;
   outline: none;
   border: none;
   background: transparent;
@@ -578,7 +701,7 @@ onUnmounted(() => {
 
 .nav-arrow {
   font-size: 12px;
-  transition: transform 0.2s;
+  transition: transform 0.2s ease;
 }
 
 .nav-dropdown:hover .nav-arrow {
@@ -603,10 +726,11 @@ onUnmounted(() => {
 .search-box {
   display: flex;
   align-items: center;
-  background: #f0f2f5;
-  border-radius: 20px;
+  background: var(--color-muted);
+  border: 1px solid var(--color-border-neutral);
+  border-radius: 999px;
   padding: 0 4px 0 2px;
-  height: 34px;
+  height: 36px;
   width: 260px;
   flex-shrink: 0;
 }
@@ -636,7 +760,7 @@ onUnmounted(() => {
 .search-divider {
   width: 1px;
   height: 18px;
-  background: #dcdfe6;
+  background: var(--color-border-neutral);
   flex-shrink: 0;
 }
 
@@ -674,8 +798,9 @@ onUnmounted(() => {
   max-height: 320px;
   overflow-y: auto;
   background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.14);
+  border: 2.5px solid var(--nb-ink);
+  border-radius: var(--radius-md);
+  box-shadow: var(--nb-shadow);
   padding: 6px 0;
 }
 
@@ -696,7 +821,7 @@ onUnmounted(() => {
   background: transparent;
   cursor: pointer;
   text-align: left;
-  transition: background 0.15s;
+  transition: background 0.15s ease;
 }
 
 .suggest-item:hover,
@@ -718,7 +843,7 @@ onUnmounted(() => {
   flex-shrink: 0;
   font-size: 11px;
   color: var(--color-primary);
-  background: rgba(32, 148, 243, 0.1);
+  background: var(--color-primary-light);
   padding: 2px 8px;
   border-radius: 10px;
 }
@@ -734,7 +859,7 @@ onUnmounted(() => {
   color: var(--color-text-muted);
   cursor: pointer;
   border-radius: 50%;
-  transition: color 0.2s;
+  transition: color 0.2s ease;
 }
 
 .search-btn:hover {
@@ -744,48 +869,55 @@ onUnmounted(() => {
 .auth-btns {
   display: flex;
   align-items: center;
-  background: var(--color-primary);
-  border-radius: 20px;
-  overflow: hidden;
-  height: 34px;
+  gap: 10px;
+  height: auto;
+  background: transparent;
 }
 
 .btn-login,
 .btn-register {
-  padding: 0 16px;
   font-size: 13px;
   text-decoration: none;
-  line-height: 34px;
   white-space: nowrap;
-  transition: background 0.2s;
+  cursor: pointer;
 }
 
 .btn-login {
-  color: var(--color-white);
+  color: var(--nb-ink);
+  font-weight: 800;
+  padding: 8px 4px;
 }
 
 .btn-login:hover {
-  background: var(--color-primary-dark);
+  color: var(--nb-green-deep);
 }
 
 .btn-register {
-  color: var(--color-primary);
-  background: var(--color-white);
-  border-radius: 0 20px 20px 0;
+  color: #fff;
+  background: var(--nb-green);
+  border: 2.5px solid var(--nb-ink);
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-weight: 800;
+  box-shadow: var(--nb-shadow-sm);
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
 }
 
 .btn-register:hover {
-  background: var(--color-primary-light);
+  background: var(--nb-green-deep);
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 0 var(--nb-ink);
 }
 
 .profile-trigger {
   padding: 6px 14px;
   border: 1px solid var(--color-primary);
-  border-radius: 20px;
+  border-radius: 999px;
   color: var(--color-primary);
   font-weight: 500;
   flex-shrink: 0;
   white-space: nowrap;
+  cursor: pointer;
 }
 
 .profile-name {
@@ -815,9 +947,10 @@ onUnmounted(() => {
   border-radius: 50%;
   color: var(--color-text-secondary);
   text-decoration: none;
-  transition: background 0.2s, color 0.2s;
+  transition: background 0.2s ease, color 0.2s ease;
   overflow: visible;
   flex-shrink: 0;
+  cursor: pointer;
 }
 
 .message-entry:hover {
@@ -826,7 +959,7 @@ onUnmounted(() => {
 }
 
 .message-entry.has-unread {
-  color: #7dd3fc;
+  color: var(--color-primary);
 }
 
 .message-dot {
@@ -836,11 +969,10 @@ onUnmounted(() => {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #f43f5e;
-  border: 1.5px solid rgba(8, 18, 36, 0.95);
+  background: var(--color-destructive);
+  border: 1.5px solid var(--color-card);
   pointer-events: none;
 }
-
 
 @media (max-width: 1280px) {
   .header-main {
@@ -866,6 +998,10 @@ onUnmounted(() => {
     display: none;
   }
 
+  .mobile-nav-toggle {
+    display: inline-grid;
+  }
+
   .search-box {
     width: 210px;
   }
@@ -873,22 +1009,144 @@ onUnmounted(() => {
   .search-category {
     width: 76px;
   }
+
+  .logo-sub {
+    display: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .header-inner {
+    padding: 0 12px;
+    gap: 8px;
+  }
+
+  .search-box {
+    width: 148px;
+  }
+
+  .search-category {
+    display: none;
+  }
+
+  .search-divider {
+    display: none;
+  }
+
+  .profile-name {
+    display: none;
+  }
+
+  .auth-btns .btn-login {
+    display: none;
+  }
+}
+
+.mobile-nav-toggle {
+  display: none;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border: 2.5px solid var(--nb-ink);
+  border-radius: 12px;
+  background: var(--nb-yellow);
+  color: var(--nb-ink);
+  box-shadow: var(--nb-shadow-sm);
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.mobile-nav-toggle:hover {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0 0 var(--nb-ink);
+}
+
+.mobile-nav-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 998;
+  background: rgba(26, 32, 44, 0.28);
+}
+
+.mobile-nav-panel {
+  position: fixed;
+  top: calc(var(--header-height) + 8px);
+  left: 16px;
+  right: 16px;
+  z-index: 999;
+  max-height: min(70vh, 520px);
+  overflow-y: auto;
+  padding: 16px;
+  background: #fff;
+  border: 2.5px solid var(--nb-ink);
+  border-radius: 20px;
+  box-shadow: var(--nb-shadow-lg);
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mobile-nav-panel.is-open {
+  display: flex;
+}
+
+.mobile-nav-label {
+  margin: 0 0 8px;
+  font-family: var(--font-heading);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--header-text-muted);
+}
+
+.mobile-nav-link {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 12px 14px;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  background: transparent;
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--nb-ink);
+  cursor: pointer;
+}
+
+.mobile-nav-link:hover,
+.mobile-nav-link.active {
+  background: #bbf7d0;
+  border-color: var(--nb-ink);
+}
+
+.mobile-nav-auth {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 2px solid color-mix(in srgb, var(--nb-ink) 16%, transparent);
+}
+
+.mobile-nav-auth .nb-btn {
+  min-height: 42px;
+  font-size: 0.875rem;
 }
 </style>
 
 <style>
-/* 导航 / 个人中心下拉：teleport 到 body */
+/* 导航 / 个人中心下拉：Neo-brutal */
 .app-header-dropdown.el-popper,
 .app-header-dropdown {
-  --el-dropdown-menuItem-hover-fill: rgba(56, 189, 248, 0.16);
-  --el-dropdown-menuItem-hover-color: #e0f2fe;
-  border: 1px solid rgba(125, 211, 252, 0.28) !important;
-  border-radius: 12px !important;
-  background:
-    radial-gradient(ellipse at 20% 0%, rgba(56, 189, 248, 0.14), transparent 50%),
-    rgba(8, 18, 36, 0.96) !important;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4) !important;
-  backdrop-filter: blur(14px);
+  --el-dropdown-menuItem-hover-fill: #bbf7d0;
+  --el-dropdown-menuItem-hover-color: var(--nb-ink);
+  border: 2.5px solid var(--nb-ink) !important;
+  border-radius: 14px !important;
+  background: #fff !important;
+  box-shadow: var(--nb-shadow) !important;
   overflow: hidden;
 }
 
@@ -900,7 +1158,7 @@ onUnmounted(() => {
 }
 
 .app-header-dropdown .el-dropdown-menu__item {
-  color: rgba(226, 232, 240, 0.9);
+  color: var(--color-foreground);
   border-radius: 8px;
   margin: 2px 0;
   line-height: 1.4;
@@ -909,16 +1167,16 @@ onUnmounted(() => {
 
 .app-header-dropdown .el-dropdown-menu__item:not(.is-disabled):hover,
 .app-header-dropdown .el-dropdown-menu__item:focus {
-  background: rgba(56, 189, 248, 0.16);
-  color: #e0f2fe;
+  background: var(--color-primary-light);
+  color: var(--color-primary-dark);
 }
 
 .app-header-dropdown .el-dropdown-menu__item.is-disabled {
-  color: rgba(148, 163, 184, 0.55);
+  color: var(--color-muted-foreground);
 }
 
 .app-header-dropdown .el-dropdown-menu__item--divided {
-  border-top-color: rgba(147, 197, 253, 0.16);
+  border-top-color: var(--color-border-neutral);
 }
 
 .app-header-dropdown .el-dropdown-menu__item--divided::before {
@@ -926,7 +1184,7 @@ onUnmounted(() => {
 }
 
 .app-header-dropdown .el-popper__arrow::before {
-  background: rgba(8, 18, 36, 0.96) !important;
-  border: 1px solid rgba(125, 211, 252, 0.28) !important;
+  background: var(--color-card) !important;
+  border: 1px solid var(--color-border-neutral) !important;
 }
 </style>

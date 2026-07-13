@@ -118,7 +118,9 @@ onMounted(fetchMessage)
   font-size: 22px;
   margin-bottom: 16px;
   line-height: 1.4;
-  color: #e0f2fe;
+  color: var(--nb-ink, var(--color-foreground));
+  font-family: var(--font-heading);
+  font-weight: 900;
 }
 
 .detail-meta {
@@ -126,16 +128,16 @@ onMounted(fetchMessage)
   flex-wrap: wrap;
   gap: 16px;
   font-size: 14px;
-  color: rgba(186, 230, 253, 0.78);
+  color: var(--color-muted-foreground);
   margin-bottom: 24px;
   padding-bottom: 16px;
-  border-bottom: 1px solid rgba(125, 211, 252, 0.18);
+  border-bottom: 2px solid color-mix(in srgb, var(--nb-ink, #1a202c) 14%, transparent);
 }
 
 .detail-content {
   font-size: 15px;
   line-height: 1.8;
   white-space: pre-wrap;
-  color: rgba(241, 245, 249, 0.94);
+  color: var(--color-foreground);
 }
 </style>

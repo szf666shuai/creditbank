@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1920" />
+  <title>P21 · 视频面试</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../shared/grammar.css" />
+  <link rel="stylesheet" href="../shared/themes-b-e.css" />
+  <link rel="stylesheet" href="../shared/theme-b-layouts.css" />
+</head>
+<body class="theme-b">
+<header class="top-nav">
+    <div class="brand"><span class="brand-mark">秩</span> 星秩存册</div>
+    <nav class="chapters"><span class="ch"><span class="idx">01</span>背景</span>
+      <span class="ch active"><span class="idx">02</span>产品</span>
+      <span class="ch"><span class="idx">03</span>技术</span>
+      <span class="ch"><span class="idx">04</span>组织</span>
+      <span class="ch"><span class="idx">05</span>小结</span></nav>
+  </header>
+  <div class="b-page">
+    <div class="b-page-inner">
+      <p class="chapter-label">02 · 项目展示</p>
+      <h1 class="content-headline" style="font-size:72px;margin-bottom:32px">平台内<em>视频面试</em></h1>
+      <div class="b-two-col">
+        <div class="b-visual-stage">
+          <div class="b-visual-label"><strong>全流程演示 ★</strong><span>投递 → 邀请 → 进房 15–20s</span><button type="button" class="demo-play-btn" data-demo-open data-demo-title="视频面试全流程" data-demo-src="../assets/demos/interview-trtc.gif"><span class="play-icon">▶</span>观看操作演示</button></div>
+        </div>
+        <div class="spotlight-stage" style="min-height:420px">
+          <div class="beat-stack" data-beat-deck>
+            <div class="beat-card active"><div class="beat-num">01 / 03</div><p class="beat-quote">无需第三方会议链接</p><p class="beat-detail">平台内闭环 · 状态同步</p></div>
+            <div class="beat-card"><div class="beat-num">02 / 03</div><p class="beat-quote">TRTC UserSig 安全鉴权</p><p class="beat-detail">TlsSigApiV2 · 低延迟</p></div>
+            <div class="beat-card"><div class="beat-num">03 / 03</div><p class="beat-quote">投递状态机 + 录用私信联动</p><p class="beat-detail">canJoinVideo · 进房时间窗</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="beat-progress"><div class="beat-progress-fill"></div></div>
+  <div class="beat-hint show">→ 1 / 3</div>
+  <script src="../shared/beat.js"></script>
+  <script src="../shared/demo-theater.js"></script>
+</body>
+</html>

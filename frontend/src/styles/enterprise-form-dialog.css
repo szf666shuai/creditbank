@@ -1,91 +1,122 @@
-/* 企业端发布/编辑弹窗：暗色玻璃风，避免白底+浅色字看不清 */
+/* 企业端发布/编辑弹窗 — Neo-brutal Light */
 
 .enterprise-form-dialog.el-dialog {
-  background:
-    radial-gradient(ellipse at 12% 0%, rgba(56, 189, 248, 0.18), transparent 42%),
-    rgba(8, 18, 36, 0.96);
-  border: 1px solid rgba(125, 211, 252, 0.28);
-  border-radius: 16px;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(16px);
+  background: #fff;
+  border: 2.5px solid var(--nb-ink, #1a202c);
+  border-radius: 18px;
+  box-shadow: var(--nb-shadow-lg, 6px 6px 0 0 #1a202c);
+  backdrop-filter: none;
 }
 
 .enterprise-form-dialog .el-dialog__header {
   margin-right: 0;
   padding: 16px 20px 12px;
-  border-bottom: 1px solid rgba(147, 197, 253, 0.14);
+  border-bottom: 2px solid color-mix(in srgb, var(--nb-ink, #1a202c) 14%, transparent);
 }
 
 .enterprise-form-dialog .el-dialog__title {
-  color: #e0f2fe;
+  color: var(--nb-ink, #1a202c);
+  font-family: var(--font-heading);
+  font-weight: 900;
 }
 
 .enterprise-form-dialog .el-dialog__headerbtn .el-dialog__close {
-  color: rgba(186, 230, 253, 0.78);
+  color: var(--color-muted-foreground, #64748b);
 }
 
 .enterprise-form-dialog .el-dialog__body {
   padding: 16px 20px 8px;
-  color: #e2e8f0;
+  color: var(--color-foreground, #1a202c);
   max-height: min(70vh, 640px);
   overflow-y: auto;
 }
 
 .enterprise-form-dialog .el-dialog__footer {
   padding: 12px 20px 18px;
-  border-top: 1px solid rgba(147, 197, 253, 0.14);
+  border-top: 2px solid color-mix(in srgb, var(--nb-ink, #1a202c) 14%, transparent);
 }
 
 .enterprise-form-dialog .el-form-item__label {
-  color: rgba(186, 230, 253, 0.88) !important;
+  color: var(--nb-ink, #1a202c) !important;
+  font-weight: 700;
 }
 
 .enterprise-form-dialog .el-input__wrapper,
 .enterprise-form-dialog .el-textarea__inner,
 .enterprise-form-dialog .el-select__wrapper,
 .enterprise-form-dialog .el-input-number {
-  background: rgba(8, 20, 40, 0.55) !important;
-  box-shadow: 0 0 0 1px rgba(125, 211, 252, 0.28) inset !important;
-  border-radius: 10px;
+  background: var(--nb-cream, #fff9f0) !important;
+  box-shadow: none !important;
+  border: 2px solid var(--nb-ink, #1a202c) !important;
+  border-radius: 12px !important;
 }
 
 .enterprise-form-dialog .el-input__inner,
 .enterprise-form-dialog .el-textarea__inner,
 .enterprise-form-dialog .el-select__placeholder,
 .enterprise-form-dialog .el-select__selected-item {
-  color: #e0f2fe !important;
+  color: var(--nb-ink, #1a202c) !important;
 }
 
 .enterprise-form-dialog .el-input__inner::placeholder,
 .enterprise-form-dialog .el-textarea__inner::placeholder {
-  color: rgba(147, 197, 253, 0.45) !important;
+  color: var(--color-muted-foreground, #64748b) !important;
 }
 
 .enterprise-form-dialog .el-textarea__inner {
   box-shadow: none !important;
-  border: 1px solid rgba(125, 211, 252, 0.28);
+  border: 2px solid var(--nb-ink, #1a202c);
+}
+
+.enterprise-form-dialog .el-input__wrapper.is-focus,
+.enterprise-form-dialog .el-select__wrapper.is-focused {
+  box-shadow: 3px 3px 0 0 var(--nb-ink, #1a202c) !important;
 }
 
 .enterprise-select-dropdown.el-select__popper,
 .enterprise-select-dropdown {
-  background: rgba(8, 18, 36, 0.96) !important;
-  border: 1px solid rgba(125, 211, 252, 0.28) !important;
+  background: #fff !important;
+  border: 2.5px solid var(--nb-ink, #1a202c) !important;
+  box-shadow: var(--nb-shadow, 4px 4px 0 0 #1a202c) !important;
 }
 
 .enterprise-select-dropdown .el-select-dropdown__item {
-  color: rgba(226, 232, 240, 0.9);
+  color: var(--nb-ink, #1a202c);
 }
 
 .enterprise-select-dropdown .el-select-dropdown__item.is-hovering,
 .enterprise-select-dropdown .el-select-dropdown__item:hover {
-  background: rgba(56, 189, 248, 0.16);
-  color: #e0f2fe;
+  background: #bbf7d0;
+  color: var(--nb-ink, #1a202c);
 }
 
 .enterprise-form-dialog .el-radio {
-  color: rgba(226, 232, 240, 0.92);
+  color: var(--nb-ink, #1a202c);
 }
 
 .enterprise-form-dialog .el-radio__input.is-checked + .el-radio__label {
-  color: #7dd3fc;
+  color: var(--nb-green-deep, #16a34a);
+  font-weight: 800;
+}
+
+.enterprise-form-dialog .el-button--primary {
+  border: 2.5px solid var(--nb-ink, #1a202c) !important;
+  background: var(--nb-green, #22c55e) !important;
+  color: #fff !important;
+  border-radius: 999px !important;
+  font-weight: 800;
+  box-shadow: var(--nb-shadow-sm, 3px 3px 0 0 #1a202c);
+}
+
+.enterprise-form-dialog .el-button--primary:hover {
+  background: var(--nb-green-deep, #16a34a) !important;
+}
+
+.enterprise-form-dialog .el-button--default {
+  border: 2px solid var(--nb-ink, #1a202c) !important;
+  background: #fff !important;
+  color: var(--nb-ink, #1a202c) !important;
+  border-radius: 999px !important;
+  font-weight: 700;
+  box-shadow: 2px 2px 0 0 var(--nb-ink, #1a202c);
 }

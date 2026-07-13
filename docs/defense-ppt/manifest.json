@@ -1,0 +1,164 @@
+{
+  "slides": [
+    {
+      "file": "slides/01-cover.html",
+      "label": "封面"
+    },
+    {
+      "file": "slides/02-toc.html",
+      "label": "目录"
+    },
+    {
+      "file": "slides/03-bg-open.html",
+      "label": "背景 · 开场"
+    },
+    {
+      "file": "slides/04-pain-points.html",
+      "label": "四个痛点"
+    },
+    {
+      "file": "slides/05-response.html",
+      "label": "平台回应"
+    },
+    {
+      "file": "slides/06-market.html",
+      "label": "市场机会"
+    },
+    {
+      "file": "slides/07-vs-competitors.html",
+      "label": "竞品对比"
+    },
+    {
+      "file": "slides/08-roles.html",
+      "label": "三类用户"
+    },
+    {
+      "file": "slides/09-overview.html",
+      "label": "产品概况"
+    },
+    {
+      "file": "slides/10-portal.html",
+      "label": "平台门户"
+    },
+    {
+      "file": "slides/11-student.html",
+      "label": "学员端"
+    },
+    {
+      "file": "slides/12-enterprise-admin.html",
+      "label": "企业与管理"
+    },
+    {
+      "file": "slides/13-player.html",
+      "label": "播放器"
+    },
+    {
+      "file": "slides/14-danmaku.html",
+      "label": "弹幕评论"
+    },
+    {
+      "file": "slides/15-forum.html",
+      "label": "四频道论坛"
+    },
+    {
+      "file": "slides/16-info-search.html",
+      "label": "资讯搜索"
+    },
+    {
+      "file": "slides/17-ai-chat.html",
+      "label": "AI助手"
+    },
+    {
+      "file": "slides/18-ai-profile.html",
+      "label": "AI画像"
+    },
+    {
+      "file": "slides/19-ai-chain.html",
+      "label": "AI四层链"
+    },
+    {
+      "file": "slides/20-credit-integrity.html",
+      "label": "秩点诚信"
+    },
+    {
+      "file": "slides/21-trtc.html",
+      "label": "视频面试"
+    },
+    {
+      "file": "slides/22-cert-audit.html",
+      "label": "证书审核"
+    },
+    {
+      "file": "slides/23-innovations.html",
+      "label": "六大创新"
+    },
+    {
+      "file": "slides/24-chapter-tech.html",
+      "label": "章 · 技术"
+    },
+    {
+      "file": "slides/25-architecture.html",
+      "label": "三层架构"
+    },
+    {
+      "file": "slides/26-frontend.html",
+      "label": "前端架构"
+    },
+    {
+      "file": "slides/27-backend.html",
+      "label": "后端架构"
+    },
+    {
+      "file": "slides/28-tech-stack.html",
+      "label": "技术选型"
+    },
+    {
+      "file": "slides/29-innov-credit.html",
+      "label": "创新 · 秩点"
+    },
+    {
+      "file": "slides/30-innov-learning.html",
+      "label": "创新 · 学习"
+    },
+    {
+      "file": "slides/31-innov-ai.html",
+      "label": "创新 · AI"
+    },
+    {
+      "file": "slides/32-innov-trtc.html",
+      "label": "创新 · TRTC"
+    },
+    {
+      "file": "slides/33-innov-community.html",
+      "label": "创新 · 社区"
+    },
+    {
+      "file": "slides/34-innov-blockchain.html",
+      "label": "创新 · 存证"
+    },
+    {
+      "file": "slides/35-database.html",
+      "label": "数据库"
+    },
+    {
+      "file": "slides/36-deploy.html",
+      "label": "部署"
+    },
+    {
+      "file": "slides/37-chapter-team.html",
+      "label": "章 · 组织"
+    },
+    {
+      "file": "slides/38-team.html",
+      "label": "团队成员"
+    },
+    {
+      "file": "slides/39-milestones.html",
+      "label": "里程碑"
+    },
+    {
+      "file": "slides/40-thanks.html",
+      "label": "致谢"
+    }
+  ]
+}

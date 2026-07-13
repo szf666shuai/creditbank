@@ -316,9 +316,10 @@ onBeforeUnmount(() => {
   width: 100%;
   aspect-ratio: 16 / 9;
   background: #0f1117;
-  border-radius: 12px;
+  border-radius: 14px;
   overflow: hidden;
-  box-shadow: 0 12px 32px rgba(15, 17, 23, 0.18);
+  border: 2.5px solid var(--nb-ink, #1a202c);
+  box-shadow: var(--nb-shadow-lg, 6px 6px 0 0 #1a202c);
 }
 
 .course-player.is-fullscreen {
@@ -397,7 +398,7 @@ onBeforeUnmount(() => {
 .progress-slider,
 .volume-slider {
   width: 100%;
-  accent-color: #00a1d6;
+  accent-color: #22c55e;
 }
 
 .volume-slider {
@@ -455,7 +456,7 @@ onBeforeUnmount(() => {
 }
 
 .text-btn.active {
-  color: #00a1d6;
+  color: #22c55e;
 }
 
 .time-text {
@@ -508,13 +509,13 @@ onBeforeUnmount(() => {
   min-width: 58px;
   height: 34px;
   border-radius: 17px;
-  background: #00a1d6;
+  background: #22c55e;
   font-size: 13px;
   font-weight: 600;
 }
 
 :deep(.el-dropdown-menu__item.is-active) {
-  color: #00a1d6;
+  color: #22c55e;
   font-weight: 600;
 }
 </style>

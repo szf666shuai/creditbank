@@ -142,20 +142,22 @@ onMounted(fetchResumes)
 }
 
 .resume-card {
-  border: 1px solid rgba(125, 211, 252, 0.16);
-  border-radius: 12px;
+  border: 2.5px solid var(--nb-ink, #1a202c);
+  border-radius: 16px;
   padding: 18px;
-  background: rgba(8, 20, 40, 0.38);
+  background: #fff;
   text-align: left;
   cursor: pointer;
-  transition: border-color 0.2s, box-shadow 0.2s;
-  color: #e2e8f0;
-  backdrop-filter: blur(8px);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+  color: var(--nb-ink, #1a202c);
+  box-shadow: var(--nb-shadow-sm, 3px 3px 0 0 #1a202c);
+  backdrop-filter: none;
 }
 
 .resume-card:hover {
-  border-color: rgba(56, 189, 248, 0.45);
-  box-shadow: 0 8px 20px rgba(14, 165, 233, 0.12);
+  border-color: var(--nb-ink, #1a202c);
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 0 var(--nb-ink, #1a202c);
 }
 
 .add-card {
@@ -165,7 +167,7 @@ onMounted(fetchResumes)
   justify-content: center;
   min-height: 180px;
   border-style: dashed;
-  background: rgba(8, 20, 40, 0.25);
+  background: var(--nb-cream, #fff9f0);
 }
 
 .add-card:hover {

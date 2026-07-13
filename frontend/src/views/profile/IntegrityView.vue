@@ -200,9 +200,10 @@ onMounted(async () => {
   gap: 28px;
   margin-bottom: 24px;
   padding: 20px;
-  background: rgba(56, 189, 248, 0.12);
-  border: 1px solid rgba(125, 211, 252, 0.16);
-  border-radius: 12px;
+  background: var(--nb-blue, #bee3f8);
+  border: 2.5px solid var(--nb-ink, #1a202c);
+  border-radius: 16px;
+  box-shadow: var(--nb-shadow-sm, 3px 3px 0 0 #1a202c);
 }
 
 .score-ring {
@@ -214,8 +215,9 @@ onMounted(async () => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: rgba(8, 20, 40, 0.55);
+  background: #fff;
   flex-shrink: 0;
+  box-shadow: 3px 3px 0 0 var(--nb-ink, #1a202c);
 }
 
 .score-value {

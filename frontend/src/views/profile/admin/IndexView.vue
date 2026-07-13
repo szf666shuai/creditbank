@@ -149,16 +149,17 @@ onMounted(loadDashboard)
 .avatar {
   width: 72px;
   height: 72px;
-  border-radius: 50%;
-  background: rgba(56, 189, 248, 0.2);
-  color: #7dd3fc;
+  border-radius: 18px;
+  background: var(--nb-pink, #fecdd3);
+  color: var(--nb-ink, #1a202c);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 28px;
-  font-weight: 600;
+  font-weight: 900;
   flex-shrink: 0;
-  border: 1px solid rgba(125, 211, 252, 0.28);
+  border: 2.5px solid var(--nb-ink, #1a202c);
+  box-shadow: var(--nb-shadow-sm, 3px 3px 0 0 #1a202c);
 }
 
 .user-title-row {
@@ -171,7 +172,7 @@ onMounted(loadDashboard)
 
 .user-title-row h1 {
   font-size: 26px;
-  color: #e0f2fe;
+  color: #1a202c;
 }
 
 .user-sub {
@@ -186,7 +187,7 @@ onMounted(loadDashboard)
 .overview-panel h2 {
   font-size: 16px;
   margin-bottom: 12px;
-  color: #e0f2fe;
+  color: #1a202c;
 }
 
 .overview-grid {
@@ -197,22 +198,25 @@ onMounted(loadDashboard)
 
 .overview-item {
   padding: 16px;
-  background: rgba(8, 20, 40, 0.38);
-  border: 1px solid rgba(125, 211, 252, 0.14);
-  border-radius: 10px;
+  background: #fff;
+  border: 2.5px solid var(--nb-ink, #1a202c);
+  border-radius: 14px;
   text-align: center;
-  backdrop-filter: blur(8px);
+  box-shadow: var(--nb-shadow-sm, 3px 3px 0 0 #1a202c);
+  backdrop-filter: none;
 }
 
 .overview-value {
   display: block;
   font-size: 24px;
-  font-weight: 700;
-  color: #7dd3fc;
+  font-weight: 900;
+  font-family: var(--font-heading);
+  color: var(--nb-green-deep, #16a34a);
 }
 
 .overview-label {
   font-size: 13px;
-  color: rgba(148, 163, 184, 0.9);
+  font-weight: 700;
+  color: var(--color-muted-foreground);
 }
 </style>

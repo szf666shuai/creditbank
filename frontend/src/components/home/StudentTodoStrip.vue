@@ -111,11 +111,10 @@ onMounted(loadData)
 <style scoped>
 .todo-strip {
   padding: 20px 22px;
-  border-radius: 18px;
-  background: var(--role-surface, rgba(6, 22, 38, 0.58));
-  border: 1px solid var(--role-border, rgba(0, 161, 214, 0.28));
-  box-shadow: var(--role-shadow, 0 12px 40px rgba(0, 0, 0, 0.35));
-  backdrop-filter: blur(12px);
+  border-radius: var(--radius-lg);
+  background: var(--color-card);
+  border: 1px solid var(--color-border-neutral);
+  box-shadow: var(--shadow-md);
 }
 
 .strip-head {
@@ -128,13 +127,14 @@ onMounted(loadData)
 
 .strip-head h2 {
   margin: 0;
-  font-size: 18px;
-  color: var(--role-primary-dark, #67e8f9);
+  font-family: var(--font-heading);
+  font-size: 1.125rem;
+  color: var(--color-foreground);
 }
 
 .strip-head span {
-  font-size: 13px;
-  color: var(--role-text-muted, #8ec8de);
+  font-size: 0.8125rem;
+  color: var(--color-muted-foreground);
 }
 
 .todo-grid {
@@ -147,55 +147,55 @@ onMounted(loadData)
   display: grid;
   gap: 6px;
   padding: 14px;
-  border-radius: 14px;
-  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-neutral);
   text-align: left;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
-  background: var(--role-surface-card, rgba(10, 36, 58, 0.68));
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  background: var(--color-background);
 }
 
 .todo-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  box-shadow: var(--shadow-md);
 }
 
 .todo-card--interview {
-  border-color: rgba(245, 158, 11, 0.28);
+  border-color: rgba(217, 119, 6, 0.35);
 }
 
 .todo-card--activity {
-  border-color: rgba(34, 197, 94, 0.28);
+  border-color: rgba(13, 148, 136, 0.35);
 }
 
 .todo-card--activity .todo-tag {
-  color: #4ade80;
+  color: var(--color-primary-dark);
 }
 
 .todo-card--message {
-  border-color: rgba(124, 58, 237, 0.28);
+  border-color: rgba(217, 119, 6, 0.28);
 }
 
 .todo-card--message .todo-tag {
-  color: #c4b5fd;
+  color: var(--color-accent);
 }
 
 .todo-tag {
   font-size: 12px;
-  color: #fbbf24;
+  color: var(--color-accent);
   font-weight: 600;
 }
 
 .todo-card strong {
   font-size: 14px;
-  color: var(--role-text, #e8f8ff);
+  color: var(--color-foreground);
   line-height: 1.4;
 }
 
 .todo-card p {
   margin: 0;
   font-size: 12px;
-  color: var(--role-text-muted, #8ec8de);
+  color: var(--color-muted-foreground);
   line-height: 1.5;
 }
 

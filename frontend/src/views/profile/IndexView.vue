@@ -31,7 +31,7 @@ const studentStatCards = computed(() => {
       value: data.creditBalance,
       suffix: '分',
       icon: 'credit',
-      color: '#2094f3',
+      color: '#22c55e',
       path: '/profile/credit',
     },
     {
@@ -40,7 +40,7 @@ const studentStatCards = computed(() => {
       value: data.integrityScore ?? '-',
       suffix: data.integrityScore != null ? '分' : '',
       icon: 'integrity',
-      color: '#fa8c16',
+      color: '#d97706',
       path: '/profile/integrity',
     },
     {
@@ -49,7 +49,7 @@ const studentStatCards = computed(() => {
       value: data.unreadMessageCount,
       suffix: '条',
       icon: 'message',
-      color: '#722ed1',
+      color: '#0284c7',
       path: '/profile/messages',
     },
   ]
@@ -64,7 +64,7 @@ const enterpriseStatCards = computed(() => {
       value: '进入',
       suffix: '',
       icon: 'enterprise',
-      color: '#2094f3',
+      color: '#22c55e',
       path: '/profile/enterprise',
     },
     {
@@ -73,7 +73,7 @@ const enterpriseStatCards = computed(() => {
       value: '查看',
       suffix: '',
       icon: 'view',
-      color: '#52c41a',
+      color: '#059669',
       path: user.value?.orgId ? `/enterprise/${user.value.orgId}` : '/enterprise',
     },
     {
@@ -82,30 +82,30 @@ const enterpriseStatCards = computed(() => {
       value: unread,
       suffix: '条',
       icon: 'message',
-      color: '#722ed1',
+      color: '#0284c7',
       path: '/profile/messages',
     },
   ]
 })
 
 const studentQuickEntries = [
-  { label: '我的简历', desc: '编辑个人简历', icon: 'resume', path: '/profile/resume', color: '#2094f3' },
-  { label: '学习档案', desc: '学习记录与统计', icon: 'folder', path: '/profile/learning', color: '#52c41a' },
-  { label: '学习画像', desc: 'AI 生成能力画像', icon: 'user', path: '/profile/learning-profile', color: '#2094f3' },
-  { label: '秩点流水', desc: '查看秩点变动', icon: 'credit', path: '/profile/credit', color: '#fa8c16' },
-  { label: '诚信评定', desc: '诚信分详情', icon: 'integrity', path: '/profile/integrity', color: '#eb2f96' },
-  { label: '投递记录', desc: '求职投递历史', icon: 'applications', path: '/profile/applications', color: '#13c2c2' },
-  { label: '我的活动', desc: '活动报名与邀请', icon: 'activity', path: '/profile/activities', color: '#722ed1' },
-  { label: '消息中心', desc: '查看私信通知', icon: 'message', path: '/profile/messages', color: '#eb2f96' },
+  { label: '我的简历', desc: '编辑个人简历', icon: 'resume', path: '/profile/resume', color: '#22c55e' },
+  { label: '学习档案', desc: '学习记录与统计', icon: 'folder', path: '/profile/learning', color: '#059669' },
+  { label: '学习画像', desc: 'AI 生成能力画像', icon: 'user', path: '/profile/learning-profile', color: '#0f766e' },
+  { label: '秩点流水', desc: '查看秩点变动', icon: 'credit', path: '/profile/credit', color: '#d97706' },
+  { label: '诚信评定', desc: '诚信分详情', icon: 'integrity', path: '/profile/integrity', color: '#ea580c' },
+  { label: '投递记录', desc: '求职投递历史', icon: 'applications', path: '/profile/applications', color: '#0284c7' },
+  { label: '我的活动', desc: '活动报名与邀请', icon: 'activity', path: '/profile/activities', color: '#22c55e' },
+  { label: '消息中心', desc: '查看私信通知', icon: 'message', path: '/profile/messages', color: '#0284c7' },
 ]
 
 const enterpriseQuickEntries = [
-  { label: '企业工作台', desc: '运营数据概览', icon: 'enterprise', path: '/profile/enterprise', color: '#2094f3' },
-  { label: '招聘管理', desc: '发布与管理职位', icon: 'job', path: '/profile/enterprise/jobs', color: '#52c41a' },
-  { label: '活动管理', desc: '发布与管理活动', icon: 'activity', path: '/profile/enterprise/activities', color: '#13c2c2' },
-  { label: '投递管理', desc: '处理简历投递', icon: 'applications', path: '/profile/enterprise/applications', color: '#fa8c16' },
-  { label: '机构信息', desc: '维护企业简介', icon: 'school', path: '/profile/enterprise/org', color: '#2f54eb' },
-  { label: '消息中心', desc: '查看私信通知', icon: 'message', path: '/profile/messages', color: '#722ed1' },
+  { label: '企业工作台', desc: '运营数据概览', icon: 'enterprise', path: '/profile/enterprise', color: '#22c55e' },
+  { label: '招聘管理', desc: '发布与管理职位', icon: 'job', path: '/profile/enterprise/jobs', color: '#059669' },
+  { label: '活动管理', desc: '发布与管理活动', icon: 'activity', path: '/profile/enterprise/activities', color: '#0f766e' },
+  { label: '投递管理', desc: '处理简历投递', icon: 'applications', path: '/profile/enterprise/applications', color: '#d97706' },
+  { label: '机构信息', desc: '维护企业简介', icon: 'school', path: '/profile/enterprise/org', color: '#0284c7' },
+  { label: '消息中心', desc: '查看私信通知', icon: 'message', path: '/profile/messages', color: '#0284c7' },
 ]
 
 const statCards = computed(() =>
@@ -233,15 +233,15 @@ onMounted(() => {
   width: 72px;
   height: 72px;
   border-radius: 50%;
-  background: rgba(56, 189, 248, 0.2);
-  color: #7dd3fc;
+  background: var(--color-primary-light);
+  color: var(--color-primary-dark);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 28px;
   font-weight: 600;
   flex-shrink: 0;
-  border: 1px solid rgba(125, 211, 252, 0.28);
+  border: 1px solid var(--color-border);
 }
 
 .user-title-row {
@@ -254,30 +254,31 @@ onMounted(() => {
 
 .user-title-row h1 {
   font-size: 26px;
-  color: #e0f2fe;
+  color: var(--color-foreground);
+  font-family: var(--font-heading);
 }
 
 .user-sub {
   font-size: 14px;
-  color: rgba(148, 163, 184, 0.9);
+  color: var(--color-muted-foreground);
   margin-bottom: 4px;
 }
 
 .user-org {
   font-size: 13px;
-  color: rgba(186, 230, 253, 0.75);
+  color: var(--color-muted-foreground);
 }
 
 .info-card {
   margin-bottom: 28px;
-  background: rgba(8, 20, 40, 0.42) !important;
-  border: 1px solid rgba(125, 211, 252, 0.16) !important;
-  backdrop-filter: blur(10px);
-  color: #e2e8f0;
+  background: var(--color-card) !important;
+  border: 1px solid var(--color-border-neutral) !important;
+  color: var(--color-card-foreground);
+  box-shadow: var(--shadow-sm);
 }
 
 .info-card :deep(.el-card__header) {
-  border-bottom-color: rgba(125, 211, 252, 0.12);
-  color: #e0f2fe;
+  border-bottom-color: var(--color-border-neutral);
+  color: var(--color-foreground);
 }
 </style>

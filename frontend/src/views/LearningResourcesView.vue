@@ -190,7 +190,17 @@ onMounted(async () => {
 
 <template>
   <div class="resources-portal" v-loading="loading">
-    <!-- 介绍区：参考示范教学包问答布局 -->
+    <!-- 页头：与首页 CTA 连续的浅色教育站气质 -->
+    <section class="page-hero">
+      <div class="page-hero__inner">
+        <p class="eyebrow">学习资源</p>
+        <h1>探索优质课程</h1>
+        <p class="page-hero__desc">
+          由联盟机构与平台沉淀的在线课程，支持视频学习、进度追踪与成果认证。
+        </p>
+      </div>
+    </section>
+
     <section class="intro-band">
       <div class="intro-inner">
         <div class="intro-card">
@@ -210,10 +220,9 @@ onMounted(async () => {
       </div>
     </section>
 
-    <!-- 优势 -->
     <section class="portal-section">
       <header class="section-head">
-        <p class="eyebrow">Advantages</p>
+        <p class="eyebrow">平台优势</p>
         <h2>学习资源的优势</h2>
       </header>
       <div class="advantage-grid">
@@ -225,12 +234,13 @@ onMounted(async () => {
       </div>
     </section>
 
-    <!-- 资源目录 -->
+    <!-- 课程目录：Popular Courses 气质 + 真实数据 -->
     <section class="portal-section catalog-section">
       <header class="section-head section-head--row">
         <div>
-          <p class="eyebrow">Catalog</p>
-          <h2>学习资源</h2>
+          <p class="eyebrow">课程目录</p>
+          <h2>精选课程</h2>
+          <p class="section-sub">按标签与学习状态筛选，进入课程页继续学习</p>
         </div>
         <div class="catalog-stats">
           <div>
@@ -368,15 +378,14 @@ onMounted(async () => {
           size="large"
           @click="showAllCourses = !showAllCourses"
         >
-          {{ showAllCourses ? '收起列表' : '查看更多' }}
+          {{ showAllCourses ? '收起列表' : '查看更多课程' }}
         </el-button>
       </div>
     </section>
 
-    <!-- 反馈引言 -->
     <section class="portal-section quote-section">
       <header class="section-head">
-        <p class="eyebrow">Voices</p>
+        <p class="eyebrow">学习者声音</p>
         <h2>学习者与共建者反馈</h2>
       </header>
       <div class="quote-grid">
@@ -394,19 +403,43 @@ onMounted(async () => {
 
 <style scoped>
 .resources-portal {
-  background: transparent;
-  padding-bottom: 56px;
+  background: var(--nb-cream, var(--color-background));
+  padding-bottom: 64px;
   min-height: calc(100vh - var(--header-height));
 }
 
-.intro-band {
-  position: relative;
-  padding: 56px 16px 48px;
-  margin-bottom: 8px;
+.page-hero {
+  padding: 48px 16px 28px;
   background:
-    radial-gradient(ellipse at 20% 0%, rgba(14, 165, 233, 0.28), transparent 50%),
-    radial-gradient(ellipse at 80% 20%, rgba(56, 189, 248, 0.18), transparent 45%),
-    linear-gradient(180deg, rgba(8, 20, 40, 0.35), transparent);
+    radial-gradient(circle at 88% 18%, rgba(34, 197, 94, 0.12), transparent 28%),
+    radial-gradient(circle at 12% 80%, rgba(190, 227, 248, 0.45), transparent 32%),
+    var(--nb-cream, var(--color-background));
+  border-bottom: 2.5px solid var(--nb-ink, var(--color-border-neutral));
+}
+
+.page-hero__inner {
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+}
+
+.page-hero h1 {
+  margin: 0 0 12px;
+  font-family: var(--font-heading);
+  font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+  color: var(--color-foreground);
+  line-height: 1.2;
+}
+
+.page-hero__desc {
+  margin: 0;
+  max-width: 40rem;
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: var(--color-text-secondary);
+}
+
+.intro-band {
+  padding: 28px 16px 8px;
 }
 
 .intro-inner {
@@ -414,42 +447,41 @@ onMounted(async () => {
   margin: 0 auto;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  gap: 16px;
 }
 
 .intro-card {
-  padding: 28px 30px;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(125, 211, 252, 0.22);
-  backdrop-filter: blur(14px);
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.18);
-  color: #e8f8ff;
+  padding: 24px 26px;
+  border-radius: var(--radius-lg);
+  background: #fff;
+  border: 2.5px solid var(--nb-ink, var(--color-border-neutral));
+  box-shadow: var(--nb-shadow-sm, var(--shadow-sm));
+  color: var(--color-foreground);
 }
 
 .intro-card h2 {
-  margin: 0 0 12px;
-  font-size: 24px;
-  color: #f0f9ff;
+  margin: 0 0 10px;
+  font-family: var(--font-heading);
+  font-size: 1.2rem;
+  color: var(--color-foreground);
 }
 
 .intro-card p {
   margin: 0;
-  line-height: 1.85;
-  color: rgba(224, 242, 254, 0.86);
-  font-size: 15px;
+  line-height: 1.8;
+  color: var(--color-muted-foreground);
+  font-size: 0.95rem;
 }
 
 .portal-section {
   max-width: var(--content-max-width);
   margin: 0 auto;
-  padding: 28px 16px 8px;
+  padding: 32px 16px 8px;
 }
 
 .section-head {
   text-align: center;
   margin-bottom: 24px;
-  color: rgba(226, 232, 240, 0.78);
 }
 
 .section-head--row {
@@ -462,18 +494,26 @@ onMounted(async () => {
 
 .eyebrow {
   margin: 0 0 8px;
-  font-size: 12px;
-  letter-spacing: 0.16em;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #7dd3fc;
+  color: var(--color-primary);
   font-weight: 700;
 }
 
 .section-head h2 {
   margin: 0;
-  font-size: 30px;
-  color: #f8fafc;
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.35);
+  font-family: var(--font-heading);
+  font-size: clamp(1.5rem, 2.5vw, 1.875rem);
+  color: var(--color-foreground);
+  text-shadow: none;
+}
+
+.section-sub {
+  margin: 8px 0 0;
+  font-size: 0.9rem;
+  color: var(--color-muted-foreground);
+  line-height: 1.5;
 }
 
 .catalog-stats {
@@ -484,21 +524,21 @@ onMounted(async () => {
 .catalog-stats div {
   min-width: 88px;
   padding: 10px 14px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: var(--radius-md);
+  background: var(--color-primary-light);
+  border: 1px solid var(--color-border);
   text-align: center;
 }
 
 .catalog-stats strong {
   display: block;
-  font-size: 22px;
-  color: #f8fafc;
+  font-size: 1.35rem;
+  color: var(--color-primary-dark);
 }
 
 .catalog-stats span {
   font-size: 12px;
-  color: rgba(186, 230, 253, 0.7);
+  color: var(--color-muted-foreground);
 }
 
 .advantage-grid {
@@ -509,44 +549,44 @@ onMounted(async () => {
 
 .advantage-card {
   padding: 24px 22px;
-  border-radius: 16px;
-  background: rgba(8, 30, 48, 0.45);
-  border: 1px solid rgba(103, 232, 249, 0.18);
-  backdrop-filter: blur(12px);
-  color: #e0f2fe;
+  border-radius: var(--radius-lg);
+  background: var(--color-card);
+  border: 1px solid var(--color-border-neutral);
+  box-shadow: var(--shadow-sm);
+  color: var(--color-foreground);
 }
 
 .advantage-icon {
   display: inline-grid;
   place-items: center;
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   margin-bottom: 14px;
   border-radius: 12px;
-  font-size: 22px;
-  background: rgba(14, 165, 233, 0.18);
-  border: 1px solid rgba(125, 211, 252, 0.28);
+  color: var(--color-primary-dark);
+  background: var(--color-primary-light);
 }
 
 .advantage-card h3 {
   margin: 0 0 10px;
-  font-size: 18px;
-  color: #f0f9ff;
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  color: var(--color-foreground);
 }
 
 .advantage-card p {
   margin: 0;
   line-height: 1.7;
-  font-size: 14px;
-  color: rgba(186, 230, 253, 0.78);
+  font-size: 0.9rem;
+  color: var(--color-muted-foreground);
 }
 
 .catalog-section {
-  padding-top: 36px;
+  padding-top: 40px;
 }
 
 .catalog-toolbar {
-  margin-bottom: 14px;
+  margin-bottom: 16px;
 }
 
 .catalog-toolbar .glass-search {
@@ -561,20 +601,23 @@ onMounted(async () => {
 }
 
 .chip-row--tags {
-  margin-bottom: 20px;
+  margin-bottom: 22px;
 }
 
 .chip {
-  border: 1px solid rgba(148, 163, 184, 0.28);
-  background: rgba(15, 23, 42, 0.35);
-  color: rgba(226, 232, 240, 0.86);
+  border: 2px solid var(--nb-ink, var(--color-border-neutral));
+  background: #fff;
+  color: var(--color-foreground);
   border-radius: 999px;
   padding: 7px 14px;
   cursor: pointer;
   font-size: 13px;
+  font-weight: 700;
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  box-shadow: 2px 2px 0 0 var(--nb-ink, #1a202c);
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
 }
 
 .chip em {
@@ -587,42 +630,48 @@ onMounted(async () => {
   background: transparent;
 }
 
-.chip:hover,
+.chip:hover {
+  border-color: var(--nb-ink, var(--color-border));
+  background: var(--nb-yellow, var(--color-primary-light));
+  color: var(--nb-ink, var(--color-primary-dark));
+}
+
 .chip.active {
-  border-color: rgba(56, 189, 248, 0.55);
-  color: #e0f2fe;
-  background: rgba(14, 165, 233, 0.22);
-  font-weight: 600;
+  border-color: var(--nb-ink, var(--color-primary));
+  color: var(--nb-ink, var(--color-primary-dark));
+  background: #bbf7d0;
+  font-weight: 800;
+  box-shadow: 2px 2px 0 0 var(--nb-ink, #1a202c);
 }
 
 .package-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 16px;
+  gap: 18px;
 }
 
 .package-card {
   display: flex;
   flex-direction: column;
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
   cursor: pointer;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  backdrop-filter: blur(12px);
-  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.18);
-  transition: transform 0.18s, border-color 0.18s;
+  background: #fff;
+  border: 2.5px solid var(--nb-ink, var(--color-border-neutral));
+  box-shadow: var(--nb-shadow, var(--shadow-md));
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
 }
 
 .package-card:hover {
-  transform: translateY(-3px);
-  border-color: rgba(125, 211, 252, 0.4);
+  transform: translate(3px, 3px);
+  border-color: var(--nb-ink, var(--color-border));
+  box-shadow: 2px 2px 0 0 var(--nb-ink, #1a202c);
 }
 
 .package-cover {
   position: relative;
   aspect-ratio: 16 / 10;
-  background: #0b1527;
+  background: var(--color-muted);
 }
 
 .package-cover img,
@@ -639,8 +688,8 @@ onMounted(async () => {
 .cover-fallback {
   display: grid;
   place-items: center;
-  font-size: 36px;
-  background: linear-gradient(135deg, #0c4a6e, #0284c7);
+  color: var(--color-on-primary);
+  background: linear-gradient(135deg, var(--color-primary-dark), var(--color-primary));
 }
 
 .package-badge {
@@ -651,18 +700,26 @@ onMounted(async () => {
   border-radius: 999px;
   font-size: 11px;
   font-weight: 700;
-  color: #082f49;
-  background: rgba(186, 230, 253, 0.92);
+  color: var(--color-primary-dark);
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid var(--color-border);
 }
 
 .package-badge.paid {
-  background: rgba(251, 191, 36, 0.92);
-  color: #78350f;
+  background: #fff7ed;
+  color: #9a3412;
+  border-color: rgba(217, 119, 6, 0.35);
 }
 
 .package-badge.done {
-  background: rgba(74, 222, 128, 0.92);
-  color: #14532d;
+  background: #ecfdf5;
+  color: #065f46;
+  border-color: rgba(16, 185, 129, 0.35);
+}
+
+.package-badge.progress {
+  background: var(--color-primary-light);
+  color: var(--color-primary-dark);
 }
 
 .package-body {
@@ -671,25 +728,27 @@ onMounted(async () => {
   flex-direction: column;
   gap: 8px;
   flex: 1;
-  color: #e8f8ff;
+  color: var(--color-foreground);
 }
 
 .package-body h3 {
   margin: 0;
-  font-size: 16px;
+  font-family: var(--font-heading);
+  font-size: 1rem;
   line-height: 1.4;
-  color: #f8fafc;
+  color: var(--color-foreground);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  min-height: 44px;
+  min-height: 2.8em;
 }
 
 .package-org {
   margin: 0;
   font-size: 12px;
-  color: #7dd3fc;
+  color: var(--color-primary);
+  font-weight: 600;
 }
 
 .package-tags {
@@ -703,9 +762,9 @@ onMounted(async () => {
   padding: 1px 8px;
   border-radius: 999px;
   font-size: 11px;
-  background: rgba(14, 165, 233, 0.16);
-  border: 1px solid rgba(125, 211, 252, 0.25);
-  color: #bae6fd;
+  background: var(--color-primary-light);
+  border: 1px solid var(--color-border);
+  color: var(--color-primary-dark);
 }
 
 .package-meta {
@@ -713,7 +772,7 @@ onMounted(async () => {
   flex-wrap: wrap;
   gap: 10px;
   font-size: 12px;
-  color: rgba(186, 230, 253, 0.72);
+  color: var(--color-muted-foreground);
 }
 
 .package-actions {
@@ -727,41 +786,47 @@ onMounted(async () => {
 .more-wrap {
   display: flex;
   justify-content: center;
-  margin-top: 24px;
+  margin-top: 28px;
 }
 
 .more-btn {
-  min-width: 160px;
+  min-width: 180px;
   border-radius: 999px !important;
-  background: rgba(14, 165, 233, 0.2) !important;
-  border: 1px solid rgba(125, 211, 252, 0.4) !important;
-  color: #e0f2fe !important;
+  background: var(--color-card) !important;
+  border: 1px solid var(--color-primary) !important;
+  color: var(--color-primary-dark) !important;
+  font-weight: 600 !important;
+}
+
+.more-btn:hover {
+  background: var(--color-primary-light) !important;
 }
 
 .quote-section {
-  padding-top: 40px;
+  padding-top: 48px;
 }
 
 .quote-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
+  gap: 16px;
 }
 
 .quote-card {
   margin: 0;
   padding: 22px 20px;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(10px);
-  color: rgba(226, 232, 240, 0.9);
+  border-radius: var(--radius-lg);
+  background: #fff;
+  border: 2.5px solid var(--nb-ink, var(--color-border-neutral));
+  box-shadow: var(--nb-shadow-sm, var(--shadow-sm));
+  color: var(--color-foreground);
 }
 
 .quote-card p {
   margin: 0 0 16px;
   line-height: 1.75;
-  font-size: 14px;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
 }
 
 .quote-card footer {
@@ -771,13 +836,13 @@ onMounted(async () => {
 }
 
 .quote-card strong {
-  color: #7dd3fc;
+  color: var(--color-primary-dark);
   font-size: 13px;
 }
 
 .quote-card span {
   font-size: 12px;
-  color: rgba(148, 163, 184, 0.85);
+  color: var(--color-muted-foreground);
 }
 
 @media (max-width: 1100px) {
@@ -806,6 +871,10 @@ onMounted(async () => {
 @media (max-width: 560px) {
   .package-grid {
     grid-template-columns: 1fr;
+  }
+
+  .page-hero {
+    padding: 36px 16px 24px;
   }
 }
 </style>

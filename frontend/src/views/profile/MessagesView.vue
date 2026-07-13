@@ -156,6 +156,6 @@ onMounted(async () => {
 
 .unread {
   font-weight: 600;
-  color: #e0f2fe;
+  color: #1a202c;
 }
 </style>

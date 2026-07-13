@@ -523,14 +523,15 @@ onUnmounted(() => {
   position: relative;
   width: 72px;
   height: 72px;
-  border-radius: 50%;
-  background: linear-gradient(160deg, #4db3ff 0%, #2094f3 55%, #1a7fd4 100%);
+  border-radius: 18px;
+  background: linear-gradient(160deg, #86efac 0%, #22c55e 55%, #16a34a 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8px 24px rgba(32, 148, 243, 0.4);
+  border: 2.5px solid var(--nb-ink, #1a202c);
+  box-shadow: var(--nb-shadow, 4px 4px 0 0 #1a202c);
   overflow: hidden;
-  transition: transform 0.2s ease;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
 }
 
 .ai-ring {
@@ -657,7 +658,7 @@ onUnmounted(() => {
   font-size: 13px;
   line-height: 1.55;
   border-radius: 12px 12px 4px 12px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.14);
+  box-shadow: var(--nb-shadow-sm, 3px 3px 0 0 #1a202c);
   white-space: normal;
   word-break: keep-all;
   overflow-wrap: break-word;
@@ -681,7 +682,7 @@ onUnmounted(() => {
   height: 420px;
   background: #fff;
   border-radius: 14px;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+  box-shadow: var(--nb-shadow-lg, 6px 6px 0 0 #1a202c);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -694,7 +695,7 @@ onUnmounted(() => {
   align-items: center;
   justify-content: space-between;
   padding: 12px 14px;
-  background: #2094f3;
+  background: #22c55e;
   color: #fff;
 }
 
@@ -763,7 +764,7 @@ onUnmounted(() => {
 
 .ai-msg.user {
   align-self: flex-end;
-  background: #2094f3;
+  background: #22c55e;
   color: #fff;
 }
 
@@ -796,7 +797,7 @@ onUnmounted(() => {
   align-self: flex-start;
   padding: 4px 10px;
   border-radius: 999px;
-  background: #2094f3;
+  background: #22c55e;
   color: #fff;
   font-size: 13px;
   font-weight: 600;
@@ -821,7 +822,7 @@ onUnmounted(() => {
   border-radius: 6px;
   background: #fff;
   border: 1px solid #cfe3f7;
-  color: #1a7fd4;
+  color: #16a34a;
   font-size: 12px;
   line-height: 1.4;
 }
@@ -870,7 +871,7 @@ onUnmounted(() => {
   border: 1px solid rgba(32, 148, 243, 0.35);
   border-radius: 8px;
   background: #fff;
-  color: #1a7fd4;
+  color: #16a34a;
   font-size: 13px;
   cursor: pointer;
 }
@@ -891,7 +892,7 @@ onUnmounted(() => {
 }
 
 .ai-panel-footer input:focus {
-  border-color: #2094f3;
+  border-color: #22c55e;
 }
 
 .ai-send {
@@ -899,14 +900,14 @@ onUnmounted(() => {
   padding: 0 16px;
   border: none;
   border-radius: 8px;
-  background: #2094f3;
+  background: #22c55e;
   color: #fff;
   font-size: 14px;
   cursor: pointer;
 }
 
 .ai-send:hover {
-  background: #1a7fd4;
+  background: #16a34a;
 }
 
 .ai-send:disabled,

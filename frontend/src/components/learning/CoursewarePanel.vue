@@ -92,7 +92,7 @@ watch(
       >
         <div
           class="material-icon"
-          :style="{ background: `${typeMeta[item.fileType]?.color || '#00a1d6'}18`, color: typeMeta[item.fileType]?.color || '#00a1d6' }"
+          :style="{ background: `${typeMeta[item.fileType]?.color || '#22c55e'}18`, color: typeMeta[item.fileType]?.color || '#22c55e' }"
         >
           <el-icon><Document v-if="item.fileType !== 'link'" /><Link v-else /></el-icon>
         </div>
@@ -146,15 +146,17 @@ watch(
   gap: 12px;
   align-items: center;
   padding: 14px 16px;
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
+  border: 2.5px solid var(--nb-ink, #1a202c);
+  border-radius: 14px;
   background: #fff;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  box-shadow: var(--nb-shadow-sm, 3px 3px 0 0 #1a202c);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
 }
 
 .material-card:hover {
-  border-color: #00a1d6;
-  box-shadow: 0 8px 20px rgba(0, 161, 214, 0.12);
+  border-color: var(--nb-ink, #1a202c);
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 0 var(--nb-ink, #1a202c);
 }
 
 .material-icon {
@@ -192,22 +194,26 @@ watch(
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  border: 1px solid var(--color-border);
+  border: 2px solid var(--nb-ink, #1a202c);
   background: #fff;
   color: var(--color-text-secondary);
-  border-radius: 8px;
+  border-radius: 999px;
   padding: 6px 12px;
   font-size: 12px;
+  font-weight: 700;
   cursor: pointer;
+  box-shadow: 2px 2px 0 0 var(--nb-ink, #1a202c);
 }
 
 .action-btn.primary {
-  border-color: #00a1d6;
-  background: #00a1d6;
+  border-color: var(--nb-ink, #1a202c);
+  background: var(--nb-green, #22c55e);
   color: #fff;
 }
 
 .action-btn:hover {
-  opacity: 0.92;
+  opacity: 1;
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0 0 var(--nb-ink, #1a202c);
 }
 </style>

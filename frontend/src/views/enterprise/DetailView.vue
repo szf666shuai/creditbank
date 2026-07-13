@@ -558,34 +558,31 @@ onMounted(async () => {
   align-items: center;
   gap: 6px;
   border: none;
-  background: rgba(56, 189, 248, 0.1);
-  color: #7dd3fc;
+  background: color-mix(in srgb, var(--color-primary) 16%, transparent);
+  color: var(--color-primary);
   font-size: 14px;
   cursor: pointer;
   margin-bottom: 20px;
   padding: 8px 14px;
   border-radius: 999px;
-  border: 1px solid rgba(125, 211, 252, 0.22);
+  border: 2.5px solid var(--nb-ink, var(--color-border-neutral));
   transition: background 0.2s, color 0.2s;
 }
 
 .back-link:hover {
-  background: rgba(56, 189, 248, 0.18);
-  color: #e0f2fe;
+  background: color-mix(in srgb, var(--color-primary) 16%, transparent);
+  color: var(--color-foreground);
 }
 
 .org-hero {
   position: relative;
   overflow: hidden;
-  background:
-    radial-gradient(ellipse at 10% 0%, rgba(56, 189, 248, 0.2), transparent 48%),
-    rgba(8, 20, 40, 0.55);
-  border: 1px solid rgba(125, 211, 252, 0.18);
+  background: var(--color-card);
+  border: 2.5px solid var(--nb-ink, var(--color-border-neutral));
   border-radius: 18px;
   padding: 28px;
   margin-bottom: 24px;
-  backdrop-filter: blur(14px);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.22);
+  box-shadow: var(--nb-shadow, var(--shadow-md));
 }
 
 .org-hero__glow {
@@ -594,7 +591,7 @@ onMounted(async () => {
   width: 220px;
   height: 220px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(56, 189, 248, 0.22), transparent 70%);
+  background: radial-gradient(circle, color-mix(in srgb, var(--color-secondary) 28%, transparent), transparent 70%);
   pointer-events: none;
 }
 
@@ -610,8 +607,8 @@ onMounted(async () => {
   height: 88px;
   border-radius: 18px;
   overflow: hidden;
-  background: rgba(56, 189, 248, 0.12);
-  border: 1px solid rgba(125, 211, 252, 0.24);
+  background: color-mix(in srgb, var(--color-primary) 16%, transparent);
+  border: 2.5px solid var(--nb-ink, var(--color-border-neutral));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -625,7 +622,7 @@ onMounted(async () => {
 }
 
 .org-logo-fallback {
-  color: #7dd3fc;
+  color: var(--color-primary);
 }
 
 .org-kicker {
@@ -633,7 +630,7 @@ onMounted(async () => {
   font-size: 12px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: rgba(186, 230, 253, 0.72);
+  color: var(--color-muted-foreground);
 }
 
 .org-title-row {
@@ -646,13 +643,13 @@ onMounted(async () => {
 
 .org-title-row h1 {
   font-size: 28px;
-  color: #e0f2fe;
+  color: var(--color-foreground);
 }
 
 .org-intro {
   font-size: 15px;
   line-height: 1.75;
-  color: rgba(186, 230, 253, 0.88);
+  color: var(--color-muted-foreground);
   max-width: 760px;
 }
 
@@ -662,27 +659,27 @@ onMounted(async () => {
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 14px;
   padding-top: 20px;
-  border-top: 1px solid rgba(125, 211, 252, 0.14);
+  border-top: 1px solid var(--color-border-neutral);
 }
 
 .contact-item {
   padding: 12px 14px;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(125, 211, 252, 0.1);
+  background: var(--color-background);
+  border: 2.5px solid var(--nb-ink, var(--color-border-neutral));
   font-size: 14px;
-  color: #e2e8f0;
+  color: var(--color-foreground);
 }
 
 .contact-item .label {
   display: block;
-  color: rgba(186, 230, 253, 0.65);
+  color: var(--color-muted-foreground);
   font-size: 12px;
   margin-bottom: 6px;
 }
 
 .contact-item a {
-  color: #38bdf8;
+  color: var(--color-primary);
   text-decoration: none;
 }
 
@@ -691,32 +688,31 @@ onMounted(async () => {
 }
 
 .detail-tabs {
-  background: rgba(8, 20, 40, 0.42);
-  border: 1px solid rgba(125, 211, 252, 0.16);
+  background: var(--color-card);
+  border: 2.5px solid var(--nb-ink, var(--color-border-neutral));
   border-radius: 16px;
   padding: 8px 20px 24px;
-  backdrop-filter: blur(12px);
-}
+  }
 
 .detail-tabs :deep(.el-tabs__header) {
   margin-bottom: 20px;
 }
 
 .detail-tabs :deep(.el-tabs__item) {
-  color: rgba(186, 230, 253, 0.72);
+  color: var(--color-muted-foreground);
   font-size: 15px;
 }
 
 .detail-tabs :deep(.el-tabs__item.is-active) {
-  color: #38bdf8;
+  color: var(--color-primary);
 }
 
 .detail-tabs :deep(.el-tabs__active-bar) {
-  background: #38bdf8;
+  background: var(--color-primary);
 }
 
 .detail-tabs :deep(.el-tabs__nav-wrap::after) {
-  background: rgba(125, 211, 252, 0.12);
+  background: var(--color-border-neutral);
 }
 
 .tab-error {
@@ -730,21 +726,21 @@ onMounted(async () => {
 }
 
 .tab-card {
-  border: 1px solid rgba(125, 211, 252, 0.14);
+  border: 2.5px solid var(--nb-ink, var(--color-border-neutral));
   border-radius: 14px;
   padding: 18px 20px;
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--color-background);
   transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
 }
 
 .tab-card:hover {
-  border-color: rgba(56, 189, 248, 0.35);
-  transform: translateY(-1px);
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+  border-color: color-mix(in srgb, var(--color-primary) 16%, transparent);
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 0 var(--nb-ink, #1a202c);
 }
 
 .job-card {
-  border-left: 3px solid rgba(56, 189, 248, 0.55);
+  border-left: 3px solid color-mix(in srgb, var(--color-primary) 16%, transparent);
 }
 
 .tab-card-header {
@@ -757,7 +753,7 @@ onMounted(async () => {
 
 .tab-card-title h3 {
   font-size: 18px;
-  color: #e0f2fe;
+  color: var(--color-foreground);
   margin-bottom: 10px;
 }
 
@@ -773,7 +769,7 @@ onMounted(async () => {
 .tab-desc {
   font-size: 14px;
   line-height: 1.7;
-  color: rgba(186, 230, 253, 0.82);
+  color: var(--color-muted-foreground);
   margin-bottom: 8px;
 }
 
@@ -789,24 +785,24 @@ onMounted(async () => {
   padding: 4px 10px;
   border-radius: 999px;
   font-size: 12px;
-  color: rgba(224, 242, 254, 0.92);
-  background: rgba(56, 189, 248, 0.12);
-  border: 1px solid rgba(125, 211, 252, 0.16);
+  color: var(--color-primary-dark);
+  background: var(--color-primary-light);
+  border: 1px solid var(--color-border);
 }
 
 .tab-sub {
   margin-top: 10px;
   padding-top: 10px;
-  border-top: 1px dashed rgba(125, 211, 252, 0.14);
+  border-top: 1px dashed var(--color-border-neutral);
   font-size: 13px;
-  color: rgba(186, 230, 253, 0.72);
+  color: var(--color-muted-foreground);
   line-height: 1.6;
 }
 
 .tab-total {
   margin-top: 14px;
   font-size: 12px;
-  color: rgba(186, 230, 253, 0.65);
+  color: var(--color-muted-foreground);
   text-align: right;
 }
 
@@ -814,19 +810,19 @@ onMounted(async () => {
   padding: 14px 16px;
   margin-bottom: 18px;
   border-radius: 12px;
-  background: rgba(56, 189, 248, 0.1);
-  border: 1px solid rgba(125, 211, 252, 0.18);
+  background: color-mix(in srgb, var(--color-primary) 16%, transparent);
+  border: 2.5px solid var(--nb-ink, var(--color-border-neutral));
 }
 
 .apply-job-label {
   display: block;
   font-size: 12px;
-  color: rgba(186, 230, 253, 0.72);
+  color: var(--color-muted-foreground);
   margin-bottom: 6px;
 }
 
 .apply-job-banner strong {
-  color: #e0f2fe;
+  color: var(--color-foreground);
   font-size: 16px;
 }
 
@@ -838,7 +834,7 @@ onMounted(async () => {
   margin-bottom: 10px;
   font-size: 13px;
   font-weight: 600;
-  color: rgba(186, 230, 253, 0.88);
+  color: var(--color-muted-foreground);
 }
 
 .resume-mode-group {
@@ -852,14 +848,14 @@ onMounted(async () => {
   margin-top: 10px;
   font-size: 12px;
   line-height: 1.6;
-  color: rgba(186, 230, 253, 0.68);
+  color: var(--color-muted-foreground);
 }
 
 .apply-resume-link {
   display: inline-block;
   margin-top: 10px;
   font-size: 13px;
-  color: #38bdf8;
+  color: var(--color-primary);
   text-decoration: none;
 }
 

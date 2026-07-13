@@ -28,29 +28,33 @@ const title = computed(() => (route.meta.title as string) || '页面建设中')
 
 .placeholder-inner {
   text-align: center;
-  color: #e2e8f0;
+  color: var(--color-foreground);
 }
 
 .icon {
   margin-bottom: 16px;
+  color: var(--color-primary);
 }
 
 .placeholder-inner h2 {
   margin: 0 0 8px;
   font-size: 24px;
+  font-family: var(--font-heading);
 }
 
 .placeholder-inner p {
   margin: 0 0 20px;
-  color: rgba(186, 230, 253, 0.75);
+  color: var(--color-muted-foreground);
 }
 
 .back-link {
-  color: #38bdf8;
+  color: var(--color-primary);
   text-decoration: none;
+  font-weight: 600;
 }
 
 .back-link:hover {
+  color: var(--color-primary-dark);
   text-decoration: underline;
 }
 </style>

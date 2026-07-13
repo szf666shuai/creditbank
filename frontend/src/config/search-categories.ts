@@ -30,14 +30,14 @@ export const featuredSearchTypes = gridSearchTypes
 export const allSearchSections = {
   grid: gridSearchTypes,
   dual: [
-    { value: 'news', label: '资讯', icon: 'news', color: '#2094f3' },
-    { value: 'activity', label: '活动', icon: 'activity', color: '#13c2c2' },
+    { value: 'news', label: '资讯', icon: 'news', color: '#0284c7' },
+    { value: 'activity', label: '活动', icon: 'activity', color: '#0d9488' },
   ] as const,
   stack: [
-    { value: 'job', label: '招聘', icon: 'job', color: '#eb2f96' },
-    { value: 'forum', label: '论坛', icon: 'forum', color: '#722ed1' },
+    { value: 'job', label: '招聘', icon: 'job', color: '#d97706' },
+    { value: 'forum', label: '论坛', icon: 'forum', color: '#0f766e' },
   ] as const,
-  enterprise: { value: 'enterprise', label: '企业', icon: 'enterprise', color: '#52c41a' },
+  enterprise: { value: 'enterprise', label: '企业', icon: 'enterprise', color: '#059669' },
 }
 
 export const ALL_SEARCH_TYPE_VALUES = [

@@ -1,0 +1,97 @@
+/* Shared Neo-brutal utilities (MASTER neo-brutal lock) */
+
+.nb-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 0 20px;
+  border: 2.5px solid var(--nb-ink);
+  border-radius: 999px;
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  box-shadow: var(--nb-shadow);
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+  user-select: none;
+}
+
+.nb-btn:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 0 var(--nb-ink);
+}
+
+.nb-btn:active {
+  transform: translate(4px, 4px);
+  box-shadow: 0 0 0 0 var(--nb-ink);
+}
+
+.nb-btn--primary {
+  background: var(--nb-green);
+  color: #fff;
+}
+
+.nb-btn--primary:hover {
+  background: var(--nb-green-deep);
+}
+
+.nb-btn--secondary {
+  background: var(--nb-blue);
+  color: var(--nb-ink);
+}
+
+.nb-btn--cream {
+  background: var(--nb-cream);
+  color: var(--nb-ink);
+}
+
+.nb-btn--block {
+  width: 100%;
+}
+
+.nb-card {
+  background: #fff;
+  border: 2.5px solid var(--nb-ink);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--nb-shadow);
+}
+
+.nb-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 2px solid var(--nb-ink);
+  border-radius: 999px;
+  font-family: var(--font-heading);
+  font-size: 12px;
+  font-weight: 800;
+  box-shadow: var(--nb-shadow-sm);
+}
+
+.nb-icon-box {
+  width: 52px;
+  height: 52px;
+  border: 2.5px solid var(--nb-ink);
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  color: var(--nb-ink);
+}
+
+.nb-icon-box--green { background: #bbf7d0; }
+.nb-icon-box--blue { background: var(--nb-blue); }
+.nb-icon-box--pink { background: var(--nb-pink); }
+.nb-icon-box--purple { background: var(--nb-purple); }
+.nb-icon-box--yellow { background: var(--nb-yellow); }
+
+@media (prefers-reduced-motion: reduce) {
+  .nb-btn {
+    transition: none;
+  }
+}

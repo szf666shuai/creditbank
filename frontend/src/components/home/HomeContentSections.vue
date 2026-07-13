@@ -106,9 +106,14 @@ const displayJobs = computed(() =>
   padRows(homeData.value?.jobs ?? [], JOB_SLOT_COUNT, 'job', '更多招聘岗位即将发布', -200),
 )
 
-const featuredCourse = computed(() => homeData.value?.courses?.[0] ?? null)
-const courseList = computed(() => (homeData.value?.courses ?? []).slice(1, 5))
+const courseCards = computed(() => (homeData.value?.courses ?? []).slice(0, 4))
 const productShelf = computed(() => (homeData.value?.hotProducts ?? []).slice(0, 6))
+
+const courseAccent = ['pink', 'blue', 'purple', 'yellow'] as const
+
+function courseAccentClass(index: number) {
+  return `course-card__icon--${courseAccent[index % courseAccent.length]}`
+}
 
 function newsSubText(item: DisplayRow) {
   if (item.isPlaceholder) return item.extra ?? ''
@@ -156,62 +161,51 @@ onMounted(loadHomeData)
             <el-button link type="primary" @click="loadHomeData">重新加载</el-button>
           </template>
         </el-alert>
-        <!-- 热门课程：大图精选 + 侧栏列表 -->
-        <section class="home-block">
-          <HomeSectionHeader title="热门课程" icon="course" more-to="/resources" />
+        <!-- 热门课程：Neo-brutal 双列卡片 -->
+        <section class="home-block home-block--courses">
+          <HomeSectionHeader
+            title="热门课程"
+            badge="精选课程"
+            icon="course"
+            more-to="/resources"
+            more-label="查看全部课程"
+          />
           <el-empty v-if="!homeData.courses.length" description="暂无课程" :image-size="64" />
-          <div v-else class="course-showcase">
+          <div v-else class="course-grid">
             <router-link
-              v-if="featuredCourse"
-              :to="itemPath(featuredCourse)"
-              class="course-feature"
+              v-for="(item, index) in courseCards"
+              :key="`course-${item.id}`"
+              :to="itemPath(item)"
+              class="course-card"
             >
-              <div class="course-feature__cover">
-                <img
-                  v-if="showCoverImage(featuredCourse.coverUrl)"
-                  :src="featuredCourse.coverUrl"
-                  :alt="featuredCourse.title"
-                  loading="lazy"
-                />
-                <div v-else class="cover-placeholder course-placeholder">
-                  <UiIcon name="course" :size="36" />
-                </div>
-                <span class="play-badge" aria-hidden="true">▶</span>
-              </div>
-              <div class="course-feature__body">
-                <span class="course-kicker">本周精选</span>
-                <h3>{{ featuredCourse.title }}</h3>
-                <p v-if="featuredCourse.summary">{{ truncate(featuredCourse.summary, 90) }}</p>
-                <div class="course-feature__meta">
-                  <span v-if="featuredCourse.extra">{{ featuredCourse.extra }}</span>
-                  <em>进入学习</em>
-                </div>
-              </div>
-            </router-link>
-
-            <div class="course-rail">
-              <router-link
-                v-for="(item, index) in courseList"
-                :key="`course-${item.id}`"
-                :to="itemPath(item)"
-                class="course-rail-item"
-              >
-                <span class="course-rail-index">{{ String(index + 2).padStart(2, '0') }}</span>
-                <div class="course-rail-thumb">
+              <div class="course-card__top">
+                <div class="course-card__icon" :class="courseAccentClass(index)">
                   <img
                     v-if="showCoverImage(item.coverUrl)"
                     :src="item.coverUrl"
                     :alt="item.title"
                     loading="lazy"
                   />
-                  <UiIcon v-else name="course" :size="20" />
+                  <UiIcon v-else name="course" :size="24" />
                 </div>
-                <div class="course-rail-copy">
-                  <h4>{{ item.title }}</h4>
-                  <p>{{ item.extra || truncate(item.summary, 28) }}</p>
+                <div class="course-card__heading">
+                  <h3>{{ item.title }}</h3>
+                  <p class="course-card__extra">{{ item.extra || '学习资源' }}</p>
                 </div>
-              </router-link>
-            </div>
+                <span class="course-card__rating" title="学习热度">★ 精选</span>
+              </div>
+              <p v-if="item.summary" class="course-card__summary">{{ truncate(item.summary, 72) }}</p>
+              <div class="course-card__meta">
+                <span>课程</span>
+                <span>{{ item.typeName || '开放学习' }}</span>
+                <span>进入学习 →</span>
+              </div>
+            </router-link>
+          </div>
+          <div class="course-more-wrap">
+            <router-link to="/resources" class="nb-btn nb-btn--secondary course-more-btn">
+              查看全部课程 →
+            </router-link>
           </div>
         </section>
 
@@ -406,24 +400,11 @@ onMounted(loadHomeData)
 
 <style scoped>
 .home-content-sections {
-  margin-top: 32px;
-  padding: 32px 0 48px;
-  background: transparent;
+  margin-top: 8px;
+  padding: 40px 0 28px;
+  background: var(--nb-cream, #fff9f0);
   position: relative;
   z-index: 1;
-}
-
-.home-content-sections :deep(.header-title) {
-  color: #fff;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
-}
-
-.home-content-sections :deep(.header-more) {
-  color: rgba(255, 255, 255, 0.92);
-}
-
-.home-content-sections :deep(.header-more:hover) {
-  color: #fff;
 }
 
 .load-alert {
@@ -437,190 +418,142 @@ onMounted(loadHomeData)
 }
 
 .home-block {
-  margin-bottom: 36px;
+  margin-bottom: 40px;
 }
 
-/* —— 热门课程：大图精选 + 列表 —— */
-.course-showcase {
+/* —— 热门课程 Neo-brutal —— */
+.course-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.9fr);
-  gap: 16px;
-  align-items: stretch;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
 }
 
-.course-feature {
-  display: grid;
-  grid-template-rows: minmax(200px, 1fr) auto;
-  border-radius: 18px;
-  overflow: hidden;
-  text-decoration: none;
-  color: inherit;
-  background: rgba(8, 30, 48, 0.55);
-  border: 1px solid rgba(103, 232, 249, 0.22);
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.22);
-  transition: transform 0.18s, border-color 0.18s;
-}
-
-.course-feature:hover {
-  transform: translateY(-2px);
-  border-color: rgba(103, 232, 249, 0.45);
-}
-
-.course-feature__cover {
-  position: relative;
-  min-height: 220px;
-  background: #0b1527;
-}
-
-.course-feature__cover img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.play-badge {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  background: rgba(8, 145, 178, 0.88);
-  color: #ecfeff;
-  font-size: 18px;
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
-  border: 2px solid rgba(255, 255, 255, 0.35);
-}
-
-.course-feature__body {
-  padding: 18px 20px 20px;
-  color: #e8f8ff;
-}
-
-.course-kicker {
-  display: inline-block;
-  margin-bottom: 8px;
-  padding: 2px 10px;
-  border-radius: 999px;
-  font-size: 12px;
-  background: rgba(34, 211, 238, 0.18);
-  border: 1px solid rgba(103, 232, 249, 0.35);
-  color: #67e8f9;
-}
-
-.course-feature__body h3 {
-  margin: 0 0 8px;
-  font-size: 22px;
-  line-height: 1.35;
-}
-
-.course-feature__body p {
-  margin: 0;
-  line-height: 1.65;
-  color: rgba(232, 248, 255, 0.72);
-  font-size: 14px;
-}
-
-.course-feature__meta {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  align-items: center;
-  margin-top: 14px;
-  font-size: 13px;
-  color: rgba(186, 230, 253, 0.8);
-}
-
-.course-feature__meta em {
-  font-style: normal;
-  color: #67e8f9;
-  font-weight: 600;
-}
-
-.course-rail {
+.course-card {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-}
-
-.course-rail-item {
-  display: grid;
-  grid-template-columns: 28px 72px minmax(0, 1fr);
   gap: 12px;
-  align-items: center;
-  padding: 10px 12px;
-  border-radius: 14px;
+  padding: 18px 18px 16px;
+  background: #fff;
+  border: 2.5px solid var(--nb-ink);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--nb-shadow);
   text-decoration: none;
   color: inherit;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(10px);
-  transition: background 0.15s, transform 0.15s;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+  cursor: pointer;
 }
 
-.course-rail-item:hover {
-  background: rgba(34, 211, 238, 0.12);
-  transform: translateX(2px);
+.course-card:hover {
+  transform: translate(3px, 3px);
+  box-shadow: 2px 2px 0 0 var(--nb-ink);
 }
 
-.course-rail-index {
-  font-size: 13px;
-  font-weight: 700;
-  color: rgba(103, 232, 249, 0.7);
-  font-variant-numeric: tabular-nums;
+.course-card__top {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: start;
 }
 
-.course-rail-thumb {
-  width: 72px;
-  height: 48px;
-  border-radius: 8px;
+.course-card__icon {
+  width: 56px;
+  height: 56px;
+  border: 2.5px solid var(--nb-ink);
+  border-radius: 14px;
   overflow: hidden;
-  background: rgba(8, 30, 48, 0.8);
   display: grid;
   place-items: center;
-  font-size: 18px;
+  color: var(--nb-ink);
+  flex-shrink: 0;
 }
 
-.course-rail-thumb img {
+.course-card__icon img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.course-rail-copy {
+.course-card__icon--pink { background: var(--nb-pink); }
+.course-card__icon--blue { background: var(--nb-blue); }
+.course-card__icon--purple { background: var(--nb-purple); }
+.course-card__icon--yellow { background: var(--nb-yellow); }
+
+.course-card__heading {
   min-width: 0;
 }
 
-.course-rail-copy h4 {
+.course-card__heading h3 {
   margin: 0 0 4px;
-  font-size: 14px;
-  color: #f0f9ff;
-  line-height: 1.4;
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+  font-weight: 900;
+  line-height: 1.35;
+  color: var(--nb-ink);
   display: -webkit-box;
-  -webkit-line-clamp: 1;
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-.course-rail-copy p {
+.course-card__extra {
   margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-muted-foreground);
+}
+
+.course-card__rating {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border: 2px solid var(--nb-green-deep);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--nb-green-deep);
+  font-family: var(--font-heading);
   font-size: 12px;
-  color: rgba(186, 230, 253, 0.65);
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.course-card__summary {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--color-muted-foreground);
   display: -webkit-box;
-  -webkit-line-clamp: 1;
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+.course-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin-top: auto;
+  padding-top: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-muted-foreground);
+}
+
+.course-more-wrap {
+  display: flex;
+  justify-content: center;
+  margin-top: 22px;
+}
+
+.course-more-btn {
+  min-width: 220px;
 }
 
 .course-placeholder {
-  background: linear-gradient(135deg, #0c4a6e, #0891b2) !important;
+  background: var(--nb-pink) !important;
+  color: var(--nb-ink);
 }
 
-/* —— 热卖商品：价签货架 —— */
+/* —— 热卖商品 —— */
 .product-shelf {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
@@ -632,19 +565,19 @@ onMounted(loadHomeData)
   display: flex;
   flex-direction: column;
   padding: 12px;
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   text-decoration: none;
   color: inherit;
-  background: linear-gradient(180deg, rgba(255, 247, 237, 0.14), rgba(255, 255, 255, 0.08));
-  border: 1px solid rgba(251, 191, 36, 0.22);
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.16);
-  backdrop-filter: blur(10px);
-  transition: transform 0.15s, border-color 0.15s;
+  background: #fff;
+  border: 2.5px solid var(--nb-ink);
+  box-shadow: var(--nb-shadow-sm);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+  cursor: pointer;
 }
 
 .product-tile:hover {
-  transform: translateY(-3px);
-  border-color: rgba(251, 191, 36, 0.5);
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 0 var(--nb-ink);
 }
 
 .product-rank {
@@ -652,28 +585,30 @@ onMounted(loadHomeData)
   top: 8px;
   left: 8px;
   z-index: 1;
-  width: 22px;
-  height: 22px;
-  border-radius: 6px;
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
   display: grid;
   place-items: center;
   font-size: 11px;
-  font-weight: 700;
-  color: rgba(255, 247, 237, 0.8);
-  background: rgba(15, 23, 42, 0.55);
+  font-weight: 800;
+  color: var(--nb-ink);
+  background: var(--nb-yellow);
+  border: 2px solid var(--nb-ink);
 }
 
 .product-rank.hot {
-  color: #431407;
-  background: linear-gradient(135deg, #fcd34d, #f59e0b);
+  color: var(--nb-ink);
+  background: var(--nb-pink);
 }
 
 .product-tile__cover {
   aspect-ratio: 1;
   border-radius: 10px;
   overflow: hidden;
-  background: rgba(15, 23, 42, 0.45);
+  background: var(--color-muted);
   margin-bottom: 10px;
+  border: 2px solid var(--nb-ink);
 }
 
 .product-tile__cover img {
@@ -684,14 +619,17 @@ onMounted(loadHomeData)
 }
 
 .product-placeholder {
-  background: linear-gradient(135deg, #78350f, #f59e0b) !important;
+  background: var(--nb-blue) !important;
+  color: var(--nb-ink);
 }
 
 .product-tile h3 {
   margin: 0 0 10px;
+  font-family: var(--font-heading);
   font-size: 13px;
+  font-weight: 800;
   line-height: 1.4;
-  color: #fff7ed;
+  color: var(--nb-ink);
   min-height: 36px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -709,13 +647,14 @@ onMounted(loadHomeData)
 
 .product-tile__price strong {
   font-size: 13px;
-  color: #fbbf24;
-  font-weight: 700;
+  color: var(--nb-green-deep);
+  font-weight: 800;
 }
 
 .product-tile__price span {
   font-size: 11px;
-  color: rgba(253, 230, 138, 0.75);
+  font-weight: 700;
+  color: var(--color-muted-foreground);
 }
 
 .card-grid {
@@ -798,40 +737,40 @@ onMounted(loadHomeData)
   font-weight: 500;
 }
 
-/* 封面卡片标题在深色粒子背景上 */
 .card-grid--media .grid-title {
-  color: rgba(255, 255, 255, 0.95);
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
+  color: var(--color-foreground);
+  text-shadow: none;
 }
 
 .card-grid--media .grid-summary {
-  color: rgba(255, 255, 255, 0.68);
+  color: var(--color-muted-foreground);
 }
 
 .card-grid--media .grid-meta {
-  color: rgba(255, 255, 255, 0.72);
+  color: var(--color-muted-foreground);
 }
 
 .card-grid--media .grid-meta.highlight {
-  color: #7ec8ff;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+  color: var(--color-primary);
+  text-shadow: none;
 }
 
 .activity-card {
   display: flex;
   gap: 14px;
   padding: 16px;
-  background: var(--color-white);
-  border-radius: 8px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  background: #fff;
+  border: 2.5px solid var(--nb-ink);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--nb-shadow-sm);
   text-decoration: none;
   color: inherit;
-  transition: box-shadow 0.2s, transform 0.15s;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
 }
 
 .activity-card:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-  transform: translateY(-2px);
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 0 var(--nb-ink);
 }
 
 .activity-icon {
@@ -841,16 +780,21 @@ onMounted(loadHomeData)
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #13c2c218;
-  border-radius: 10px;
+  background: var(--nb-blue);
+  border: 2.5px solid var(--nb-ink);
+  border-radius: 12px;
   font-size: 24px;
+  color: var(--nb-ink);
+  box-shadow: 2px 2px 0 0 var(--nb-ink);
 }
 
 .activity-title {
+  font-family: var(--font-heading);
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 800;
   margin: 0 0 6px;
   line-height: 1.4;
+  color: var(--nb-ink);
 }
 
 .activity-meta,
@@ -863,18 +807,19 @@ onMounted(loadHomeData)
 .micro-card {
   display: flex;
   flex-direction: column;
-  background: var(--color-white);
-  border-radius: 8px;
+  background: #fff;
+  border: 2.5px solid var(--nb-ink);
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--nb-shadow-sm);
   text-decoration: none;
   color: inherit;
-  transition: transform 0.15s, box-shadow 0.2s;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
 }
 
 .micro-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 0 var(--nb-ink);
 }
 
 .micro-cover {
@@ -896,7 +841,7 @@ onMounted(loadHomeData)
   margin: 0 0 4px;
   font-size: 12px;
   font-weight: 500;
-  color: var(--color-primary, #2094f3);
+  color: var(--color-primary);
 }
 
 .micro-title {
@@ -929,26 +874,33 @@ onMounted(loadHomeData)
   min-width: 0;
   display: flex;
   flex-direction: column;
+  padding: 8px 4px 4px;
 }
 
 .dual-row--ghost .split-list {
   flex: 1;
   gap: 0;
+  background: #fff;
+  border: 2.5px solid var(--nb-ink);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--nb-shadow-sm);
+  overflow: hidden;
 }
 
 .dual-row--ghost .split-item {
   display: flex;
   gap: 14px;
   min-height: 72px;
-  padding: 18px 8px;
+  padding: 18px 16px;
   background: transparent;
   box-shadow: none;
   border-radius: 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--color-border-neutral);
   text-decoration: none;
   color: inherit;
-  transition: background 0.2s;
+  transition: background 0.2s ease;
   align-items: flex-start;
+  cursor: pointer;
 }
 
 .dual-row--ghost .split-item:last-child {
@@ -956,7 +908,7 @@ onMounted(loadHomeData)
 }
 
 .dual-row--ghost .split-item:hover {
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--color-primary-light);
   transform: none;
   box-shadow: none;
 }
@@ -968,38 +920,40 @@ onMounted(loadHomeData)
 .dual-row--ghost .text-title {
   font-size: 16px;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.94);
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+  color: var(--color-foreground);
+  text-shadow: none;
 }
 
 .dual-row--ghost .split-item.is-placeholder .text-title {
-  color: rgba(255, 255, 255, 0.38);
+  color: var(--color-muted-foreground);
   text-shadow: none;
 }
 
 .dual-row--ghost .text-sub {
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.62);
+  color: var(--color-muted-foreground);
   margin-top: 6px;
 }
 
 .dual-row--ghost .split-item.is-placeholder .text-sub {
-  color: rgba(255, 255, 255, 0.28);
+  color: var(--color-muted-foreground);
+  opacity: 0.7;
 }
 
 .dual-row--ghost .text-dot {
   width: 8px;
   height: 8px;
   margin-top: 10px;
-  box-shadow: 0 0 6px rgba(32, 148, 243, 0.6);
+  box-shadow: none;
 }
 
 .dual-row--ghost .text-dot.job {
-  box-shadow: 0 0 6px rgba(235, 47, 150, 0.55);
+  background: var(--color-accent);
+  box-shadow: none;
 }
 
 .dual-row--ghost .text-dot.is-dim {
-  background: rgba(255, 255, 255, 0.25);
+  background: var(--color-border-neutral);
   box-shadow: none;
 }
 
@@ -1016,17 +970,18 @@ onMounted(loadHomeData)
   display: flex;
   gap: 10px;
   padding: 16px 18px;
-  background: var(--color-white);
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  background: #fff;
+  border: 2.5px solid var(--nb-ink);
+  border-radius: var(--radius-md);
+  box-shadow: var(--nb-shadow-sm);
   text-decoration: none;
   color: inherit;
-  transition: box-shadow 0.2s, transform 0.15s;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
 }
 
 .split-item:hover {
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
-  transform: translateY(-1px);
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 0 var(--nb-ink);
 }
 
 .text-body {
@@ -1044,7 +999,7 @@ onMounted(loadHomeData)
 }
 
 .text-dot.job {
-  background: #eb2f96;
+  background: var(--color-accent);
 }
 
 .text-title {
@@ -1075,26 +1030,29 @@ onMounted(loadHomeData)
   align-items: flex-start;
   gap: 12px;
   padding: 16px 18px;
-  background: var(--color-white);
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  background: #fff;
+  border: 2.5px solid var(--nb-ink);
+  border-radius: var(--radius-md);
+  box-shadow: var(--nb-shadow-sm);
   text-decoration: none;
   color: inherit;
-  transition: box-shadow 0.2s;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
 }
 
 .forum-item:hover {
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 0 var(--nb-ink);
 }
 
 .forum-tag {
   flex-shrink: 0;
   font-size: 11px;
-  padding: 2px 8px;
-  border-radius: 4px;
-  background: #722ed118;
-  color: #722ed1;
-  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--nb-yellow);
+  color: var(--nb-ink);
+  font-weight: 800;
+  border: 2px solid var(--nb-ink);
 }
 
 .forum-body {
@@ -1133,27 +1091,30 @@ onMounted(loadHomeData)
   align-items: center;
   gap: 10px;
   padding: 20px 12px;
-  background: var(--color-white);
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  background: #fff;
+  border: 2.5px solid var(--nb-ink);
+  border-radius: var(--radius-md);
+  box-shadow: var(--nb-shadow-sm);
   text-decoration: none;
   color: inherit;
-  transition: transform 0.15s, box-shadow 0.2s;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
 }
 
 .partner-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 0 var(--nb-ink);
 }
 
 .partner-logo {
   width: 56px;
   height: 56px;
-  border-radius: 50%;
-  background: var(--color-primary-light);
-  color: var(--color-primary);
+  border-radius: 14px;
+  background: var(--nb-purple);
+  color: var(--nb-ink);
+  border: 2.5px solid var(--nb-ink);
+  box-shadow: 2px 2px 0 0 var(--nb-ink);
   font-size: 22px;
-  font-weight: 700;
+  font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1188,7 +1149,7 @@ onMounted(loadHomeData)
 }
 
 @media (max-width: 768px) {
-  .course-showcase {
+  .course-grid {
     grid-template-columns: 1fr;
   }
 

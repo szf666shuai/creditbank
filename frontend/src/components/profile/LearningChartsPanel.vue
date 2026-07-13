@@ -82,7 +82,7 @@ function renderCharts() {
   const splitLine = { lineStyle: { color: 'rgba(125, 211, 252, 0.12)' } }
 
   lineChart.setOption({
-    title: { text: '学习时长趋势', left: 'center', textStyle: { fontSize: 14, fontWeight: 600, color: '#e0f2fe' } },
+    title: { text: '学习时长趋势', left: 'center', textStyle: { fontSize: 14, fontWeight: 600, color: '#1a202c' } },
     tooltip: { trigger: 'axis' },
     grid: { left: 48, right: 24, top: 48, bottom: 32 },
     xAxis: { type: 'category', data: dates, boundaryGap: false, axisLabel, axisLine },
@@ -91,7 +91,7 @@ function renderCharts() {
   })
 
   barChart.setOption({
-    title: { text: '完课与秩点', left: 'center', textStyle: { fontSize: 14, fontWeight: 600, color: '#e0f2fe' } },
+    title: { text: '完课与秩点', left: 'center', textStyle: { fontSize: 14, fontWeight: 600, color: '#1a202c' } },
     tooltip: { trigger: 'axis' },
     legend: { data: ['完成课程', '获得秩点'], top: 28, textStyle: { color: '#cbd5e1' } },
     grid: { left: 48, right: 24, top: 64, bottom: 32 },
@@ -207,7 +207,7 @@ defineExpose({ fetchStats })
 
 .panel-head h2 {
   font-size: 18px;
-  color: #e0f2fe;
+  color: #1a202c;
 }
 
 .panel-error {

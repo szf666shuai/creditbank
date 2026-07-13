@@ -46,7 +46,7 @@ async function handleLogin() {
         <p class="auth-brand__slogan">{{ BRAND_SLOGAN }}</p>
       </div>
 
-      <h2 class="auth-title">欢迎回来</h2>
+      <h2 class="auth-title">登录账号</h2>
       <p class="auth-sub">{{ BRAND_FULL }}</p>
 
       <el-form label-position="top" @submit.prevent="handleLogin">

@@ -1,16 +1,89 @@
+/**
+ * 星秩存册 · Neo-brutal Light tokens
+ * Direction lock: cream canvas + green CTA + hard offset shadows
+ * Reference vibe: educational neo-brutal (brand stays 星秩存册)
+ */
 :root {
-  --color-primary: #2094f3;
-  --color-primary-dark: #1a7fd4;
-  --color-primary-light: #e8f4fe;
-  --color-text: #333333;
-  --color-text-secondary: #666666;
-  --color-text-muted: #999999;
-  --color-border: #e8e8e8;
-  --color-bg: #f5f7fa;
+  /* Brand / Neo-brutal palette */
+  --color-primary: #22c55e;
+  --color-primary-dark: #16a34a;
+  --color-primary-light: #dcfce7;
+  --color-on-primary: #ffffff;
+  --color-secondary: #bee3f8;
+  --color-on-secondary: #1a202c;
+  --color-accent: #fda4af;
+  --color-on-accent: #1a202c;
+
+  --color-background: #fff9f0;
+  --color-bg: #fff9f0;
+  --color-foreground: #1a202c;
+  --color-card: #ffffff;
+  --color-card-foreground: #1a202c;
+  --color-muted: #f5efe6;
+  --color-muted-foreground: #64748b;
+
+  --color-text: #1a202c;
+  --color-text-secondary: #475569;
+  --color-text-muted: #64748b;
+
+  --color-border: #1a202c;
+  --color-border-strong: #1a202c;
+  --color-border-neutral: #1a202c;
+  --color-destructive: #dc2626;
+  --color-ring: #22c55e;
   --color-white: #ffffff;
-  --header-height: 64px;
-  --header-gap: 14px;
+
+  --nb-ink: #1a202c;
+  --nb-cream: #fff9f0;
+  --nb-green: #22c55e;
+  --nb-green-deep: #16a34a;
+  --nb-blue: #bee3f8;
+  --nb-sky: #bae6fd;
+  --nb-pink: #fecdd3;
+  --nb-purple: #ddd6fe;
+  --nb-yellow: #fef08a;
+  --nb-shadow: 4px 4px 0 0 var(--nb-ink);
+  --nb-shadow-lg: 6px 6px 0 0 var(--nb-ink);
+  --nb-shadow-sm: 3px 3px 0 0 var(--nb-ink);
+
+  --hero-gradient: linear-gradient(135deg, #fff9f0 0%, #fef3c7 42%, #ffffff 100%);
+  --cta-band: #22c55e;
+
+  /* Typography */
+  --font-heading: 'Nunito', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  --font-body: 'Source Sans 3', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  --text-hero: clamp(2rem, 4vw, 3rem);
+  --text-h2: 1.75rem;
+  --text-h3: 1.25rem;
+  --text-body: 1rem;
+  --text-sm: 0.875rem;
+  --text-xs: 0.75rem;
+
+  /* Spacing */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+  --space-3xl: 72px;
+
+  /* Radius & hard shadow */
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --shadow-sm: 3px 3px 0 0 var(--nb-ink);
+  --shadow-md: 4px 4px 0 0 var(--nb-ink);
+  --shadow-lg: 6px 6px 0 0 var(--nb-ink);
+
+  /* Layout chrome */
+  --header-height: 72px;
+  --header-gap: 12px;
   --content-max-width: 1200px;
-  --footer-bg: #2c3e50;
-  --footer-text: #bdc3c7;
+  --footer-bg: #fff9f0;
+  --footer-text: #64748b;
+
+  /* Element Plus bridge */
+  --el-color-primary: #22c55e;
 }

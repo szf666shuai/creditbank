@@ -236,9 +236,10 @@ watch(
 <style scoped>
 .search-agent {
   margin-bottom: 20px;
-  border: 1px solid rgba(32, 148, 243, 0.28);
-  border-radius: 12px;
-  background: linear-gradient(135deg, var(--color-primary-light) 0%, #fff 72%);
+  border: 1px solid var(--color-border-neutral);
+  border-radius: 14px;
+  background: var(--color-card);
+  box-shadow: var(--shadow-md);
   padding: 16px 18px 14px;
 }
 
@@ -261,8 +262,8 @@ watch(
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: #2094f3;
-  box-shadow: 0 0 0 4px rgba(32, 148, 243, 0.15);
+  background: var(--color-primary);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primary) 18%, transparent);
   flex-shrink: 0;
 }
 
@@ -276,12 +277,13 @@ watch(
 .search-agent-title {
   font-size: 15px;
   font-weight: 600;
-  color: var(--color-text);
+  color: var(--color-foreground);
+  font-family: var(--font-heading);
 }
 
 .search-agent-sub {
   font-size: 12px;
-  color: var(--color-text-muted);
+  color: var(--color-muted-foreground);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -290,21 +292,25 @@ watch(
 .search-agent-toggle {
   border: none;
   background: transparent;
-  color: #2094f3;
+  color: var(--color-primary);
   font-size: 12px;
   cursor: pointer;
   flex-shrink: 0;
   padding: 4px 0;
 }
 
+.search-agent-toggle:hover {
+  color: var(--color-primary-dark);
+}
+
 .search-agent-idle {
   font-size: 13px;
   line-height: 1.6;
-  color: var(--color-text-muted);
+  color: var(--color-muted-foreground);
 }
 
 .search-agent-idle.error {
-  color: #c45656;
+  color: var(--color-destructive);
   display: flex;
   align-items: center;
   gap: 10px;
@@ -312,9 +318,9 @@ watch(
 }
 
 .retry-btn {
-  border: 1px solid #c45656;
-  background: #fff;
-  color: #c45656;
+  border: 1px solid var(--color-destructive);
+  background: var(--color-card);
+  color: var(--color-destructive);
   border-radius: 6px;
   font-size: 12px;
   padding: 2px 8px;
@@ -324,11 +330,15 @@ watch(
 .search-agent-insight {
   font-size: 13px;
   line-height: 1.7;
-  color: var(--color-text);
+  color: var(--color-foreground);
   white-space: pre-wrap;
   max-height: 160px;
   overflow-y: auto;
   margin-bottom: 12px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--color-background);
+  border: 1px solid var(--color-border-neutral);
 }
 
 .search-agent.expanded .search-agent-insight {
@@ -355,15 +365,15 @@ watch(
 
 .thread-msg.user {
   align-self: flex-end;
-  background: #2094f3;
-  color: #fff;
+  background: var(--color-primary);
+  color: var(--color-on-primary);
 }
 
 .thread-msg.assistant {
   align-self: flex-start;
-  background: #fff;
-  border: 1px solid #e8eef5;
-  color: var(--color-text);
+  background: var(--color-background);
+  border: 1px solid var(--color-border-neutral);
+  color: var(--color-foreground);
 }
 
 .search-agent-chips {
@@ -374,13 +384,19 @@ watch(
 }
 
 .chip {
-  border: 1px solid rgba(32, 148, 243, 0.35);
-  background: #fff;
-  color: #1a7fd4;
+  border: 1px solid var(--color-border);
+  background: var(--color-primary-light);
+  color: var(--color-primary-dark);
   border-radius: 999px;
   font-size: 12px;
   padding: 4px 10px;
   cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.chip:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 14%, white);
 }
 
 .chip:disabled {
@@ -396,16 +412,22 @@ watch(
 .search-agent-input input {
   flex: 1;
   height: 34px;
-  border: 1px solid #dce3ea;
+  border: 1px solid var(--color-border-neutral);
   border-radius: 8px;
   padding: 0 10px;
   font-size: 13px;
   outline: none;
-  background: #fff;
+  background: var(--color-card);
+  color: var(--color-foreground);
+}
+
+.search-agent-input input::placeholder {
+  color: var(--color-muted-foreground);
 }
 
 .search-agent-input input:focus {
-  border-color: #2094f3;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 16%, transparent);
 }
 
 .send-btn {
@@ -413,10 +435,15 @@ watch(
   padding: 0 14px;
   border: none;
   border-radius: 8px;
-  background: #2094f3;
-  color: #fff;
+  background: var(--color-primary);
+  color: var(--color-on-primary);
   font-size: 13px;
   cursor: pointer;
+  transition: background 0.2s;
+}
+
+.send-btn:hover:not(:disabled) {
+  background: var(--color-primary-dark);
 }
 
 .send-btn:disabled {
