@@ -86,8 +86,16 @@ export interface CourseComment {
   avatar?: string
   content: string
   likeCount: number
+  liked?: boolean
+  creditReward?: number
   createTime: string
   replies?: CourseComment[]
+}
+
+export interface CourseCommentLikeResult {
+  commentId: number
+  likeCount: number
+  liked: boolean
 }
 
 export interface CourseDanmaku {
@@ -205,6 +213,12 @@ export function fetchCourseComments(courseId: number, limit = 50) {
 
 export function postCourseComment(courseId: number, payload: { content: string; parentId?: number }) {
   return request.post<CourseComment>(`/learning/resources/${courseId}/comments`, payload)
+}
+
+export function toggleCourseCommentLike(courseId: number, commentId: number) {
+  return request.post<CourseCommentLikeResult>(
+    `/learning/resources/${courseId}/comments/${commentId}/like`,
+  )
 }
 
 export function fetchCourseDanmaku(courseId: number) {

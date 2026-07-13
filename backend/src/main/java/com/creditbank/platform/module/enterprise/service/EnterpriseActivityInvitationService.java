@@ -11,6 +11,7 @@ import com.creditbank.platform.mapper.SysUserMapper;
 import com.creditbank.platform.module.enterprise.dto.ActivityInvitationVO;
 import com.creditbank.platform.module.enterprise.dto.SendActivityInviteRequest;
 import com.creditbank.platform.module.enterprise.entity.Activity;
+import com.creditbank.platform.module.enterprise.support.ActivityStatus;
 import com.creditbank.platform.module.enterprise.entity.ActivityInvitation;
 import com.creditbank.platform.module.enterprise.entity.ActivityRegistration;
 import com.creditbank.platform.module.enterprise.mapper.ActivityInvitationMapper;
@@ -38,10 +39,10 @@ public class EnterpriseActivityInvitationService {
     private static final int MSG_TYPE_ACTIVITY = 3;
     private static final String REF_TYPE_ACTIVITY = "activity";
     private static final int UNREAD = 0;
-    private static final int ACTIVITY_CANCELLED = 0;
-    private static final int ACTIVITY_OPEN = 1;
-    private static final int ACTIVITY_ONGOING = 2;
-    private static final int ACTIVITY_ENDED = 3;
+    private static final int ACTIVITY_CANCELLED = ActivityStatus.CANCELLED;
+    private static final int ACTIVITY_OPEN = ActivityStatus.OPEN;
+    private static final int ACTIVITY_ONGOING = ActivityStatus.ONGOING;
+    private static final int ACTIVITY_ENDED = ActivityStatus.ENDED;
     private static final int INVITE_PENDING = 0;
     private static final int REG_REGISTERED = 0;
     private static final int REG_CHECKED_IN = 1;
@@ -54,12 +55,13 @@ public class EnterpriseActivityInvitationService {
     private final ActivityMapper activityMapper;
     private final ActivityInvitationMapper activityInvitationMapper;
     private final ActivityRegistrationMapper activityRegistrationMapper;
+    private final ActivityLifecycleService activityLifecycleService;
     private final UserMessageMapper userMessageMapper;
 
     public List<ActivityInvitationVO> listSentInvitations() {
         SysUser user = authSupport.requireEnterprise();
-        List<Activity> activities = activityMapper.selectList(new LambdaQueryWrapper<Activity>()
-                .eq(Activity::getOrgId, user.getOrgId()));
+        List<Activity> activities = activityLifecycleService.refreshAll(activityMapper.selectList(
+                new LambdaQueryWrapper<Activity>().eq(Activity::getOrgId, user.getOrgId())));
         if (activities.isEmpty()) {
             return List.of();
         }
@@ -82,7 +84,8 @@ public class EnterpriseActivityInvitationService {
         }
 
         validateStudentUser(toUserId);
-        Activity activity = authSupport.requireOrgActivity(request.getActivityId(), orgId);
+        Activity activity = activityLifecycleService.refresh(
+                authSupport.requireOrgActivity(request.getActivityId(), orgId));
         validateActivityInvitable(activity);
         ensureNoPendingInvite(activity.getId(), toUserId);
         ensureNotRegistered(activity.getId(), toUserId);

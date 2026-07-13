@@ -14,6 +14,7 @@ import com.creditbank.platform.module.enterprise.dto.ApplyJobRequest;
 import com.creditbank.platform.module.enterprise.dto.JobApplyResultVO;
 import com.creditbank.platform.module.enterprise.dto.OrgParticipationStatusVO;
 import com.creditbank.platform.module.enterprise.entity.Activity;
+import com.creditbank.platform.module.enterprise.support.ActivityStatus;
 import com.creditbank.platform.module.enterprise.entity.ActivityRegistration;
 import com.creditbank.platform.module.enterprise.entity.JobApplication;
 import com.creditbank.platform.module.enterprise.entity.JobPosting;
@@ -38,9 +39,10 @@ public class StudentEnterpriseActionService {
 
     private static final int JOB_OPEN = 1;
     private static final int APP_STATUS_APPLIED = 0;
-    private static final int ACTIVITY_CANCELLED = 0;
-    private static final int ACTIVITY_OPEN = 1;
-    private static final int ACTIVITY_ONGOING = 2;
+    private static final int ACTIVITY_CANCELLED = ActivityStatus.CANCELLED;
+    private static final int ACTIVITY_OPEN = ActivityStatus.OPEN;
+    private static final int ACTIVITY_ONGOING = ActivityStatus.ONGOING;
+    private static final int ACTIVITY_ENDED = ActivityStatus.ENDED;
     private static final int REG_REGISTERED = 0;
     private static final int REG_CHECKED_IN = 1;
 
@@ -53,6 +55,7 @@ public class StudentEnterpriseActionService {
     private final ActivityMapper activityMapper;
     private final ActivityRegistrationMapper activityRegistrationMapper;
     private final CreditService creditService;
+    private final ActivityLifecycleService activityLifecycleService;
 
     public OrgParticipationStatusVO getOrgParticipationStatus(Long orgId) {
         SysUser user = authSupport.requireStudent();
@@ -137,13 +140,14 @@ public class StudentEnterpriseActionService {
     @Transactional
     public ActivityRegisterResultVO registerActivity(Long activityId) {
         SysUser user = authSupport.requireStudent();
-        Activity activity = activityMapper.selectById(activityId);
+        Activity activity = activityLifecycleService.refreshById(activityId);
         if (activity == null) {
             throw new BusinessException(404, "活动不存在");
         }
         validateJoinedOrg(activity.getOrgId());
         if (activity.getStatus() == null
                 || activity.getStatus() == ACTIVITY_CANCELLED
+                || activity.getStatus() == ACTIVITY_ENDED
                 || (activity.getStatus() != ACTIVITY_OPEN && activity.getStatus() != ACTIVITY_ONGOING)) {
             throw new BusinessException(400, "活动当前不可报名");
         }
@@ -186,7 +190,7 @@ public class StudentEnterpriseActionService {
     @Transactional
     public ActivityCheckinResultVO checkInActivity(Long activityId) {
         SysUser user = authSupport.requireStudent();
-        Activity activity = activityMapper.selectById(activityId);
+        Activity activity = activityLifecycleService.refreshById(activityId);
         if (activity == null) {
             throw new BusinessException(404, "活动不存在");
         }

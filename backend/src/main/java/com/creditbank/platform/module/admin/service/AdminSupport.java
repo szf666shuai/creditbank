@@ -2,6 +2,8 @@ package com.creditbank.platform.module.admin.service;
 
 import com.creditbank.platform.common.BusinessException;
 
+import com.creditbank.platform.module.enterprise.support.ActivityStatus;
+
 public final class AdminSupport {
 
     public static final int JOIN_PENDING = 0;
@@ -79,9 +81,6 @@ public final class AdminSupport {
     }
 
     public static String activityStatusName(Integer status) {
-        if (status == null || status == 1) {
-            return "进行中";
-        }
-        return status == 0 ? "已下架" : "未知";
+        return ActivityStatus.label(status);
     }
 }

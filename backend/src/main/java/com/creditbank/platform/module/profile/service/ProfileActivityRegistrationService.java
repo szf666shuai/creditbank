@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.creditbank.platform.entity.SysOrganization;
 import com.creditbank.platform.entity.SysUser;
 import com.creditbank.platform.mapper.SysOrganizationMapper;
+import com.creditbank.platform.module.enterprise.service.ActivityLifecycleService;
+import com.creditbank.platform.module.enterprise.support.ActivityStatus;
 import com.creditbank.platform.module.enterprise.entity.Activity;
 import com.creditbank.platform.module.enterprise.entity.ActivityRegistration;
 import com.creditbank.platform.module.enterprise.mapper.ActivityMapper;
@@ -31,6 +33,7 @@ public class ProfileActivityRegistrationService {
     private final ActivityRegistrationMapper activityRegistrationMapper;
     private final ActivityMapper activityMapper;
     private final SysOrganizationMapper orgMapper;
+    private final ActivityLifecycleService activityLifecycleService;
 
     public List<MyActivityRegistrationVO> listMyRegistrations() {
         SysUser user = authSupport.requireStudent();
@@ -47,8 +50,9 @@ public class ProfileActivityRegistrationService {
                 .map(ActivityRegistration::getActivityId)
                 .distinct()
                 .toList();
-        Map<Long, Activity> activityMap = activityMapper.selectList(
-                        new LambdaQueryWrapper<Activity>().in(Activity::getId, activityIds))
+        Map<Long, Activity> activityMap = activityLifecycleService.refreshAll(
+                        activityMapper.selectList(
+                                new LambdaQueryWrapper<Activity>().in(Activity::getId, activityIds)))
                 .stream()
                 .collect(Collectors.toMap(Activity::getId, Function.identity()));
 
@@ -85,7 +89,7 @@ public class ProfileActivityRegistrationService {
                 .location(activity.getLocation())
                 .creditReward(activity.getCreditReward())
                 .activityStatus(activity.getStatus())
-                .activityStatusName(activityStatusLabel(activity.getStatus()))
+                .activityStatusName(ActivityStatus.label(activity.getStatus()))
                 .status(registration.getStatus())
                 .statusName(registrationStatusName(registration.getStatus()))
                 .createTime(registration.getCreateTime())
@@ -100,19 +104,6 @@ public class ProfileActivityRegistrationService {
             case REG_REGISTERED -> "已报名";
             case REG_CHECKED_IN -> "已签到";
             case REG_CANCELLED -> "已取消";
-            default -> "未知";
-        };
-    }
-
-    private static String activityStatusLabel(Integer status) {
-        if (status == null) {
-            return "未知";
-        }
-        return switch (status) {
-            case 0 -> "已取消";
-            case 1 -> "报名中";
-            case 2 -> "进行中";
-            case 3 -> "已结束";
             default -> "未知";
         };
     }

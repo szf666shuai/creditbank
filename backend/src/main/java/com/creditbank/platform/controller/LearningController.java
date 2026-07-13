@@ -6,6 +6,7 @@ import com.creditbank.platform.dto.CertificateVerifyResult;
 import com.creditbank.platform.dto.LearningArchiveVO;
 import com.creditbank.platform.dto.LearningCertificateVO;
 import com.creditbank.platform.dto.LearningCompletionResult;
+import com.creditbank.platform.dto.CourseCommentLikeResult;
 import com.creditbank.platform.dto.CourseCommentCreateRequest;
 import com.creditbank.platform.dto.CourseCommentVO;
 import com.creditbank.platform.dto.CourseDanmakuCreateRequest;
@@ -67,8 +68,8 @@ public class LearningController {
     @GetMapping("/resources/{courseId}/comments")
     public Result<List<CourseCommentVO>> comments(@PathVariable Long courseId,
                                                   @RequestParam(defaultValue = "50") int limit) {
-        authSupport.requireStudent();
-        return Result.ok(courseInteractionService.listComments(courseId, limit));
+        SysUser student = authSupport.requireStudent();
+        return Result.ok(courseInteractionService.listComments(courseId, student.getId(), limit));
     }
 
     @PostMapping("/resources/{courseId}/comments")
@@ -76,6 +77,13 @@ public class LearningController {
                                                  @Valid @RequestBody CourseCommentCreateRequest request) {
         SysUser student = authSupport.requireStudent();
         return Result.ok(courseInteractionService.createComment(student.getId(), courseId, request));
+    }
+
+    @PostMapping("/resources/{courseId}/comments/{commentId}/like")
+    public Result<CourseCommentLikeResult> toggleCommentLike(@PathVariable Long courseId,
+                                                             @PathVariable Long commentId) {
+        SysUser student = authSupport.requireStudent();
+        return Result.ok(courseInteractionService.toggleCommentLike(student.getId(), courseId, commentId));
     }
 
     @GetMapping("/resources/{courseId}/danmaku")

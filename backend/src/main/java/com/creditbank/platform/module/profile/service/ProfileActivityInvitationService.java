@@ -7,6 +7,8 @@ import com.creditbank.platform.entity.SysUser;
 import com.creditbank.platform.mapper.SysOrganizationMapper;
 import com.creditbank.platform.mapper.SysUserMapper;
 import com.creditbank.platform.module.enterprise.dto.ActivityInvitationVO;
+import com.creditbank.platform.module.enterprise.service.ActivityLifecycleService;
+import com.creditbank.platform.module.enterprise.support.ActivityStatus;
 import com.creditbank.platform.module.enterprise.entity.Activity;
 import com.creditbank.platform.module.enterprise.entity.ActivityInvitation;
 import com.creditbank.platform.module.enterprise.entity.ActivityRegistration;
@@ -30,9 +32,10 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class ProfileActivityInvitationService {
 
-    private static final int ACTIVITY_CANCELLED = 0;
-    private static final int ACTIVITY_OPEN = 1;
-    private static final int ACTIVITY_ONGOING = 2;
+    private static final int ACTIVITY_CANCELLED = ActivityStatus.CANCELLED;
+    private static final int ACTIVITY_OPEN = ActivityStatus.OPEN;
+    private static final int ACTIVITY_ONGOING = ActivityStatus.ONGOING;
+    private static final int ACTIVITY_ENDED = ActivityStatus.ENDED;
     private static final int INVITE_PENDING = 0;
     private static final int INVITE_ACCEPTED = 1;
     private static final int INVITE_REJECTED = 2;
@@ -46,6 +49,7 @@ public class ProfileActivityInvitationService {
     private final ActivityMapper activityMapper;
     private final ActivityInvitationMapper activityInvitationMapper;
     private final ActivityRegistrationMapper activityRegistrationMapper;
+    private final ActivityLifecycleService activityLifecycleService;
 
     public List<ActivityInvitationVO> listMyInvitations() {
         SysUser user = authSupport.requireStudent();
@@ -70,12 +74,13 @@ public class ProfileActivityInvitationService {
             throw new BusinessException(400, "该邀请已处理，无法重复操作");
         }
 
-        Activity activity = activityMapper.selectById(invitation.getActivityId());
+        Activity activity = activityLifecycleService.refreshById(invitation.getActivityId());
         if (activity == null) {
             throw new BusinessException(404, "活动不存在");
         }
         if (activity.getStatus() == null
                 || activity.getStatus() == ACTIVITY_CANCELLED
+                || activity.getStatus() == ACTIVITY_ENDED
                 || (activity.getStatus() != ACTIVITY_OPEN && activity.getStatus() != ACTIVITY_ONGOING)) {
             throw new BusinessException(400, "活动当前不可报名");
         }
@@ -153,7 +158,7 @@ public class ProfileActivityInvitationService {
     }
 
     private ActivityInvitationVO toVO(ActivityInvitation invitation) {
-        Activity activity = activityMapper.selectById(invitation.getActivityId());
+        Activity activity = activityLifecycleService.refreshById(invitation.getActivityId());
         SysOrganization org = activity != null ? orgMapper.selectById(activity.getOrgId()) : null;
         Map<Long, String> nameMap = loadNameMap(invitation);
         return ActivityInvitationVO.builder()
@@ -181,8 +186,9 @@ public class ProfileActivityInvitationService {
         if (invitations.isEmpty()) {
             return List.of();
         }
-        Map<Long, Activity> activityMap = activityMapper.selectList(new LambdaQueryWrapper<Activity>()
-                        .in(Activity::getId, invitations.stream().map(ActivityInvitation::getActivityId).distinct().toList()))
+        Map<Long, Activity> activityMap = activityLifecycleService.refreshAll(
+                        activityMapper.selectList(new LambdaQueryWrapper<Activity>()
+                                .in(Activity::getId, invitations.stream().map(ActivityInvitation::getActivityId).distinct().toList())))
                 .stream()
                 .collect(Collectors.toMap(Activity::getId, a -> a, (a, b) -> a));
         Map<Long, String> orgNameMap = orgMapper.selectList(new LambdaQueryWrapper<SysOrganization>()

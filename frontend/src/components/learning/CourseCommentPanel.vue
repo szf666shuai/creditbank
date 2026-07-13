@@ -2,7 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { ChatDotRound, ChatLineRound, Pointer } from '@element-plus/icons-vue'
-import { fetchCourseComments, postCourseComment, type CourseComment } from '@/api/learning'
+import { fetchCourseComments, postCourseComment, toggleCourseCommentLike, type CourseComment } from '@/api/learning'
 import { useAuthStore } from '@/stores/auth'
 
 const props = defineProps<{
@@ -12,6 +12,7 @@ const props = defineProps<{
 const authStore = useAuthStore()
 const loading = ref(false)
 const submitting = ref(false)
+const likingCommentId = ref<number | null>(null)
 const comments = ref<CourseComment[]>([])
 const draft = ref('')
 const replyTarget = ref<CourseComment | null>(null)
@@ -74,11 +75,58 @@ async function submitComment() {
     }
     draft.value = ''
     replyTarget.value = null
-    ElMessage.success(isReply ? '回复已发布' : '评论已发布')
+    const reward = Number(created.creditReward || 0)
+    ElMessage.success(
+      reward > 0
+        ? `${isReply ? '回复已发布' : '评论已发布'}，获得 ${reward.toFixed(2)} 秩点`
+        : isReply
+          ? '回复已发布'
+          : '评论已发布',
+    )
   } catch (e) {
     ElMessage.error(e instanceof Error ? e.message : '发表评论失败')
   } finally {
     submitting.value = false
+  }
+}
+
+function findCommentById(commentId: number) {
+  for (const item of comments.value) {
+    if (item.id === commentId) return item
+    const reply = item.replies?.find((child) => child.id === commentId)
+    if (reply) return reply
+  }
+  return null
+}
+
+function applyLikeState(commentId: number, likeCount: number, liked: boolean) {
+  const target = findCommentById(commentId)
+  if (!target) return
+  target.likeCount = likeCount
+  target.liked = liked
+}
+
+async function toggleLike(item: CourseComment) {
+  if (!authStore.isLoggedIn) {
+    ElMessage.warning('登录后即可点赞')
+    return
+  }
+  if (item.userId === authStore.userInfo?.id) {
+    ElMessage.warning('不能给自己的评论点赞')
+    return
+  }
+  likingCommentId.value = item.id
+  try {
+    const res = await toggleCourseCommentLike(props.courseId, item.id)
+    if (res.code !== 200 || !res.data) throw new Error(res.message || '点赞失败')
+    applyLikeState(res.data.commentId, res.data.likeCount, res.data.liked)
+    if (res.data.liked) {
+      ElMessage.success('点赞成功')
+    }
+  } catch (e) {
+    ElMessage.error(e instanceof Error ? e.message : '点赞失败')
+  } finally {
+    likingCommentId.value = null
   }
 }
 
@@ -136,7 +184,7 @@ watch(
           :placeholder="replyTarget ? `回复 ${replyTarget.authorName}...` : '分享你的学习心得、疑问或笔记要点'"
         />
         <div class="editor-actions">
-          <span class="editor-tip">纯净学习区，友善交流，专注课程本身</span>
+          <span class="editor-tip">发表评论/回复可获得秩点奖励，被点赞也有奖励</span>
           <el-button type="primary" :loading="submitting" @click="submitComment">
             {{ replyTarget ? '发表回复' : '发表评论' }}
           </el-button>
@@ -158,7 +206,13 @@ watch(
             </div>
             <p>{{ item.content }}</p>
             <div class="comment-actions">
-              <button type="button" class="like-btn">
+              <button
+                type="button"
+                class="like-btn"
+                :class="{ active: item.liked }"
+                :disabled="likingCommentId === item.id"
+                @click="toggleLike(item)"
+              >
                 <el-icon><Pointer /></el-icon>
                 {{ item.likeCount || 0 }}
               </button>
@@ -181,7 +235,13 @@ watch(
               </div>
               <p>{{ reply.content }}</p>
               <div class="comment-actions">
-                <button type="button" class="like-btn">
+                <button
+                  type="button"
+                  class="like-btn"
+                  :class="{ active: reply.liked }"
+                  :disabled="likingCommentId === reply.id"
+                  @click="toggleLike(reply)"
+                >
                   <el-icon><Pointer /></el-icon>
                   {{ reply.likeCount || 0 }}
                 </button>
@@ -358,8 +418,12 @@ watch(
   font-size: 12px;
 }
 
-.reply-btn:hover,
-.like-btn:hover {
+.like-btn:hover,
+.like-btn.active {
+  color: #fb7299;
+}
+
+.reply-btn:hover {
   color: var(--color-primary);
 }
 </style>

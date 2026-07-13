@@ -21,6 +21,8 @@ import com.creditbank.platform.module.admin.dto.AdminJobVO;
 import com.creditbank.platform.module.admin.dto.AdminMallProductVO;
 import com.creditbank.platform.module.admin.dto.AdminProductApprovalRequest;
 import com.creditbank.platform.module.admin.dto.UpdateContentStatusRequest;
+import com.creditbank.platform.module.enterprise.service.ActivityLifecycleService;
+import com.creditbank.platform.module.enterprise.support.ActivityStatus;
 import com.creditbank.platform.module.enterprise.entity.Activity;
 import com.creditbank.platform.module.enterprise.entity.JobPosting;
 import com.creditbank.platform.module.enterprise.mapper.ActivityMapper;
@@ -49,6 +51,7 @@ public class AdminOversightService {
     private final SysOrganizationMapper sysOrganizationMapper;
     private final SysUserMapper sysUserMapper;
     private final MallProductMapper mallProductMapper;
+    private final ActivityLifecycleService activityLifecycleService;
 
     public PageResult<AdminJobVO> pageJobs(long page, long pageSize, Integer status, String keyword) {
         authSupport.requireAdmin();
@@ -135,9 +138,10 @@ public class AdminOversightService {
         }
 
         Page<Activity> result = activityMapper.selectPage(new Page<>(page, pageSize), wrapper);
-        Map<Long, String> orgNameMap = loadOrgNameMap(result.getRecords().stream().map(Activity::getOrgId).toList());
+        List<Activity> refreshed = activityLifecycleService.refreshAll(result.getRecords());
+        Map<Long, String> orgNameMap = loadOrgNameMap(refreshed.stream().map(Activity::getOrgId).toList());
         return PageResult.of(
-                result.getRecords().stream().map(item -> toActivityVO(item, orgNameMap.get(item.getOrgId()))).toList(),
+                refreshed.stream().map(item -> toActivityVO(item, orgNameMap.get(item.getOrgId()))).toList(),
                 result.getTotal(),
                 result.getCurrent(),
                 result.getSize());
@@ -153,7 +157,12 @@ public class AdminOversightService {
         if (request.getStatus() != 0 && request.getStatus() != 1) {
             throw new BusinessException(400, "状态无效");
         }
-        activity.setStatus(request.getStatus());
+        if (request.getStatus() == 0) {
+            activity.setStatus(ActivityStatus.CANCELLED);
+        } else {
+            activity.setStatus(ActivityStatus.OPEN);
+            activityLifecycleService.refresh(activity);
+        }
         activityMapper.updateById(activity);
         return toActivityVO(activity, loadOrgName(activity.getOrgId()));
     }
@@ -255,7 +264,7 @@ public class AdminOversightService {
                 .startTime(activity.getStartTime())
                 .endTime(activity.getEndTime())
                 .status(activity.getStatus())
-                .statusName(AdminSupport.activityStatusName(activity.getStatus()))
+                .statusName(ActivityStatus.label(activity.getStatus()))
                 .createTime(activity.getCreateTime())
                 .build();
     }

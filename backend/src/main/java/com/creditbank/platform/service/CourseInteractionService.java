@@ -2,15 +2,20 @@ package com.creditbank.platform.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.creditbank.platform.common.BusinessException;
+import com.creditbank.platform.dto.CourseCommentLikeResult;
 import com.creditbank.platform.dto.CourseCommentCreateRequest;
 import com.creditbank.platform.dto.CourseCommentVO;
 import com.creditbank.platform.dto.CourseDanmakuCreateRequest;
 import com.creditbank.platform.dto.CourseDanmakuVO;
 import com.creditbank.platform.dto.CourseMaterialVO;
+import com.creditbank.platform.dto.CreditChangeResult;
+import com.creditbank.platform.dto.CreditEarnRequest;
 import com.creditbank.platform.entity.Course;
 import com.creditbank.platform.entity.CourseComment;
+import com.creditbank.platform.entity.CourseCommentLike;
 import com.creditbank.platform.entity.CourseDanmaku;
 import com.creditbank.platform.entity.SysUser;
+import com.creditbank.platform.mapper.CourseCommentLikeMapper;
 import com.creditbank.platform.mapper.CourseCommentMapper;
 import com.creditbank.platform.mapper.CourseDanmakuMapper;
 import com.creditbank.platform.mapper.CourseMapper;
@@ -38,13 +43,16 @@ public class CourseInteractionService {
 
     private final CourseMapper courseMapper;
     private final CourseCommentMapper commentMapper;
+    private final CourseCommentLikeMapper commentLikeMapper;
     private final CourseDanmakuMapper danmakuMapper;
     private final CourseMaterialMapper materialMapper;
     private final SysUserMapper sysUserMapper;
+    private final CreditService creditService;
 
-    public List<CourseCommentVO> listComments(Long courseId, int limit) {
+    public List<CourseCommentVO> listComments(Long courseId, Long userId, int limit) {
         ensureCourseExists(courseId);
-        List<CourseCommentVO> flat = commentMapper.listByCourseId(courseId, Math.min(Math.max(limit, 1), 200));
+        List<CourseCommentVO> flat = commentMapper.listByCourseId(
+                courseId, userId, Math.min(Math.max(limit, 1), 200));
         return buildCommentTree(flat);
     }
 
@@ -73,6 +81,8 @@ public class CourseInteractionService {
         comment.setCreateTime(LocalDateTime.now());
         commentMapper.insert(comment);
         CourseCommentVO vo = toCommentVO(comment, user);
+        vo.setLiked(false);
+        vo.setCreditReward(awardCommentCredit(userId, comment));
         if (parent != null) {
             SysUser parentUser = sysUserMapper.selectById(parent.getUserId());
             if (parentUser != null) {
@@ -80,6 +90,56 @@ public class CourseInteractionService {
             }
         }
         return vo;
+    }
+
+    @Transactional
+    public CourseCommentLikeResult toggleCommentLike(Long userId, Long courseId, Long commentId) {
+        ensureCourseExists(courseId);
+        CourseComment comment = commentMapper.selectOne(
+                new LambdaQueryWrapper<CourseComment>()
+                        .eq(CourseComment::getId, commentId)
+                        .eq(CourseComment::getCourseId, courseId)
+                        .eq(CourseComment::getDeleted, 0)
+        );
+        if (comment == null) {
+            throw new BusinessException(404, "评论不存在");
+        }
+        if (comment.getUserId().equals(userId)) {
+            throw new BusinessException(400, "不能给自己的评论点赞");
+        }
+
+        CourseCommentLike existing = commentLikeMapper.selectOne(
+                new LambdaQueryWrapper<CourseCommentLike>()
+                        .eq(CourseCommentLike::getCommentId, commentId)
+                        .eq(CourseCommentLike::getUserId, userId)
+        );
+        if (existing != null) {
+            commentLikeMapper.deleteById(existing.getId());
+            int likeCount = Math.max(0, nz(comment.getLikeCount()) - 1);
+            comment.setLikeCount(likeCount);
+            commentMapper.updateById(comment);
+            return CourseCommentLikeResult.builder()
+                    .commentId(commentId)
+                    .likeCount(likeCount)
+                    .liked(false)
+                    .build();
+        }
+
+        CourseCommentLike like = new CourseCommentLike();
+        like.setCommentId(commentId);
+        like.setUserId(userId);
+        like.setCreateTime(LocalDateTime.now());
+        commentLikeMapper.insert(like);
+
+        int likeCount = nz(comment.getLikeCount()) + 1;
+        comment.setLikeCount(likeCount);
+        commentMapper.updateById(comment);
+        awardCommentLikeCredit(comment.getUserId(), like.getId());
+        return CourseCommentLikeResult.builder()
+                .commentId(commentId)
+                .likeCount(likeCount)
+                .liked(true)
+                .build();
     }
 
     public List<CourseDanmakuVO> listDanmaku(Long courseId) {
@@ -191,5 +251,37 @@ public class CourseInteractionService {
 
     private String displayName(SysUser user) {
         return StringUtils.hasText(user.getRealName()) ? user.getRealName() : user.getUsername();
+    }
+
+    private BigDecimal awardCommentCredit(Long userId, CourseComment comment) {
+        try {
+            boolean isReply = comment.getParentId() != null;
+            CreditEarnRequest earnRequest = new CreditEarnRequest();
+            earnRequest.setRuleCode(isReply ? "REPLY_CREATE" : "POST_CREATE");
+            earnRequest.setRefType("course_comment");
+            earnRequest.setRefId(comment.getId());
+            earnRequest.setSource(isReply ? "回复课程评论" : "发表课程评论");
+            CreditChangeResult change = creditService.earnByRule(userId, earnRequest);
+            return change.getAmount();
+        } catch (BusinessException ignored) {
+            return null;
+        }
+    }
+
+    private void awardCommentLikeCredit(Long authorUserId, Long likeId) {
+        try {
+            CreditEarnRequest earnRequest = new CreditEarnRequest();
+            earnRequest.setRuleCode("POST_LIKE");
+            earnRequest.setRefType("course_comment_like");
+            earnRequest.setRefId(likeId);
+            earnRequest.setSource("课程评论被点赞");
+            creditService.earnByRule(authorUserId, earnRequest);
+        } catch (BusinessException ignored) {
+            // 被点赞奖励未命中时不阻断点赞
+        }
+    }
+
+    private int nz(Integer value) {
+        return value == null ? 0 : value;
     }
 }

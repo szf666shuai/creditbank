@@ -12,6 +12,8 @@ import com.creditbank.platform.module.enterprise.dto.JobPostingVO;
 import com.creditbank.platform.module.enterprise.dto.OrgMaterialVO;
 import com.creditbank.platform.module.enterprise.dto.OrgVO;
 import com.creditbank.platform.module.enterprise.entity.Activity;
+import com.creditbank.platform.module.enterprise.service.ActivityLifecycleService;
+import com.creditbank.platform.module.enterprise.support.ActivityStatus;
 import com.creditbank.platform.module.enterprise.entity.JobPosting;
 import com.creditbank.platform.module.enterprise.entity.OrgMaterial;
 import com.creditbank.platform.module.enterprise.mapper.ActivityMapper;
@@ -34,6 +36,7 @@ public class EnterpriseService {
     private final JobPostingMapper jobPostingMapper;
     private final ActivityMapper activityMapper;
     private final OrgMaterialMapper orgMaterialMapper;
+    private final ActivityLifecycleService activityLifecycleService;
 
     public PageResult<OrgVO> pageJoinedOrgs(long page, long pageSize, String name, Integer type) {
         LambdaQueryWrapper<SysOrganization> wrapper = new LambdaQueryWrapper<SysOrganization>()
@@ -88,7 +91,8 @@ public class EnterpriseService {
         );
 
         return PageResult.of(
-                result.getRecords().stream().map(this::toActivityVO).toList(),
+                activityLifecycleService.refreshAll(result.getRecords()).stream()
+                        .map(this::toActivityVO).toList(),
                 result.getTotal(),
                 result.getCurrent(),
                 result.getSize()
@@ -168,7 +172,7 @@ public class EnterpriseService {
                 .maxParticipants(activity.getMaxParticipants())
                 .creditReward(activity.getCreditReward())
                 .status(activity.getStatus())
-                .statusName(activityStatusLabel(activity.getStatus()))
+                .statusName(ActivityStatus.label(activity.getStatus()))
                 .createTime(activity.getCreateTime())
                 .build();
     }
@@ -190,19 +194,6 @@ public class EnterpriseService {
             return "未知";
         }
         return status == JOB_OPEN ? "招聘中" : "已下架";
-    }
-
-    private String activityStatusLabel(Integer status) {
-        if (status == null) {
-            return "未知";
-        }
-        return switch (status) {
-            case 0 -> "已取消";
-            case 1 -> "报名中";
-            case 2 -> "进行中";
-            case 3 -> "已结束";
-            default -> "未知";
-        };
     }
 
     private String materialTypeLabel(Integer type) {

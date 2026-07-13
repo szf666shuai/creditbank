@@ -35,6 +35,7 @@ public class SearchTestDataSeeder {
         executeScript("db/010_course_interaction.sql", "课程评论弹幕课件");
         executeScript("db/011_course_comment_reply_materials.sql", "评论回复与课件文件");
         executeScript("db/012_course_episodes_checkin_mall.sql", "课程分集打卡与商城审核");
+        executeScript("db/013_course_comment_like.sql", "课程评论点赞");
     }
 
     private void executeScript(String path, String description) {

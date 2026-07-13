@@ -2,6 +2,7 @@ package com.creditbank.platform.dto;
 
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +19,8 @@ public class CourseCommentVO {
     private String avatar;
     private String content;
     private Integer likeCount;
+    private Boolean liked;
+    private BigDecimal creditReward;
     private LocalDateTime createTime;
     private List<CourseCommentVO> replies = new ArrayList<>();
 }
