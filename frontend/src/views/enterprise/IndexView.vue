@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue'
-import { Search } from '@element-plus/icons-vue'
-import PageShell from '@/components/common/PageShell.vue'
+import { computed, ref, watch, onMounted } from 'vue'
+import { OfficeBuilding, School, Reading, Search } from '@element-plus/icons-vue'
 import {
   listJoinedOrgsApi,
   ORG_TYPE_OPTIONS,
@@ -18,11 +17,24 @@ const pageSize = ref(12)
 const keyword = ref('')
 const typeFilter = ref<number | undefined>(undefined)
 
-const typeIcons: Record<number, string> = {
-  1: '🏫',
-  2: '📚',
-  3: '🏢',
-  4: '🏛️',
+const typeRail = computed(() =>
+  ORG_TYPE_OPTIONS.map((item) => ({
+    label: item.label,
+    value: item.value,
+  })),
+)
+
+const typeAccent: Record<number, string> = {
+  1: '#38bdf8',
+  2: '#34d399',
+  3: '#a78bfa',
+  4: '#fb923c',
+}
+
+function typeIcon(type: number) {
+  if (type === 1) return School
+  if (type === 2) return Reading
+  return OfficeBuilding
 }
 
 async function fetchOrgs() {
@@ -46,14 +58,11 @@ async function fetchOrgs() {
   }
 }
 
-function handleSearch() {
-  page.value = 1
-  fetchOrgs()
+function selectType(value?: number) {
+  typeFilter.value = value
 }
 
-function handleReset() {
-  keyword.value = ''
-  typeFilter.value = undefined
+function handleSearch() {
   page.value = 1
   fetchOrgs()
 }
@@ -78,82 +87,110 @@ onMounted(fetchOrgs)
 </script>
 
 <template>
-  <div class="enterprise-list-wrap">
-    <PageShell
-      title="加盟企业"
-      description="浏览已加盟平台的高校、培训机构与企业"
-      :loading="loading"
-      :error="loadError"
-      @retry="fetchOrgs"
-    >
-      <div class="page-toolbar">
-        <el-input
-          v-model="keyword"
-          placeholder="搜索企业名称"
-          clearable
-          class="search-input"
-          @keyup.enter="handleSearch"
-          @clear="handleSearch"
-        >
-          <template #prefix>
-            <el-icon><Search /></el-icon>
-          </template>
-        </el-input>
+  <div class="enterprise-page" v-loading="loading">
+    <section class="hero-banner">
+      <div class="hero-banner__media" aria-hidden="true" />
+      <div class="hero-banner__veil" aria-hidden="true" />
+      <div class="hero-banner__content">
+        <p class="hero-kicker">Enterprise Alliance</p>
+        <h1>企业中心</h1>
+        <p class="hero-copy">
+          汇聚加盟机构资源，连接高校、培训机构与企业，共建学习成果互认、就业服务与活动协同通道。
+        </p>
+        <div class="hero-stats">
+          <div>
+            <strong>{{ total }}</strong>
+            <span>加盟机构</span>
+          </div>
+          <div>
+            <strong>{{ typeRail.length - 1 }}</strong>
+            <span>机构类型</span>
+          </div>
+          <div>
+            <strong>{{ orgList.length }}</strong>
+            <span>本页展示</span>
+          </div>
+        </div>
+      </div>
+    </section>
 
-        <el-select v-model="typeFilter" placeholder="机构类型" clearable class="type-select">
-          <el-option
-            v-for="item in ORG_TYPE_OPTIONS.filter((o) => o.value !== undefined)"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value"
-          />
-        </el-select>
+    <div class="enterprise-inner">
+      <header class="section-head">
+        <div>
+          <p class="eyebrow">Partners</p>
+          <h2>加盟企业名录</h2>
+        </div>
+        <p>浏览机构主页，查看招聘、活动与公开资料。</p>
+      </header>
 
-        <el-button type="primary" @click="handleSearch">搜索</el-button>
-        <el-button @click="handleReset">重置</el-button>
+      <div class="filter-bar">
+        <div class="type-chips">
+          <button
+            v-for="item in typeRail"
+            :key="String(item.value ?? 'all')"
+            type="button"
+            class="type-chip"
+            :class="{ active: typeFilter === item.value }"
+            @click="selectType(item.value)"
+          >
+            {{ item.label }}
+          </button>
+        </div>
+
+        <div class="glass-search">
+          <el-input
+            v-model="keyword"
+            placeholder="搜索机构名称"
+            clearable
+            @keyup.enter="handleSearch"
+            @clear="handleSearch"
+          >
+            <template #prefix>
+              <el-icon><Search /></el-icon>
+            </template>
+          </el-input>
+          <el-button class="glass-search__btn" type="primary" @click="handleSearch">搜索</el-button>
+        </div>
       </div>
 
-      <div class="card-grid">
-        <el-empty
-          v-if="!loading && orgList.length === 0"
-          class="page-empty"
-          :image-size="80"
-          description="暂无符合条件的加盟企业"
-        />
+      <el-alert
+        v-if="loadError"
+        :title="loadError"
+        type="warning"
+        show-icon
+        :closable="false"
+        class="load-alert"
+      >
+        <template #default>
+          <el-button link type="primary" @click="fetchOrgs">重新加载</el-button>
+        </template>
+      </el-alert>
 
+      <el-empty
+        v-if="!loading && orgList.length === 0"
+        description="暂无符合条件的加盟企业"
+        :image-size="80"
+      />
+
+      <div v-else class="partner-grid">
         <router-link
           v-for="org in orgList"
           :key="org.id"
           :to="`/enterprise/${org.id}`"
-          class="org-card"
+          class="partner-card"
         >
-          <div class="org-card-header">
-            <div class="org-logo">
-              <img v-if="org.logo" :src="org.logo" :alt="org.name" />
-              <span v-else class="org-logo-fallback">{{ typeIcons[org.type] || '🏢' }}</span>
-            </div>
-            <div class="org-meta">
-              <h3>{{ org.name }}</h3>
-              <el-tag size="small" type="info">{{ org.typeName }}</el-tag>
-            </div>
+          <div
+            class="partner-logo"
+            :style="{ color: typeAccent[org.type] || '#38bdf8' }"
+          >
+            <img v-if="org.logo" :src="org.logo" :alt="org.name" />
+            <el-icon v-else :size="28"><component :is="typeIcon(org.type)" /></el-icon>
           </div>
-
-          <p class="org-intro">{{ org.intro || '暂无简介' }}</p>
-
-          <ul class="org-info">
-            <li v-if="org.contact">
-              <span class="label">联系人</span>
-              <span>{{ org.contact }}</span>
-            </li>
-            <li v-if="org.phone">
-              <span class="label">电话</span>
-              <span>{{ org.phone }}</span>
-            </li>
-            <li v-if="org.address">
-              <span class="label">地址</span>
-              <span>{{ org.address }}</span>
-            </li>
-          </ul>
+          <div class="partner-body">
+            <h3>{{ org.name }}</h3>
+            <span class="partner-type">{{ org.typeName }}</span>
+            <p>{{ org.intro || '暂无简介，点击进入机构主页了解更多。' }}</p>
+          </div>
         </router-link>
       </div>
 
@@ -169,121 +206,268 @@ onMounted(fetchOrgs)
           @size-change="handleSizeChange"
         />
       </div>
-    </PageShell>
+    </div>
   </div>
 </template>
 
 <style scoped>
-.enterprise-list-wrap {
-  padding: 24px 16px 48px;
+.enterprise-page {
+  background: transparent;
+  padding-bottom: 56px;
+  min-height: calc(100vh - var(--header-height));
 }
 
-.enterprise-list-wrap :deep(.page-shell) {
+.hero-banner {
+  position: relative;
+  min-height: min(46vh, 420px);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  margin-bottom: 28px;
+}
+
+.hero-banner__media {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(120deg, rgba(15, 23, 42, 0.2), transparent 40%),
+    url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1800&q=80')
+      center / cover no-repeat;
+  transform: scale(1.04);
+  filter: saturate(0.85) contrast(1.05);
+}
+
+.hero-banner__veil {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(8, 15, 30, 0.35) 0%, rgba(8, 15, 30, 0.72) 100%),
+    radial-gradient(ellipse at 50% 20%, rgba(56, 189, 248, 0.18), transparent 55%);
+}
+
+.hero-banner__content {
+  position: relative;
+  z-index: 1;
+  max-width: 820px;
+  padding: 48px 24px;
+  text-align: center;
+  color: #f8fafc;
+}
+
+.hero-kicker,
+.eyebrow {
+  margin: 0 0 10px;
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(186, 230, 253, 0.88);
+  font-weight: 700;
+}
+
+.hero-banner__content h1 {
+  margin: 0 0 14px;
+  font-size: clamp(34px, 5vw, 52px);
+  line-height: 1.15;
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.35);
+}
+
+.hero-copy {
+  margin: 0 auto;
+  max-width: 640px;
+  line-height: 1.85;
+  font-size: 16px;
+  color: rgba(241, 245, 249, 0.9);
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.35);
+}
+
+.hero-stats {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 28px;
+  margin-top: 28px;
+}
+
+.hero-stats strong {
+  display: block;
+  font-size: 28px;
+  line-height: 1.1;
+}
+
+.hero-stats span {
+  font-size: 12px;
+  color: rgba(186, 230, 253, 0.75);
+}
+
+.enterprise-inner {
   max-width: var(--content-max-width);
   margin: 0 auto;
+  padding: 0 16px;
 }
 
-.search-input {
-  width: 280px;
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: end;
+  margin-bottom: 18px;
+  color: rgba(226, 232, 240, 0.78);
 }
 
-.type-select {
-  width: 160px;
+.section-head h2 {
+  margin: 0;
+  color: #f8fafc;
+  font-size: 28px;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.35);
 }
 
-.card-grid {
+.section-head p {
+  margin: 0;
+  max-width: 320px;
+  line-height: 1.6;
+  font-size: 14px;
+}
+
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.type-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.type-chip {
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  background: rgba(15, 23, 42, 0.35);
+  color: rgba(226, 232, 240, 0.82);
+  border-radius: 999px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 13px;
+  backdrop-filter: blur(8px);
+}
+
+.type-chip:hover,
+.type-chip.active {
+  border-color: rgba(56, 189, 248, 0.55);
+  color: #e0f2fe;
+  background: rgba(14, 165, 233, 0.22);
+  font-weight: 600;
+}
+
+.load-alert {
+  margin-bottom: 16px;
+}
+
+.partner-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 20px;
-  min-height: 200px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  min-height: 180px;
 }
 
-.org-card {
-  display: block;
-  background: var(--color-white);
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
-  padding: 20px;
-  transition: box-shadow 0.2s, transform 0.2s;
-  text-decoration: none;
-  color: inherit;
-}
-
-.org-card:hover {
-  box-shadow: 0 8px 24px rgba(32, 148, 243, 0.12);
-  transform: translateY(-2px);
-}
-
-.org-card-header {
+.partner-card {
   display: flex;
   gap: 14px;
   align-items: center;
-  margin-bottom: 12px;
+  min-height: 108px;
+  padding: 16px 18px;
+  border-radius: 14px;
+  text-decoration: none;
+  color: inherit;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.16);
+  transition: transform 0.18s, background 0.18s, border-color 0.18s;
 }
 
-.org-logo {
-  width: 52px;
-  height: 52px;
-  border-radius: 12px;
+.partner-card:hover {
+  transform: translateY(-3px);
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(125, 211, 252, 0.4);
+}
+
+.partner-logo {
+  width: 58px;
+  height: 58px;
+  border-radius: 14px;
   overflow: hidden;
-  background: var(--color-primary-light);
-  display: flex;
-  align-items: center;
-  justify-content: center;
   flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(15, 23, 42, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
-.org-logo img {
+.partner-logo img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.org-logo-fallback {
-  font-size: 24px;
+.partner-body {
+  min-width: 0;
 }
 
-.org-meta h3 {
-  font-size: 16px;
-  color: var(--color-text);
+.partner-body h3 {
+  margin: 0 0 4px;
+  font-size: 15px;
+  color: #f8fafc;
+  line-height: 1.35;
+}
+
+.partner-type {
+  display: inline-block;
   margin-bottom: 6px;
+  font-size: 12px;
+  color: #7dd3fc;
 }
 
-.org-intro {
-  font-size: 13px;
-  line-height: 1.6;
-  color: var(--color-text-secondary);
-  margin-bottom: 14px;
+.partner-body p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.55;
+  color: rgba(226, 232, 240, 0.68);
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  min-height: 62px;
 }
 
-.org-info {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  border-top: 1px solid var(--color-border);
-  padding-top: 12px;
+.page-pagination {
+  margin-top: 22px;
 }
 
-.org-info li {
-  display: flex;
-  gap: 8px;
-  font-size: 12px;
-  color: var(--color-text-secondary);
-  margin-bottom: 6px;
+.page-pagination :deep(.el-pagination) {
+  --el-pagination-bg-color: transparent;
+  --el-pagination-button-bg-color: rgba(255, 255, 255, 0.08);
+  --el-pagination-text-color: #e2e8f0;
+  justify-content: center;
 }
 
-.org-info li:last-child {
-  margin-bottom: 0;
+@media (max-width: 960px) {
+  .partner-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .section-head,
+  .filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }
 
-.org-info .label {
-  color: var(--color-text-muted);
-  min-width: 42px;
-  flex-shrink: 0;
+@media (max-width: 640px) {
+  .partner-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

@@ -153,7 +153,7 @@ onMounted(() => {
             <el-icon :size="18"><HomeFilled /></el-icon>
           </router-link>
 
-          <!-- 带下拉的菜单 -->
+          <!-- 带下拉的菜单：有 path 时可点击进入总览 -->
           <el-dropdown
             v-else
             trigger="hover"
@@ -161,13 +161,15 @@ onMounted(() => {
             :show-timeout="80"
             :hide-timeout="150"
           >
-            <span
+            <button
+              type="button"
               class="nav-item nav-dropdown"
-              :class="{ active: isNavActive(item) }"
+              :class="{ active: isNavActive(item), 'is-clickable': !!item.path }"
+              @click.stop="item.path && navigate(item.path)"
             >
               {{ item.label }}
               <el-icon class="nav-arrow"><ArrowDown /></el-icon>
-            </span>
+            </button>
             <template #dropdown>
               <el-dropdown-menu>
                 <template v-if="item.children.length">
@@ -498,6 +500,9 @@ onMounted(() => {
   cursor: pointer;
   transition: color 0.2s, background 0.2s;
   outline: none;
+  border: none;
+  background: transparent;
+  font: inherit;
 }
 
 .app-header.is-logged-in .main-nav {

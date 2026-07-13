@@ -18,13 +18,13 @@ interface DisplayRow extends SearchItem {
 }
 
 const modulePaths: Record<string, string> = {
-  course: '/courses',
+  course: '/resources',
   credit: '/credit',
-  activity: '/activity',
-  news: '/news',
-  job: '/job',
+  activity: '/news?type=activity',
+  news: '/news?type=policy',
+  job: '/news?type=job',
   forum: '/forum',
-  partner: '/partners',
+  partner: '/enterprise',
 }
 
 const coverIcons: Record<string, string> = {
@@ -39,8 +39,38 @@ function showCoverImage(url?: string) {
   return !/\.(pdf|zip|doc|docx|ppt|pptx|xlsx)(\?.*)?$/i.test(url)
 }
 
+/** 普通条目跳转 */
 function itemPath(item: SearchItem) {
-  return modulePaths[item.type] ?? '/'
+  switch (item.type) {
+    case 'credit':
+      return `/credit/products/${item.id}`
+    case 'course':
+      return { path: '/resources', query: { courseId: String(item.id) } }
+    case 'partner':
+      return `/enterprise/${item.id}`
+    case 'activity':
+      return { path: '/news', query: { type: 'activity', id: String(item.id) } }
+    case 'job':
+      return { path: '/news', query: { type: 'job', id: String(item.id) } }
+    case 'news':
+      return { path: '/news', query: { type: 'policy', id: String(item.id) } }
+    case 'forum':
+      return { path: '/forum', query: { id: String(item.id) } }
+    default:
+      return modulePaths[item.type] ?? '/'
+  }
+}
+
+/** 微专业：按学习资源技能标签筛选 */
+function microMajorPath(item: SearchItem) {
+  const tag = item.typeName && item.typeName !== '课程' ? item.typeName : undefined
+  return {
+    path: '/resources',
+    query: {
+      ...(tag ? { tag } : {}),
+      ...(item.id ? { courseId: String(item.id) } : {}),
+    },
+  }
 }
 
 function formatDate(value?: string) {
@@ -128,9 +158,9 @@ onMounted(loadHomeData)
             <el-button link type="primary" @click="loadHomeData">重新加载</el-button>
           </template>
         </el-alert>
-        <!-- 精品课程 -->
+        <!-- 热门课程（与学习资源同源） -->
         <section class="home-block">
-          <HomeSectionHeader title="精品课程" icon="📚" more-to="/courses" />
+          <HomeSectionHeader title="热门课程" icon="📚" more-to="/resources" />
           <el-empty v-if="!homeData.courses.length" description="暂无课程" :image-size="64" />
           <div v-else class="card-grid card-grid--4 card-grid--media">
             <router-link
@@ -151,6 +181,7 @@ onMounted(loadHomeData)
                 </div>
               </div>
               <h3 class="grid-title">{{ item.title }}</h3>
+              <p v-if="item.summary" class="grid-summary">{{ truncate(item.summary, 42) }}</p>
               <p v-if="item.extra" class="grid-meta">{{ item.extra }}</p>
             </router-link>
           </div>
@@ -186,7 +217,7 @@ onMounted(loadHomeData)
 
         <!-- 热门活动 -->
         <section class="home-block">
-          <HomeSectionHeader title="热门活动" icon="📅" more-to="/activity" />
+          <HomeSectionHeader title="热门活动" icon="📅" more-to="/news?type=activity" />
           <el-empty v-if="!homeData.hotActivities.length" description="暂无活动" :image-size="64" />
           <div v-else class="card-grid card-grid--3">
             <router-link
@@ -205,15 +236,15 @@ onMounted(loadHomeData)
           </div>
         </section>
 
-        <!-- 微专业 -->
+        <!-- 微专业（按学习资源技能标签聚合） -->
         <section class="home-block">
-          <HomeSectionHeader title="微专业" icon="🎓" more-to="/courses" />
+          <HomeSectionHeader title="微专业" icon="🎓" more-to="/resources" />
           <el-empty v-if="!homeData.microMajors.length" description="暂无微专业" :image-size="64" />
           <div v-else class="card-grid card-grid--3">
             <router-link
               v-for="item in homeData.microMajors"
-              :key="`micro-${item.id}`"
-              :to="itemPath(item)"
+              :key="`micro-${item.typeName || item.id}`"
+              :to="microMajorPath(item)"
               class="micro-card"
             >
               <div class="micro-cover">
@@ -228,6 +259,7 @@ onMounted(loadHomeData)
                 </div>
               </div>
               <div class="micro-body">
+                <p v-if="item.typeName" class="micro-tag">{{ item.typeName }}</p>
                 <h3 class="micro-title">{{ item.title }}</h3>
                 <p v-if="item.summary" class="micro-summary">{{ truncate(item.summary, 48) }}</p>
                 <p v-if="item.extra" class="grid-meta">{{ item.extra }}</p>
@@ -239,7 +271,7 @@ onMounted(loadHomeData)
         <!-- 最新热点 + 招聘信息 -->
         <div class="dual-row dual-row--ghost">
           <section class="dual-panel">
-            <HomeSectionHeader title="最新热点" icon="📰" more-to="/news" />
+            <HomeSectionHeader title="最新热点" icon="📰" more-to="/news?type=policy" />
             <ul class="split-list">
               <li v-for="item in displayNews" :key="`news-${item.id}`">
                 <router-link
@@ -265,7 +297,7 @@ onMounted(loadHomeData)
           </section>
 
           <section class="dual-panel">
-            <HomeSectionHeader title="招聘信息" icon="💼" more-to="/job" />
+            <HomeSectionHeader title="招聘信息" icon="💼" more-to="/news?type=job" />
             <ul class="split-list">
               <li v-for="item in displayJobs" :key="`job-${item.id}`">
                 <router-link
@@ -314,7 +346,7 @@ onMounted(loadHomeData)
 
         <!-- 合作单位 -->
         <section class="home-block">
-          <HomeSectionHeader title="合作单位" icon="🤝" more-to="/partners" />
+          <HomeSectionHeader title="合作单位" icon="🤝" more-to="/enterprise" />
           <el-empty v-if="!homeData.partners.length" description="暂无合作单位" :image-size="64" />
           <div v-else class="partner-grid">
             <router-link
@@ -435,6 +467,17 @@ onMounted(loadHomeData)
   overflow: hidden;
 }
 
+.grid-summary {
+  margin: 0 0 4px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--color-text-muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 .grid-meta {
   font-size: 12px;
   color: var(--color-text-muted);
@@ -449,6 +492,10 @@ onMounted(loadHomeData)
 .card-grid--media .grid-title {
   color: rgba(255, 255, 255, 0.95);
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
+}
+
+.card-grid--media .grid-summary {
+  color: rgba(255, 255, 255, 0.68);
 }
 
 .card-grid--media .grid-meta {
@@ -533,6 +580,13 @@ onMounted(loadHomeData)
 
 .micro-body {
   padding: 14px 16px 16px;
+}
+
+.micro-tag {
+  margin: 0 0 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-primary, #2094f3);
 }
 
 .micro-title {

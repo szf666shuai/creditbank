@@ -150,7 +150,7 @@ onMounted(loadSummary)
         </el-button>
         <el-button @click="$router.push('/archive')">学习档案</el-button>
         <el-button @click="$router.push('/resources')">学习资源</el-button>
-        <el-button @click="$router.push('/credit')">积分商城</el-button>
+        <el-button @click="$router.push('/credit')">秩点商城</el-button>
       </div>
     </div>
   </div>

@@ -93,7 +93,7 @@ onMounted(loadProduct)
 <template>
   <div class="product-detail-page">
     <div class="section-inner">
-      <el-button :icon="ArrowLeft" text @click="router.push('/credit')">返回积分商城</el-button>
+      <el-button class="back-link" :icon="ArrowLeft" text @click="router.push('/credit')">返回秩点商城</el-button>
       <el-skeleton v-if="loading" :rows="8" animated />
       <el-empty v-else-if="!product" description="商品不存在或已下架" />
       <template v-else>
@@ -159,14 +159,23 @@ onMounted(loadProduct)
 
 <style scoped>
 .product-detail-page {
-  min-height: 100vh;
+  min-height: calc(100vh - var(--header-height));
   padding: 28px 20px 60px;
-  background: var(--color-bg);
+  background: transparent;
 }
 
 .section-inner {
   max-width: var(--content-max-width);
   margin: 0 auto;
+}
+
+.product-detail-page :deep(.back-link) {
+  color: rgba(245, 248, 255, 0.92);
+  margin-bottom: 4px;
+}
+
+.product-detail-page :deep(.back-link:hover) {
+  color: #fff;
 }
 
 .product-detail-card {
@@ -175,9 +184,10 @@ onMounted(loadProduct)
   gap: 32px;
   margin-top: 18px;
   padding: 28px;
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
-  background: var(--color-white);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
 }
 
 .detail-cover {

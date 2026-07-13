@@ -26,7 +26,8 @@ export const siteNav: NavItem[] = [
   },
   {
     key: 'credit',
-    label: '积分商城',
+    label: '秩点商城',
+    path: '/credit',
     children: [
       { label: '商品兑换', path: '/credit' },
       { label: '订单记录', path: '/credit/orders' },
@@ -43,16 +44,28 @@ export const siteNav: NavItem[] = [
   {
     key: 'forum',
     label: '论坛',
-    children: [],
+    path: '/forum',
+    children: [
+      { label: '校园频道', path: '/forum?board=campus' },
+      { label: '校园集市', path: '/forum?board=market' },
+      { label: '求职经验', path: '/forum?board=jobs' },
+      { label: '政策解读', path: '/forum?board=policy' },
+    ],
   },
   {
     key: 'news',
     label: '资讯中心',
-    children: [],
+    path: '/news',
+    children: [
+      { label: '招聘信息', path: '/news?type=job' },
+      { label: '活动信息', path: '/news?type=activity' },
+      { label: '政策资讯', path: '/news?type=policy' },
+    ],
   },
   {
     key: 'enterprise',
     label: '企业中心',
+    path: '/enterprise',
     children: [
       { label: '加盟企业', path: '/enterprise' },
     ],

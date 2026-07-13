@@ -20,11 +20,7 @@ export interface ProfileSummary {
   orders: MallOrder[]
 }
 
-export function fetchProfileSummary() {
-  return request.get<ProfileSummary>('/profile/summary')
-}
-
-/** 学习画像 */
+/** 学习画像（个人中心统计卡片） */
 export interface UserLearningProfile {
   userId: number
   totalHours: number
@@ -38,6 +34,10 @@ export interface LearningStatDaily {
   studyMinutes: number
   coursesCompleted: number
   creditEarned?: number
+}
+
+export function fetchProfileSummary() {
+  return request.get<ProfileSummary>('/profile/summary')
 }
 
 export function getLearningProfileApi() {

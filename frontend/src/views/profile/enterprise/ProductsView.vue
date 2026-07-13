@@ -148,7 +148,7 @@ onMounted(async () => {
 <template>
   <PageShell
     title="商城管理"
-    description="发布积分商城商品，提交后由平台管理员审核上架"
+    description="发布秩点商城商品，提交后由平台管理员审核上架"
     :loading="loading"
     :error="loadError"
     @retry="fetchProducts"
@@ -161,7 +161,7 @@ onMounted(async () => {
       type="info"
       :closable="false"
       show-icon
-      title="企业可挂商品到积分商城，学员使用秩点兑换。商品需经平台审核通过后才会在商城展示。"
+      title="企业可挂商品到秩点商城，学员使用秩点兑换。商品需经平台审核通过后才会在商城展示。"
       class="tip"
     />
 

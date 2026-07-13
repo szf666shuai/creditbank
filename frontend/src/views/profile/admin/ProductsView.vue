@@ -95,7 +95,7 @@ onMounted(fetchData)
 <template>
   <PageShell
     title="商品审核"
-    description="审核企业提交的积分商城商品，通过后学员可见并可兑换"
+    description="审核企业提交的秩点商城商品，通过后学员可见并可兑换"
     :loading="loading"
     :error="loadError"
     @retry="fetchData"

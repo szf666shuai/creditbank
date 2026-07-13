@@ -90,7 +90,7 @@ onMounted(loadOrders)
 
       <section class="mall-header">
         <div>
-          <p class="eyebrow">Credit Mall</p>
+          <p class="eyebrow">Rank Point Mall</p>
           <h1>订单记录</h1>
           <p class="subtitle">查看兑换订单、支付状态、兑换码与已购课程。</p>
         </div>
@@ -228,7 +228,9 @@ onMounted(loadOrders)
 
 <style scoped>
 .mall-page {
-  padding: 32px 16px 56px;
+  padding: 24px 16px 56px;
+  background: transparent;
+  min-height: calc(100vh - var(--header-height));
 }
 
 .section-inner {
@@ -239,47 +241,56 @@ onMounted(loadOrders)
 .mall-subnav {
   display: flex;
   gap: 8px;
-  margin-bottom: 20px;
+  margin-bottom: 18px;
 }
 
 .subnav-item {
   padding: 8px 16px;
-  border-radius: 20px;
+  border-radius: 999px;
   font-size: 14px;
-  color: var(--color-text-secondary);
+  color: rgba(226, 232, 240, 0.78);
   text-decoration: none;
-  background: var(--color-white);
-  border: 1px solid var(--color-border);
+  background: rgba(15, 23, 42, 0.35);
+  border: 1px solid rgba(148, 163, 184, 0.25);
   transition: all 0.2s;
+  backdrop-filter: blur(8px);
 }
 
 .subnav-item:hover,
 .subnav-item.is-active {
-  color: var(--color-primary);
-  border-color: var(--color-primary);
-  background: var(--color-primary-light);
+  color: #e0f2fe;
+  border-color: rgba(56, 189, 248, 0.5);
+  background: rgba(14, 165, 233, 0.22);
 }
 
 .mall-header {
   margin-bottom: 22px;
+  padding: 22px 24px;
+  border-radius: 20px;
+  background:
+    radial-gradient(ellipse at 12% 20%, rgba(56, 189, 248, 0.28), transparent 45%),
+    linear-gradient(135deg, rgba(15, 23, 42, 0.72), rgba(30, 58, 138, 0.45));
+  border: 1px solid rgba(125, 211, 252, 0.22);
+  color: #f8fafc;
 }
 
 .eyebrow {
-  color: var(--color-primary);
+  color: #7dd3fc;
   font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
+  letter-spacing: 0.12em;
 }
 
 h1 {
   margin: 6px 0 8px;
   font-size: 30px;
-  color: var(--color-text);
+  color: #f8fafc;
 }
 
 .subtitle {
   max-width: 680px;
-  color: var(--color-text-secondary);
+  color: rgba(226, 232, 240, 0.82);
   line-height: 1.7;
 }
 
@@ -288,7 +299,7 @@ h1 {
   align-items: center;
   gap: 8px;
   font-weight: 700;
-  color: var(--color-text);
+  color: #e2e8f0;
   margin-bottom: 14px;
 }
 

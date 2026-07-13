@@ -6,6 +6,8 @@ import PlaceholderView from '@/views/PlaceholderView.vue'
 import LoginView from '@/views/auth/LoginView.vue'
 import RegisterView from '@/views/auth/RegisterView.vue'
 import SearchView from '@/views/SearchView.vue'
+import ForumView from '@/views/ForumView.vue'
+import InformationView from '@/views/InformationView.vue'
 import CreditMallView from '@/views/CreditMallView.vue'
 import MallOrdersView from '@/views/MallOrdersView.vue'
 import LearningResourcesView from '@/views/LearningResourcesView.vue'
@@ -73,18 +75,18 @@ const router = createRouter({
         { path: '', name: 'home', component: HomeView },
         { path: 'courses', ...placeholder('课程') },
         { path: 'credit', name: 'credit', component: CreditMallView },
-        { path: 'credit/orders', name: 'credit-orders', component: MallOrdersView, meta: { requiresAuth: true } },
+        { path: 'credit/orders', name: 'mall-orders', component: MallOrdersView, meta: { ...authRoute } },
         { path: 'credit/products/:productId', name: 'mall-product-detail', component: MallProductDetailView },
-        { path: 'resources', name: 'resources', component: LearningResourcesView, meta: studentRoute },
+        { path: 'resources', name: 'resources', component: LearningResourcesView },
         { path: 'resources/:courseId', name: 'course-player', component: CoursePlayerView, meta: studentRoute },
         { path: 'archive', name: 'archive', component: LearningArchiveView, meta: studentRoute },
         { path: 'achievement', ...placeholder('学习成果') },
-        { path: 'forum', ...placeholder('论坛') },
-        { path: 'news', ...placeholder('资讯中心') },
+        { path: 'forum', name: 'forum', component: ForumView, meta: { title: '论坛' } },
+        { path: 'news', name: 'news', component: InformationView, meta: { title: '资讯中心' } },
         { path: 'organization', redirect: '/register' },
         { path: 'about', ...placeholder('关于我们') },
-        { path: 'activity', ...placeholder('活动报名') },
-        { path: 'job', ...placeholder('招聘求职') },
+        { path: 'activity', redirect: { path: '/news', query: { type: 'activity' } } },
+        { path: 'job', redirect: { path: '/news', query: { type: 'job' } } },
         { path: 'integrity', ...placeholder('诚信评定') },
         { path: 'partners', ...placeholder('合作单位') },
         { path: 'contact', ...placeholder('联系我们') },
@@ -92,6 +94,7 @@ const router = createRouter({
         { path: 'login', name: 'login', component: LoginView, meta: { guest: true } },
         { path: 'register', name: 'register', component: RegisterView, meta: { guest: true } },
 
+        // 企业中心（公开浏览）
         {
           path: 'enterprise',
           name: 'enterprise',
@@ -125,6 +128,7 @@ const router = createRouter({
           meta: { title: '企业详情' },
         },
 
+        // 个人中心（左侧菜单布局）
         {
           path: 'profile',
           component: ProfileLayout,
@@ -337,6 +341,7 @@ const router = createRouter({
           ],
         },
 
+        // 兼容旧消息中心路径
         { path: 'messages', redirect: '/profile/messages' },
         { path: 'messages/:id', redirect: (to) => `/profile/messages/${to.params.id}` },
 
@@ -344,14 +349,7 @@ const router = createRouter({
       ],
     },
   ],
-  scrollBehavior(to) {
-    if (to.hash) {
-      return {
-        el: to.hash,
-        top: 96,
-        behavior: 'smooth',
-      }
-    }
+  scrollBehavior() {
     return { top: 0 }
   },
 })

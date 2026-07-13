@@ -6,6 +6,7 @@ import { useAuthStore } from '@/stores/auth'
 import AppHeader from '@/components/layout/AppHeader.vue'
 import AppFooter from '@/components/layout/AppFooter.vue'
 import BackToTop from '@/components/layout/BackToTop.vue'
+import AiAssistantPet from '@/components/agent/AiAssistantPet.vue'
 import ParticleBackground from '@/components/effects/ParticleBackground.vue'
 import { resolveRoleThemeVariant } from '@/config/role-theme'
 import {
@@ -44,6 +45,7 @@ onMounted(() => {
       </main>
       <AppFooter />
       <BackToTop />
+      <AiAssistantPet />
     </div>
   </div>
 </template>

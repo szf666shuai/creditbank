@@ -2,7 +2,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { Delete, Goods, ShoppingCart, Wallet } from '@element-plus/icons-vue'
+import { Delete, Goods, ShoppingCart, Wallet, Ticket } from '@element-plus/icons-vue'
 import {
   createMallOrder,
   fetchMallCategories,
@@ -193,45 +193,68 @@ onMounted(async () => {
 
       <section class="mall-header">
         <div>
-          <p class="eyebrow">Credit Mall</p>
-          <h1>积分商城</h1>
-          <p class="subtitle">商品按分类展示，支持实物、虚拟商品、课程资源和服务兑换，订单与支付记录会写入数据库。</p>
+          <p class="eyebrow">Rank Point Mall</p>
+          <h1>秩点商城</h1>
+          <p class="subtitle">
+            用学习获得的秩点兑换课程资源、学习用品与虚拟权益，订单与支付记录同步写入平台。
+          </p>
         </div>
-        <div class="mall-stats">
-          <div>
-            <el-icon><Goods /></el-icon>
-            <strong>{{ products.length }}</strong>
-            <span>在售商品</span>
+        <div class="mall-header-actions">
+          <div class="mall-stats">
+            <div>
+              <el-icon><Goods /></el-icon>
+              <strong>{{ products.length }}</strong>
+              <span>在售商品</span>
+            </div>
+            <div>
+              <el-icon><ShoppingCart /></el-icon>
+              <strong>{{ cartCount }}</strong>
+              <span>购物车</span>
+            </div>
           </div>
-          <div>
-            <el-icon><ShoppingCart /></el-icon>
-            <strong>{{ cartCount }}</strong>
-            <span>购物车</span>
-          </div>
+          <el-button type="primary" plain @click="router.push('/credit/orders')">
+            <el-icon><Ticket /></el-icon>
+            订单记录
+          </el-button>
         </div>
       </section>
 
       <section class="filters">
-        <el-input
-          v-model="keyword"
-          placeholder="搜索商品"
-          clearable
-          @keyup.enter="loadProducts"
-          @clear="loadProducts"
-        />
-        <el-button type="primary" @click="loadProducts">搜索</el-button>
+        <div class="glass-search">
+          <el-input
+            v-model="keyword"
+            placeholder="搜索商品名称或关键词"
+            clearable
+            @keyup.enter="loadProducts"
+            @clear="loadProducts"
+          >
+            <template #prefix>
+              <el-icon><Goods /></el-icon>
+            </template>
+          </el-input>
+          <el-button class="glass-search__btn" type="primary" @click="loadProducts">搜索</el-button>
+        </div>
       </section>
 
       <div class="category-row">
-        <el-check-tag :checked="!activeCategoryId" @click="selectCategory()">全部</el-check-tag>
-        <el-check-tag
+        <button
+          type="button"
+          class="cat-chip"
+          :class="{ active: !activeCategoryId }"
+          @click="selectCategory()"
+        >
+          全部
+        </button>
+        <button
           v-for="category in categories"
           :key="category.id"
-          :checked="activeCategoryId === category.id"
+          type="button"
+          class="cat-chip"
+          :class="{ active: activeCategoryId === category.id }"
           @click="selectCategory(category.id)"
         >
           {{ category.name }}
-        </el-check-tag>
+        </button>
       </div>
 
       <div class="mall-layout">
@@ -400,7 +423,9 @@ onMounted(async () => {
 
 <style scoped>
 .mall-page {
-  padding: 32px 16px 56px;
+  padding: 24px 16px 56px;
+  background: transparent;
+  min-height: calc(100vh - var(--header-height));
 }
 
 .section-inner {
@@ -411,39 +436,59 @@ onMounted(async () => {
 .mall-subnav {
   display: flex;
   gap: 8px;
-  margin-bottom: 20px;
+  margin-bottom: 18px;
 }
 
 .subnav-item {
   padding: 8px 16px;
-  border-radius: 20px;
+  border-radius: 999px;
   font-size: 14px;
-  color: var(--color-text-secondary);
+  color: rgba(226, 232, 240, 0.78);
   text-decoration: none;
-  background: var(--color-white);
-  border: 1px solid var(--color-border);
+  background: rgba(15, 23, 42, 0.35);
+  border: 1px solid rgba(148, 163, 184, 0.25);
   transition: all 0.2s;
+  backdrop-filter: blur(8px);
 }
 
 .subnav-item:hover,
 .subnav-item.is-active {
-  color: var(--color-primary);
-  border-color: var(--color-primary);
-  background: var(--color-primary-light);
+  color: #e0f2fe;
+  border-color: rgba(56, 189, 248, 0.5);
+  background: rgba(14, 165, 233, 0.22);
 }
 
 .mall-header,
 .mall-layout,
-.order-head,
-.order-foot,
-.order-item-line,
 .product-footer,
 .total-line {
   display: flex;
 }
 
-.product-actions,
-.order-item-actions {
+.mall-header {
+  justify-content: space-between;
+  gap: 24px;
+  align-items: flex-end;
+  margin-bottom: 20px;
+  padding: 24px 26px;
+  border-radius: 20px;
+  background:
+    radial-gradient(ellipse at 12% 20%, rgba(56, 189, 248, 0.28), transparent 45%),
+    linear-gradient(135deg, rgba(15, 23, 42, 0.72), rgba(30, 58, 138, 0.45));
+  border: 1px solid rgba(125, 211, 252, 0.22);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(12px);
+  color: #f8fafc;
+}
+
+.mall-header-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.product-actions {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -455,7 +500,7 @@ onMounted(async () => {
   padding: 0;
   border: 0;
   background: transparent;
-  color: var(--color-primary);
+  color: #38bdf8;
   font: inherit;
   cursor: pointer;
 }
@@ -466,30 +511,27 @@ onMounted(async () => {
   text-align: center;
 }
 
-.mall-header {
-  justify-content: space-between;
-  gap: 24px;
-  align-items: flex-end;
-  margin-bottom: 22px;
-}
-
 .eyebrow {
-  color: var(--color-primary);
+  color: #7dd3fc;
   font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
+  letter-spacing: 0.12em;
 }
 
 h1 {
   margin: 6px 0 8px;
-  font-size: 30px;
-  color: var(--color-text);
+  font-size: 32px;
+  color: #f8fafc;
+  font-weight: 700;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.3);
 }
 
 .subtitle {
-  max-width: 680px;
-  color: var(--color-text-secondary);
+  max-width: 640px;
+  color: rgba(226, 232, 240, 0.82);
   line-height: 1.7;
+  margin: 0;
 }
 
 .mall-stats {
@@ -500,28 +542,30 @@ h1 {
 .mall-stats div {
   min-width: 104px;
   padding: 12px;
-  background: var(--color-white);
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 12px;
+  color: #e2e8f0;
 }
 
 .mall-stats strong {
   display: block;
   font-size: 22px;
-  color: var(--color-text);
+  color: #f8fafc;
 }
 
 .mall-stats span,
 .stock {
-  color: var(--color-text-muted);
+  color: rgba(148, 163, 184, 0.9);
   font-size: 12px;
 }
 
 .filters {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 10px;
   margin-bottom: 14px;
+}
+
+.filters .glass-search {
+  width: min(100%, 640px);
 }
 
 .category-row {
@@ -531,9 +575,28 @@ h1 {
   margin-bottom: 20px;
 }
 
+.cat-chip {
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  background: rgba(15, 23, 42, 0.35);
+  color: rgba(226, 232, 240, 0.82);
+  border-radius: 999px;
+  padding: 7px 14px;
+  cursor: pointer;
+  font-size: 13px;
+  backdrop-filter: blur(8px);
+}
+
+.cat-chip:hover,
+.cat-chip.active {
+  border-color: rgba(56, 189, 248, 0.55);
+  color: #e0f2fe;
+  background: rgba(14, 165, 233, 0.22);
+  font-weight: 600;
+}
+
 .mall-layout {
   align-items: flex-start;
-  gap: 20px;
+  gap: 18px;
 }
 
 .mall-layout main {
@@ -548,11 +611,12 @@ h1 {
 }
 
 .product-card,
-.checkout-panel,
-.order-card {
-  background: var(--color-white);
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
+.checkout-panel {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 14px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.16);
 }
 
 .product-card {
@@ -561,7 +625,7 @@ h1 {
 
 .product-cover {
   aspect-ratio: 16 / 10;
-  background: #eef2f6;
+  background: #0f172a;
 }
 
 .product-cover img,
@@ -578,8 +642,9 @@ h1 {
 .cover-placeholder {
   display: grid;
   place-items: center;
-  color: var(--color-primary);
+  color: #38bdf8;
   font-size: 34px;
+  background: linear-gradient(135deg, #0f172a, #1e3a5f);
 }
 
 .product-body {
@@ -616,17 +681,10 @@ h1 {
 }
 
 .product-footer,
-.order-head,
-.order-foot,
-.order-item-line,
 .total-line {
   justify-content: space-between;
   align-items: center;
   gap: 12px;
-}
-
-.order-item-line {
-  width: 100%;
 }
 
 .price strong {
@@ -652,8 +710,7 @@ h1 {
   gap: 14px;
 }
 
-.panel-title,
-.section-title {
+.panel-title {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -674,15 +731,13 @@ h1 {
   gap: 8px;
 }
 
-.cart-line strong,
-.order-head strong {
+.cart-line strong {
   display: block;
   font-size: 14px;
   color: var(--color-text);
 }
 
-.cart-line span,
-.order-head span {
+.cart-line span {
   display: block;
   margin-top: 3px;
   color: var(--color-text-muted);
@@ -749,15 +804,13 @@ h1 {
     flex-direction: column;
   }
 
+  .mall-header-actions {
+    align-items: stretch;
+  }
+
   .checkout-panel {
     position: static;
     width: 100%;
-  }
-}
-
-@media (max-width: 640px) {
-  .filters {
-    grid-template-columns: 1fr;
   }
 }
 </style>
