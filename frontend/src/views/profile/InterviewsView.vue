@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import PageShell from '@/components/common/PageShell.vue'
 import {
@@ -10,6 +11,8 @@ import {
 } from '@/api/interview'
 import { getErrorMessage, unwrapApi } from '@/utils/api'
 import { formatTime } from '@/utils/format'
+
+const router = useRouter()
 
 const loading = ref(false)
 const loadError = ref<string | null>(null)
@@ -32,6 +35,14 @@ async function fetchInvitations() {
   } finally {
     loading.value = false
   }
+}
+
+function canJoinVideo(row: InterviewInvitationItem) {
+  return row.canJoinVideo === true
+}
+
+function enterVideoRoom(row: InterviewInvitationItem) {
+  router.push(`/profile/interviews/${row.id}/video`)
 }
 
 async function handleAccept(row: InterviewInvitationItem) {
@@ -78,13 +89,16 @@ onMounted(fetchInvitations)
       <el-table-column label="面试时间" width="160">
         <template #default="{ row }">{{ formatTime(row.inviteTime) }}</template>
       </el-table-column>
-      <el-table-column prop="location" label="地点/方式" min-width="160" show-overflow-tooltip />
+      <el-table-column prop="location" label="地点/方式" min-width="140" show-overflow-tooltip />
+      <el-table-column label="面试方式" width="100">
+        <template #default="{ row }">{{ row.interviewModeName || '现场面试' }}</template>
+      </el-table-column>
       <el-table-column label="状态" width="100">
         <template #default="{ row }">
           <el-tag :type="statusTagType(row.status)" size="small">{{ row.statusName }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="操作" width="160" fixed="right">
+      <el-table-column label="操作" width="220" fixed="right">
         <template #default="{ row }">
           <template v-if="row.status === 0">
             <el-button
@@ -104,7 +118,12 @@ onMounted(fetchInvitations)
               拒绝
             </el-button>
           </template>
-          <span v-else class="page-text-muted">已处理</span>
+          <template v-else-if="canJoinVideo(row)">
+            <el-button link type="primary" @click="enterVideoRoom(row)">进入面试</el-button>
+          </template>
+          <span v-else-if="row.status !== 0" class="page-text-muted">
+            {{ row.applicationStatus === 3 || row.applicationStatus === 4 ? row.applicationStatusName : '已处理' }}
+          </span>
         </template>
       </el-table-column>
     </el-table>

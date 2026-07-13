@@ -1,6 +1,8 @@
 spring:
   application:
     name: credit-bank-platform
+  config:
+    import: optional:classpath:application-local.yml
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -48,3 +50,11 @@ jwt:
 
 app:
   seed-search-data: true
+
+trtc:
+  enabled: false
+  sdk-app-id: 0
+  secret-key: ""
+  expire-seconds: 86400
+  join-window-minutes-before: 30
+  join-window-minutes-after: 120

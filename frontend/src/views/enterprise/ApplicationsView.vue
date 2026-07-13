@@ -6,6 +6,8 @@ import PageShell from '@/components/common/PageShell.vue'
 import {
   listMyApplicationsApi,
   sendInterviewInviteApi,
+  INTERVIEW_MODE_VIDEO,
+  INTERVIEW_MODE_ONSITE,
   type JobApplicationItem,
 } from '@/api/interview'
 import { getErrorMessage, unwrapApi } from '@/utils/api'
@@ -21,6 +23,7 @@ const currentApplication = ref<JobApplicationItem | null>(null)
 
 const form = reactive({
   inviteTime: '',
+  interviewMode: INTERVIEW_MODE_VIDEO,
   location: '',
   remark: '',
 })
@@ -44,7 +47,8 @@ function openInvite(row: JobApplicationItem) {
   }
   currentApplication.value = row
   form.inviteTime = ''
-  form.location = ''
+  form.interviewMode = INTERVIEW_MODE_VIDEO
+  form.location = '平台视频面试'
   form.remark = ''
   dialogVisible.value = true
 }
@@ -55,8 +59,8 @@ async function handleSubmit() {
     ElMessage.warning('请选择面试时间')
     return
   }
-  if (!form.location.trim()) {
-    ElMessage.warning('请填写面试地点/方式')
+  if (form.interviewMode === INTERVIEW_MODE_ONSITE && !form.location.trim()) {
+    ElMessage.warning('现场面试请填写面试地点')
     return
   }
 
@@ -66,7 +70,8 @@ async function handleSubmit() {
       await sendInterviewInviteApi({
         applicationId: currentApplication.value.id,
         inviteTime: form.inviteTime,
-        location: form.location.trim(),
+        interviewMode: form.interviewMode,
+        location: form.location.trim() || undefined,
         remark: form.remark.trim() || undefined,
       }),
     )
@@ -146,8 +151,21 @@ onMounted(fetchApplications)
             style="width: 100%"
           />
         </el-form-item>
-        <el-form-item label="地点/方式" required>
-          <el-input v-model="form.location" placeholder="如：上海浦东 / 线上腾讯会议" />
+        <el-form-item label="面试方式" required>
+          <el-radio-group v-model="form.interviewMode">
+            <el-radio :value="INTERVIEW_MODE_VIDEO">平台视频面试</el-radio>
+            <el-radio :value="INTERVIEW_MODE_ONSITE">现场面试</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="地点/方式" :required="form.interviewMode === INTERVIEW_MODE_ONSITE">
+          <el-input
+            v-model="form.location"
+            :placeholder="
+              form.interviewMode === INTERVIEW_MODE_VIDEO
+                ? '选填，默认「平台视频面试」'
+                : '如：上海浦东某大厦'
+            "
+          />
         </el-form-item>
         <el-form-item label="补充说明">
           <el-input v-model="form.remark" type="textarea" :rows="3" placeholder="选填" />

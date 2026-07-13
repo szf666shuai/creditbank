@@ -7,6 +7,7 @@ import PageShell from '@/components/common/PageShell.vue'
 import {
   createEmptyResumeContent,
   createResumeApi,
+  generateResumeAiApi,
   getResumeApi,
   updateResumeApi,
   type ResumeContent,
@@ -20,6 +21,12 @@ const router = useRouter()
 const loading = ref(false)
 const loadError = ref<string | null>(null)
 const saving = ref(false)
+const aiGenerating = ref(false)
+const aiDialogVisible = ref(false)
+const aiForm = reactive({
+  targetRole: '',
+  extraHint: '',
+})
 const version = ref<number | undefined>()
 const updateTime = ref<string | undefined>()
 const isDefault = ref<number | undefined>()
@@ -113,8 +120,37 @@ function goBack() {
   router.push('/profile/resume')
 }
 
-function handleAiGenerate() {
-  ElMessage.info('AI 简历生成功能即将上线，敬请期待')
+function openAiDialog() {
+  aiForm.targetRole = form.title.trim() || ''
+  aiForm.extraHint = ''
+  aiDialogVisible.value = true
+}
+
+async function handleAiGenerate() {
+  if (!aiForm.targetRole.trim()) {
+    ElMessage.warning('请填写目标岗位或方向')
+    return
+  }
+
+  aiGenerating.value = true
+  try {
+    const content = unwrapApi(
+      await generateResumeAiApi({
+        targetRole: aiForm.targetRole.trim(),
+        extraHint: aiForm.extraHint.trim() || undefined,
+      }),
+    )
+    form.content = { ...createEmptyResumeContent(), ...content }
+    if (!form.title.trim()) {
+      form.title = `${aiForm.targetRole.trim()} · AI 简历`
+    }
+    aiDialogVisible.value = false
+    ElMessage.success('AI 已生成简历内容，请核对后保存')
+  } catch (e) {
+    ElMessage.error(getErrorMessage(e, 'AI 生成失败'))
+  } finally {
+    aiGenerating.value = false
+  }
 }
 
 onMounted(loadResume)
@@ -140,7 +176,7 @@ watch(
           返回简历列表
         </el-button>
         <div class="header-actions">
-          <el-button type="primary" plain @click="handleAiGenerate">✨ AI 生成</el-button>
+          <el-button type="primary" plain @click="openAiDialog">✨ AI 生成</el-button>
           <el-button type="primary" :loading="saving" @click="handleSave">保存</el-button>
         </div>
       </div>
@@ -239,6 +275,33 @@ watch(
       </el-form-item>
     </el-form>
   </PageShell>
+
+  <el-dialog v-model="aiDialogVisible" title="AI 生成简历" width="480px" destroy-on-close>
+    <el-form label-width="96px">
+      <el-form-item label="目标岗位" required>
+        <el-input
+          v-model="aiForm.targetRole"
+          maxlength="80"
+          placeholder="如：Java 后端开发、数据分析实习生"
+        />
+      </el-form-item>
+      <el-form-item label="补充说明">
+        <el-input
+          v-model="aiForm.extraHint"
+          type="textarea"
+          :rows="3"
+          maxlength="300"
+          show-word-limit
+          placeholder="如：突出 Spring Boot 项目、应届生、希望强调活动经历等"
+        />
+      </el-form-item>
+      <p class="ai-tip">将结合你的账号信息、学习档案与成果生成草稿，生成后请自行核对再保存。</p>
+    </el-form>
+    <template #footer>
+      <el-button @click="aiDialogVisible = false">取消</el-button>
+      <el-button type="primary" :loading="aiGenerating" @click="handleAiGenerate">开始生成</el-button>
+    </template>
+  </el-dialog>
 </template>
 
 <style scoped>
@@ -278,5 +341,12 @@ watch(
 
 .resume-form {
   max-width: 900px;
+}
+
+.ai-tip {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-text-muted);
+  line-height: 1.6;
 }
 </style>

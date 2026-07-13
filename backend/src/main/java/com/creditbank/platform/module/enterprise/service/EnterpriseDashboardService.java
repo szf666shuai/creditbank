@@ -19,9 +19,12 @@ import com.creditbank.platform.module.enterprise.mapper.InterviewInvitationMappe
 import com.creditbank.platform.module.enterprise.mapper.JobApplicationMapper;
 import com.creditbank.platform.module.enterprise.mapper.JobPostingMapper;
 import com.creditbank.platform.module.enterprise.mapper.OrgMaterialMapper;
+import com.creditbank.platform.module.enterprise.support.ActivityStatus;
 import com.creditbank.platform.security.AuthSupport;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -41,6 +44,7 @@ public class EnterpriseDashboardService {
     private final JobApplicationMapper jobApplicationMapper;
     private final InterviewInvitationMapper interviewInvitationMapper;
     private final OrgMaterialMapper orgMaterialMapper;
+    private final ActivityLifecycleService activityLifecycleService;
 
     public EnterpriseDashboardVO getDashboard() {
         SysUser user = authSupport.requireEnterprise();
@@ -78,10 +82,12 @@ public class EnterpriseDashboardService {
     }
 
     private long countActivities(Long orgId, int status) {
-        Long count = activityMapper.selectCount(new LambdaQueryWrapper<Activity>()
+        List<Activity> activities = activityMapper.selectList(new LambdaQueryWrapper<Activity>()
                 .eq(Activity::getOrgId, orgId)
-                .eq(Activity::getStatus, status));
-        return count != null ? count : 0;
+                .ne(Activity::getStatus, ActivityStatus.CANCELLED));
+        return activityLifecycleService.refreshAll(activities).stream()
+                .filter(item -> item.getStatus() != null && item.getStatus() == status)
+                .count();
     }
 
     private long countPendingInterviews(Long orgId) {

@@ -8,6 +8,7 @@ import com.creditbank.platform.entity.SysUser;
 import com.creditbank.platform.mapper.SysOrganizationMapper;
 import com.creditbank.platform.mapper.SysUserMapper;
 import com.creditbank.platform.module.enterprise.dto.InterviewInvitationVO;
+import com.creditbank.platform.module.enterprise.dto.InterviewRtcCredentialsVO;
 import com.creditbank.platform.module.enterprise.dto.SendInterviewInviteRequest;
 import com.creditbank.platform.module.enterprise.entity.InterviewInvitation;
 import com.creditbank.platform.module.enterprise.entity.JobApplication;
@@ -15,6 +16,8 @@ import com.creditbank.platform.module.enterprise.entity.JobPosting;
 import com.creditbank.platform.module.enterprise.mapper.InterviewInvitationMapper;
 import com.creditbank.platform.module.enterprise.mapper.JobApplicationMapper;
 import com.creditbank.platform.module.enterprise.mapper.JobPostingMapper;
+import com.creditbank.platform.module.enterprise.support.ApplicationStatus;
+import com.creditbank.platform.module.enterprise.support.InterviewMode;
 import com.creditbank.platform.module.message.entity.UserMessage;
 import com.creditbank.platform.module.message.mapper.UserMessageMapper;
 import com.creditbank.platform.security.AuthSupport;
@@ -37,7 +40,6 @@ public class EnterpriseInterviewService {
     private static final int MSG_TYPE_INTERVIEW = 2;
     private static final String REF_TYPE_INTERVIEW = "interview";
     private static final int UNREAD = 0;
-    private static final int APP_STATUS_INTERVIEW = 2;
     private static final int INVITE_PENDING = 0;
     private static final int INVITE_ACCEPTED = 1;
     private static final int INVITE_REJECTED = 2;
@@ -51,6 +53,7 @@ public class EnterpriseInterviewService {
     private final JobApplicationMapper jobApplicationMapper;
     private final InterviewInvitationMapper interviewInvitationMapper;
     private final UserMessageMapper userMessageMapper;
+    private final InterviewRtcService interviewRtcService;
 
     public List<InterviewInvitationVO> listSentInvitations() {
         SysUser user = authSupport.requireEnterprise();
@@ -93,14 +96,19 @@ public class EnterpriseInterviewService {
         JobPosting job = authSupport.requireOrgJob(jobId, orgId);
         SysOrganization org = orgMapper.selectById(orgId);
         String orgName = org != null ? org.getName() : "企业";
-        String location = request.getLocation().trim();
+        int interviewMode = request.getInterviewMode() != null ? request.getInterviewMode() : InterviewMode.VIDEO;
+        if (interviewMode != InterviewMode.ONSITE && interviewMode != InterviewMode.VIDEO) {
+            throw new BusinessException(400, "无效的面试方式");
+        }
+        String location = resolveLocation(request.getLocation(), interviewMode);
 
         UserMessage message = new UserMessage();
         message.setFromUserId(sender.getId());
         message.setToUserId(toUserId);
         message.setMsgType(MSG_TYPE_INTERVIEW);
         message.setTitle("面试邀请：" + job.getTitle());
-        message.setContent(buildMessageContent(orgName, job.getTitle(), request.getInviteTime(), location, request.getRemark()));
+        message.setContent(buildMessageContent(orgName, job.getTitle(), request.getInviteTime(), location,
+                interviewMode, request.getRemark()));
         message.setRefType(REF_TYPE_INTERVIEW);
         message.setReadStatus(UNREAD);
         userMessageMapper.insert(message);
@@ -115,18 +123,43 @@ public class EnterpriseInterviewService {
         invitation.setStatus(INVITE_PENDING);
         invitation.setInviteTime(request.getInviteTime());
         invitation.setLocation(location);
+        invitation.setInterviewMode(interviewMode);
         interviewInvitationMapper.insert(invitation);
+
+        if (interviewMode == InterviewMode.VIDEO) {
+            InterviewInvitation roomUpdate = new InterviewInvitation();
+            roomUpdate.setId(invitation.getId());
+            roomUpdate.setRoomId("interview-" + invitation.getId());
+            interviewInvitationMapper.updateById(roomUpdate);
+            invitation.setRoomId(roomUpdate.getRoomId());
+        }
 
         message.setRefId(invitation.getId());
         userMessageMapper.updateById(message);
 
-        if (application != null && (application.getStatus() == null || application.getStatus() < APP_STATUS_INTERVIEW)) {
-            application.setStatus(APP_STATUS_INTERVIEW);
+        if (application != null && shouldMoveToInterview(application.getStatus())) {
+            application.setStatus(ApplicationStatus.INTERVIEW);
             jobApplicationMapper.updateById(application);
         }
 
         InterviewInvitation saved = interviewInvitationMapper.selectById(invitation.getId());
         return toVO(saved, job.getTitle(), orgName, loadNameMap(saved));
+    }
+
+    public InterviewRtcCredentialsVO getRtcCredentials(Long invitationId) {
+        SysUser user = authSupport.requireEnterprise();
+        InterviewInvitation invitation = interviewRtcService.requireInvitation(invitationId);
+        if (!Objects.equals(invitation.getOrgId(), user.getOrgId())) {
+            throw new BusinessException(403, "无权访问该面试");
+        }
+        return interviewRtcService.issueCredentials(invitation, user.getId());
+    }
+
+    private boolean shouldMoveToInterview(Integer status) {
+        if (status == null) {
+            return true;
+        }
+        return status < ApplicationStatus.INTERVIEW || status == ApplicationStatus.INTERVIEW_CANCELLED;
     }
 
     private void ensureNoPendingInvite(Long jobId, Long toUserId, Long applicationId) {
@@ -144,12 +177,27 @@ public class EnterpriseInterviewService {
         }
     }
 
+    private String resolveLocation(String location, int interviewMode) {
+        if (StringUtils.hasText(location)) {
+            return location.trim();
+        }
+        if (interviewMode == InterviewMode.VIDEO) {
+            return "平台视频面试";
+        }
+        throw new BusinessException(400, "现场面试请填写面试地点");
+    }
+
     private String buildMessageContent(String orgName, String jobTitle,
-                                       java.time.LocalDateTime inviteTime, String location, String remark) {
+                                       java.time.LocalDateTime inviteTime, String location,
+                                       int interviewMode, String remark) {
         StringBuilder sb = new StringBuilder();
         sb.append("您好，").append(orgName).append(" 邀请您参加「").append(jobTitle).append("」的面试。\n\n");
         sb.append("面试时间：").append(inviteTime.format(TIME_FORMAT)).append('\n');
+        sb.append("面试方式：").append(InterviewMode.modeName(interviewMode)).append('\n');
         sb.append("面试地点/方式：").append(location).append("\n\n");
+        if (interviewMode == InterviewMode.VIDEO) {
+            sb.append("接受邀请后，可在「面试邀请」页面点击「进入面试」加入平台视频房间。\n\n");
+        }
         if (StringUtils.hasText(remark)) {
             sb.append(remark.trim()).append("\n\n");
         }
@@ -184,6 +232,10 @@ public class EnterpriseInterviewService {
 
     private InterviewInvitationVO toVO(InterviewInvitation invitation, String jobTitle, String orgName,
                                        Map<Long, String> nameMap) {
+        JobApplication application = invitation.getApplicationId() != null
+                ? jobApplicationMapper.selectById(invitation.getApplicationId())
+                : null;
+        Integer applicationStatus = application != null ? application.getStatus() : null;
         return InterviewInvitationVO.builder()
                 .id(invitation.getId())
                 .jobId(invitation.getJobId())
@@ -200,6 +252,12 @@ public class EnterpriseInterviewService {
                 .statusName(inviteStatusName(invitation.getStatus()))
                 .inviteTime(invitation.getInviteTime())
                 .location(invitation.getLocation())
+                .interviewMode(invitation.getInterviewMode())
+                .interviewModeName(InterviewMode.modeName(invitation.getInterviewMode()))
+                .roomId(invitation.getRoomId())
+                .applicationStatus(applicationStatus)
+                .applicationStatusName(ApplicationStatus.statusName(applicationStatus))
+                .canJoinVideo(interviewRtcService.canJoinVideo(invitation))
                 .createTime(invitation.getCreateTime())
                 .build();
     }

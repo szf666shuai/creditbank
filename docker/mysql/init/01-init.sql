@@ -502,6 +502,8 @@ CREATE TABLE IF NOT EXISTS interview_invitation (
     status          TINYINT DEFAULT 0 COMMENT '0待回复 1已接受 2已拒绝',
     invite_time     DATETIME COMMENT '面试时间',
     location        VARCHAR(255) COMMENT '面试地点/方式',
+    interview_mode  TINYINT NOT NULL DEFAULT 0 COMMENT '0现场 1视频',
+    room_id         VARCHAR(64) COMMENT 'TRTC 字符串房间号',
     create_time     DATETIME DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_invite_to (to_user_id),
     INDEX idx_invite_job (job_id)

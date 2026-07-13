@@ -32,6 +32,7 @@ logs/
 .env
 .env.local
 .env.*.local
+backend/src/main/resources/application-local.yml
 
 # Docker volumes (local data)
 docker/mysql/data/

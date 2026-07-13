@@ -2,6 +2,7 @@ package com.creditbank.platform.module.enterprise.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.creditbank.platform.common.BusinessException;
+import com.creditbank.platform.dto.CreditChangeResult;
 import com.creditbank.platform.dto.CreditEarnRequest;
 import com.creditbank.platform.entity.SysOrganization;
 import com.creditbank.platform.entity.SysUser;
@@ -30,6 +31,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -220,16 +222,23 @@ public class StudentEnterpriseActionService {
         registration.setCheckInTime(now);
         activityRegistrationMapper.updateById(registration);
 
+        Boolean creditGranted = false;
+        BigDecimal creditReward = null;
+        String creditMessage = null;
         try {
             CreditEarnRequest earnRequest = new CreditEarnRequest();
             earnRequest.setRuleCode("ACTIVITY_CHECKIN");
             earnRequest.setSource("活动签到: " + activity.getTitle());
             earnRequest.setRefType("activity_registration");
             earnRequest.setRefId(registration.getId());
-            creditService.earnByRule(user.getId(), earnRequest);
-        } catch (BusinessException ignored) {
-            // 奖励发放失败不阻断签到
+            CreditChangeResult creditChange = creditService.earnByRule(user.getId(), earnRequest);
+            creditGranted = true;
+            creditReward = creditChange != null ? creditChange.getAmount() : null;
+        } catch (BusinessException ex) {
+            creditMessage = ex.getMessage();
         }
+
+        String message = buildCheckinMessage(creditGranted, creditReward, creditMessage);
 
         return ActivityCheckinResultVO.builder()
                 .registrationId(registration.getId())
@@ -237,8 +246,21 @@ public class StudentEnterpriseActionService {
                 .status(REG_CHECKED_IN)
                 .statusName("已签到")
                 .checkInTime(now)
-                .message("签到成功，感谢参与！")
+                .creditGranted(creditGranted)
+                .creditReward(creditReward)
+                .creditMessage(creditMessage)
+                .message(message)
                 .build();
+    }
+
+    private static String buildCheckinMessage(Boolean creditGranted, BigDecimal creditReward, String creditMessage) {
+        if (Boolean.TRUE.equals(creditGranted) && creditReward != null) {
+            return "签到成功，已获得 " + creditReward.stripTrailingZeros().toPlainString() + " 秩点";
+        }
+        if (StringUtils.hasText(creditMessage)) {
+            return "签到成功，但秩点未发放：" + creditMessage;
+        }
+        return "签到成功，感谢参与！";
     }
 
     private void ensureCapacityAvailable(Activity activity) {

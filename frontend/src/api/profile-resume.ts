@@ -64,6 +64,15 @@ export function setDefaultResumeApi(id: number) {
   return request.post<UserResume>(`/profile/resumes/${id}/default`)
 }
 
+export interface ResumeAiGeneratePayload {
+  targetRole?: string
+  extraHint?: string
+}
+
+export function generateResumeAiApi(data?: ResumeAiGeneratePayload) {
+  return request.post<ResumeContent>('/profile/resumes/ai-generate', data ?? {})
+}
+
 export function createEmptyResumeContent(): ResumeContent {
   return {
     realName: '',

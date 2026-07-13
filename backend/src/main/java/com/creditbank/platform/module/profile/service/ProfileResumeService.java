@@ -3,16 +3,23 @@ package com.creditbank.platform.module.profile.service;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.creditbank.platform.common.BusinessException;
+import com.creditbank.platform.entity.LearningAchievement;
+import com.creditbank.platform.entity.LearningArchive;
 import com.creditbank.platform.entity.SysUser;
 import com.creditbank.platform.entity.UserResume;
+import com.creditbank.platform.mapper.LearningAchievementMapper;
+import com.creditbank.platform.mapper.LearningArchiveMapper;
 import com.creditbank.platform.mapper.SysUserMapper;
 import com.creditbank.platform.mapper.UserResumeMapper;
+import com.creditbank.platform.module.profile.dto.ResumeAiGenerateRequest;
 import com.creditbank.platform.module.profile.dto.ResumeContentVO;
 import com.creditbank.platform.module.profile.dto.UpdateUserResumeRequest;
 import com.creditbank.platform.module.profile.dto.UserResumeSummaryVO;
 import com.creditbank.platform.module.profile.dto.UserResumeVO;
 import com.creditbank.platform.security.AuthSupport;
+import com.creditbank.platform.service.LlmService;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,6 +28,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +42,9 @@ public class ProfileResumeService {
     private final AuthSupport authSupport;
     private final SysUserMapper userMapper;
     private final UserResumeMapper userResumeMapper;
+    private final LearningArchiveMapper learningArchiveMapper;
+    private final LearningAchievementMapper learningAchievementMapper;
+    private final LlmService llmService;
 
     public List<UserResumeSummaryVO> listMyResumes() {
         Long userId = authSupport.requireUserId();
@@ -129,6 +140,141 @@ public class ProfileResumeService {
 
     public UserResume ensureDefaultResume(Long userId) {
         return getOrCreateDefaultResume(userId);
+    }
+
+    public ResumeContentVO generateResumeWithAi(ResumeAiGenerateRequest request) {
+        Long userId = authSupport.requireUserId();
+        SysUser user = userMapper.selectById(userId);
+        if (user == null) {
+            throw new BusinessException(404, "用户不存在");
+        }
+
+        String targetRole = request != null && StringUtils.hasText(request.getTargetRole())
+                ? request.getTargetRole().trim()
+                : "通用技术岗位";
+        String extraHint = request != null && StringUtils.hasText(request.getExtraHint())
+                ? request.getExtraHint().trim()
+                : "";
+
+        String context = buildLearningContext(userId);
+        String prompt = """
+                请根据学员档案与学习记录，生成一份面向「%s」的结构化中文简历草稿。
+                %s
+                要求：
+                1. 内容真实可信，可合理润色但勿捏造与档案明显矛盾的经历；
+                2. 若档案信息不足，工作经历与项目可写「待补充」或基于已学课程合理推断实习/实训项目；
+                3. 只输出一个 JSON 对象，不要 Markdown 代码块，不要额外说明。
+                JSON 字段（均为字符串）：
+                realName, phone, email, education, workExperience, skills, selfIntro, projects
+                """.formatted(
+                targetRole,
+                StringUtils.hasText(extraHint) ? "补充要求：" + extraHint + "\n" : "");
+
+        String raw = llmService.chat(prompt, null, context);
+        ResumeContentVO generated = parseGeneratedContent(raw);
+        return mergeWithUserProfile(generated, user);
+    }
+
+    private String buildLearningContext(Long userId) {
+        StringBuilder sb = new StringBuilder();
+        SysUser user = userMapper.selectById(userId);
+        if (user != null) {
+            sb.append("姓名：").append(StringUtils.hasText(user.getRealName()) ? user.getRealName() : user.getUsername());
+            if (StringUtils.hasText(user.getPhone())) {
+                sb.append("\n手机：").append(user.getPhone());
+            }
+            if (StringUtils.hasText(user.getEmail())) {
+                sb.append("\n邮箱：").append(user.getEmail());
+            }
+        }
+
+        List<LearningArchive> archives = learningArchiveMapper.selectList(
+                new LambdaQueryWrapper<LearningArchive>()
+                        .eq(LearningArchive::getUserId, userId)
+                        .orderByDesc(LearningArchive::getEndDate)
+                        .last("LIMIT 8"));
+        if (!archives.isEmpty()) {
+            sb.append("\n\n学习档案：");
+            for (LearningArchive archive : archives) {
+                sb.append("\n- ").append(archive.getTitle());
+                if (StringUtils.hasText(archive.getCategory())) {
+                    sb.append("（").append(archive.getCategory()).append("）");
+                }
+            }
+        }
+
+        List<LearningAchievement> achievements = learningAchievementMapper.selectList(
+                new LambdaQueryWrapper<LearningAchievement>()
+                        .eq(LearningAchievement::getUserId, userId)
+                        .orderByDesc(LearningAchievement::getCreateTime)
+                        .last("LIMIT 8"));
+        if (!achievements.isEmpty()) {
+            sb.append("\n\n学习成果：");
+            sb.append(achievements.stream()
+                    .map(LearningAchievement::getTitle)
+                    .filter(StringUtils::hasText)
+                    .collect(Collectors.joining("；", "", "")));
+        }
+        return sb.toString();
+    }
+
+    private ResumeContentVO parseGeneratedContent(String raw) {
+        if (!StringUtils.hasText(raw)) {
+            throw new BusinessException(502, "AI 未返回有效内容");
+        }
+        String json = extractJsonObject(raw.trim());
+        try {
+            JsonNode node = objectMapper.readTree(json);
+            return ResumeContentVO.builder()
+                    .realName(text(node, "realName"))
+                    .phone(text(node, "phone"))
+                    .email(text(node, "email"))
+                    .education(text(node, "education"))
+                    .workExperience(text(node, "workExperience"))
+                    .skills(text(node, "skills"))
+                    .selfIntro(text(node, "selfIntro"))
+                    .projects(text(node, "projects"))
+                    .build();
+        } catch (JsonProcessingException e) {
+            throw new BusinessException(502, "AI 返回格式无法解析，请重试");
+        }
+    }
+
+    private static String text(JsonNode node, String field) {
+        JsonNode value = node.get(field);
+        if (value == null || value.isNull()) {
+            return "";
+        }
+        return value.asText("").trim();
+    }
+
+    private static String extractJsonObject(String raw) {
+        int start = raw.indexOf('{');
+        int end = raw.lastIndexOf('}');
+        if (start >= 0 && end > start) {
+            return raw.substring(start, end + 1);
+        }
+        return raw;
+    }
+
+    private ResumeContentVO mergeWithUserProfile(ResumeContentVO generated, SysUser user) {
+        ResumeContentVO base = generated != null ? generated : emptyContent();
+        return ResumeContentVO.builder()
+                .realName(StringUtils.hasText(base.getRealName())
+                        ? base.getRealName()
+                        : (StringUtils.hasText(user.getRealName()) ? user.getRealName() : user.getUsername()))
+                .phone(StringUtils.hasText(base.getPhone()) ? base.getPhone() : nullToEmpty(user.getPhone()))
+                .email(StringUtils.hasText(base.getEmail()) ? base.getEmail() : nullToEmpty(user.getEmail()))
+                .education(nullToEmpty(base.getEducation()))
+                .workExperience(nullToEmpty(base.getWorkExperience()))
+                .skills(nullToEmpty(base.getSkills()))
+                .selfIntro(nullToEmpty(base.getSelfIntro()))
+                .projects(nullToEmpty(base.getProjects()))
+                .build();
+    }
+
+    private static String nullToEmpty(String value) {
+        return value == null ? "" : value.trim();
     }
 
     private UserResume getOrCreateDefaultResume(Long userId) {

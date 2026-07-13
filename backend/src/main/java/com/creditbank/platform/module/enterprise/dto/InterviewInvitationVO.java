@@ -24,5 +24,11 @@ public class InterviewInvitationVO {
     private String statusName;
     private LocalDateTime inviteTime;
     private String location;
+    private Integer interviewMode;
+    private String interviewModeName;
+    private String roomId;
+    private Integer applicationStatus;
+    private String applicationStatusName;
+    private Boolean canJoinVideo;
     private LocalDateTime createTime;
 }

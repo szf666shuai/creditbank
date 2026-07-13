@@ -21,6 +21,7 @@ import com.creditbank.platform.mapper.UserCourseMapper;
 import com.creditbank.platform.mapper.UserEpisodeProgressMapper;
 import com.creditbank.platform.mapper.UserLearningCheckinMapper;
 import com.creditbank.platform.mapper.UserLearningReminderMapper;
+import com.creditbank.platform.module.profile.service.ProfileLearningStatsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,6 +42,7 @@ public class LearningEngagementService {
     private final UserCourseMapper userCourseMapper;
     private final UserLearningCheckinMapper userLearningCheckinMapper;
     private final UserLearningReminderMapper userLearningReminderMapper;
+    private final ProfileLearningStatsService profileLearningStatsService;
     private final CreditService creditService;
 
     public List<CourseEpisodeVO> listEpisodes(Long userId, Long courseId) {
@@ -102,7 +104,9 @@ public class LearningEngagementService {
         int watchedSeconds = record.getWatchedSeconds() == null ? 0 : record.getWatchedSeconds();
         int maxWatchedPosition = record.getMaxWatchedPositionSeconds() == null ? 0 : record.getMaxWatchedPositionSeconds();
         int watchedDelta = Math.min(Math.max(request.getWatchedDeltaSeconds(), 0), 30);
+        int previousWatchedSeconds = watchedSeconds;
         watchedSeconds = Math.min(durationSeconds, watchedSeconds + watchedDelta);
+        int acceptedWatchedDelta = Math.max(0, watchedSeconds - previousWatchedSeconds);
         int currentPosition = Math.min(durationSeconds, Math.max(request.getCurrentTimeSeconds(), 0));
         int maximumAllowedPosition = Math.min(durationSeconds, maxWatchedPosition + watchedDelta);
         int acceptedPosition = Math.min(currentPosition, maximumAllowedPosition);
@@ -114,6 +118,9 @@ public class LearningEngagementService {
         record.setLastPositionSeconds(acceptedPosition);
         record.setProgress(progress);
         userEpisodeProgressMapper.updateById(record);
+        if (acceptedWatchedDelta > 0) {
+            profileLearningStatsService.recordStudySeconds(userId, acceptedWatchedDelta);
+        }
 
         return syncCourseProgress(userId, course, episodes);
     }
@@ -233,7 +240,10 @@ public class LearningEngagementService {
             userCourse.setCourseId(course.getId());
             userCourse.setStatus(0);
             userCourse.setPaidCredit(BigDecimal.ZERO);
+            userCourse.setStartTime(LocalDateTime.now());
             userCourseMapper.insert(userCourse);
+        } else if (userCourse.getStartTime() == null) {
+            userCourse.setStartTime(LocalDateTime.now());
         }
 
         int totalDuration = episodes.stream()

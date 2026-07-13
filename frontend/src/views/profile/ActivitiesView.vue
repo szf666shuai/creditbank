@@ -71,8 +71,12 @@ function syncTabFromRoute() {
 async function handleCheckIn(row: MyActivityRegistrationItem) {
   actingId.value = row.id
   try {
-    unwrapApi(await checkInActivityApi(row.activityId))
-    ElMessage.success('签到成功')
+    const result = unwrapApi(await checkInActivityApi(row.activityId))
+    if (result.creditGranted === false && result.creditMessage) {
+      ElMessage.warning(result.message || '签到成功，但秩点未发放')
+    } else {
+      ElMessage.success(result.message || '签到成功')
+    }
     await fetchRegistrations()
   } catch (e) {
     ElMessage.error(getErrorMessage(e, '签到失败'))

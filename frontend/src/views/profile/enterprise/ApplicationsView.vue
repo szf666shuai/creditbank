@@ -6,6 +6,10 @@ import PageShell from '@/components/common/PageShell.vue'
 import {
   listMyApplicationsApi,
   sendInterviewInviteApi,
+  hireApplicationApi,
+  rejectApplicationApi,
+  INTERVIEW_MODE_VIDEO,
+  INTERVIEW_MODE_ONSITE,
   type JobApplicationItem,
 } from '@/api/interview'
 import { getErrorMessage, unwrapApi } from '@/utils/api'
@@ -16,12 +20,14 @@ const loading = ref(false)
 const loadError = ref<string | null>(null)
 const saving = ref(false)
 const invitingId = ref<number | null>(null)
+const processingId = ref<number | null>(null)
 const applications = ref<JobApplicationItem[]>([])
 const dialogVisible = ref(false)
 const currentApplication = ref<JobApplicationItem | null>(null)
 
 const form = reactive({
   inviteTime: '',
+  interviewMode: INTERVIEW_MODE_VIDEO,
   location: '',
   remark: '',
 })
@@ -29,6 +35,7 @@ const form = reactive({
 function statusTagType(status: number) {
   if (status === 3) return 'success'
   if (status === 4) return 'danger'
+  if (status === 5) return 'info'
   if (status === 2) return 'warning'
   if (status === 1) return 'primary'
   return 'info'
@@ -61,7 +68,8 @@ function openInvite(row: JobApplicationItem) {
   }
   currentApplication.value = row
   form.inviteTime = defaultInviteTime()
-  form.location = '线上视频面试'
+  form.interviewMode = INTERVIEW_MODE_VIDEO
+  form.location = '平台视频面试'
   form.remark = ''
   dialogVisible.value = true
 }
@@ -84,7 +92,8 @@ async function handleQuickInvite(row: JobApplicationItem) {
       await sendInterviewInviteApi({
         applicationId: row.id,
         inviteTime: defaultInviteTime(),
-        location: '线上视频面试',
+        interviewMode: INTERVIEW_MODE_VIDEO,
+        location: '平台视频面试',
       }),
     )
     ElMessage.success('面试邀请已发送')
@@ -102,8 +111,8 @@ async function handleSubmit() {
     ElMessage.warning('请选择面试时间')
     return
   }
-  if (!form.location.trim()) {
-    ElMessage.warning('请填写面试地点/方式')
+  if (form.interviewMode === INTERVIEW_MODE_ONSITE && !form.location.trim()) {
+    ElMessage.warning('现场面试请填写面试地点')
     return
   }
 
@@ -113,7 +122,8 @@ async function handleSubmit() {
       await sendInterviewInviteApi({
         applicationId: currentApplication.value.id,
         inviteTime: form.inviteTime,
-        location: form.location.trim(),
+        interviewMode: form.interviewMode,
+        location: form.location.trim() || undefined,
         remark: form.remark.trim() || undefined,
       }),
     )
@@ -124,6 +134,42 @@ async function handleSubmit() {
     ElMessage.error(getErrorMessage(e, '发送失败'))
   } finally {
     saving.value = false
+  }
+}
+
+async function handleHire(row: JobApplicationItem) {
+  await ElMessageBox.confirm(`确认录用「${row.applicantName}」？`, '标记录用', {
+    type: 'success',
+    confirmButtonText: '录用',
+    cancelButtonText: '取消',
+  })
+  processingId.value = row.id
+  try {
+    unwrapApi(await hireApplicationApi(row.id))
+    ElMessage.success('已标记录用')
+    await fetchApplications()
+  } catch (e) {
+    ElMessage.error(getErrorMessage(e, '操作失败'))
+  } finally {
+    processingId.value = null
+  }
+}
+
+async function handleReject(row: JobApplicationItem) {
+  await ElMessageBox.confirm(`确认拒绝「${row.applicantName}」的投递？`, '标记拒绝', {
+    type: 'warning',
+    confirmButtonText: '拒绝',
+    cancelButtonText: '取消',
+  })
+  processingId.value = row.id
+  try {
+    unwrapApi(await rejectApplicationApi(row.id))
+    ElMessage.success('已标记拒绝')
+    await fetchApplications()
+  } catch (e) {
+    ElMessage.error(getErrorMessage(e, '操作失败'))
+  } finally {
+    processingId.value = null
   }
 }
 
@@ -156,9 +202,30 @@ onMounted(fetchApplications)
       <el-table-column label="投递时间" width="160">
         <template #default="{ row }">{{ formatTime(row.createTime) }}</template>
       </el-table-column>
-      <el-table-column label="操作" width="200" fixed="right" align="center">
+      <el-table-column label="操作" width="280" fixed="right" align="center">
         <template #default="{ row }">
-          <template v-if="row.hasPendingInvite">
+          <template v-if="row.status === 3 || row.status === 4">
+            <el-tag :type="statusTagType(row.status)" size="small">{{ row.statusName }}</el-tag>
+          </template>
+          <template v-else-if="row.status === 2">
+            <el-button
+              link
+              type="success"
+              :loading="processingId === row.id"
+              @click="handleHire(row)"
+            >
+              录用
+            </el-button>
+            <el-button
+              link
+              type="danger"
+              :loading="processingId === row.id"
+              @click="handleReject(row)"
+            >
+              拒绝
+            </el-button>
+          </template>
+          <template v-else-if="row.hasPendingInvite">
             <el-tag type="info" size="small">已邀请待回复</el-tag>
           </template>
           <template v-else>
@@ -197,8 +264,21 @@ onMounted(fetchApplications)
           style="width: 100%"
         />
       </el-form-item>
-      <el-form-item label="地点/方式" required>
-        <el-input v-model="form.location" placeholder="如：上海浦东 / 线上腾讯会议" />
+      <el-form-item label="面试方式" required>
+        <el-radio-group v-model="form.interviewMode">
+          <el-radio :value="INTERVIEW_MODE_VIDEO">平台视频面试</el-radio>
+          <el-radio :value="INTERVIEW_MODE_ONSITE">现场面试</el-radio>
+        </el-radio-group>
+      </el-form-item>
+      <el-form-item label="地点/方式" :required="form.interviewMode === INTERVIEW_MODE_ONSITE">
+        <el-input
+          v-model="form.location"
+          :placeholder="
+            form.interviewMode === INTERVIEW_MODE_VIDEO
+              ? '选填，默认「平台视频面试」'
+              : '如：上海浦东某大厦'
+          "
+        />
       </el-form-item>
       <el-form-item label="补充说明">
         <el-input v-model="form.remark" type="textarea" :rows="3" placeholder="选填" />

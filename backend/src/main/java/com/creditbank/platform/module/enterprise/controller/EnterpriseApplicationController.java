@@ -5,6 +5,8 @@ import com.creditbank.platform.module.enterprise.dto.ApplicationManageVO;
 import com.creditbank.platform.module.enterprise.service.EnterpriseApplicationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,5 +22,15 @@ public class EnterpriseApplicationController {
     @GetMapping
     public Result<List<ApplicationManageVO>> listApplications() {
         return Result.ok(enterpriseApplicationService.listApplications());
+    }
+
+    @PostMapping("/{id}/hire")
+    public Result<ApplicationManageVO> hireApplication(@PathVariable Long id) {
+        return Result.ok(enterpriseApplicationService.hireApplication(id));
+    }
+
+    @PostMapping("/{id}/reject")
+    public Result<ApplicationManageVO> rejectApplication(@PathVariable Long id) {
+        return Result.ok(enterpriseApplicationService.rejectApplication(id));
     }
 }

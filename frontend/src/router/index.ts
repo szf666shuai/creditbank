@@ -36,6 +36,7 @@ import ProfileApplicationsView from '@/views/profile/ApplicationsView.vue'
 import ProfileMessagesView from '@/views/profile/MessagesView.vue'
 import ProfileMessageDetailView from '@/views/profile/MessageDetailView.vue'
 import ProfileInterviewsView from '@/views/profile/InterviewsView.vue'
+import InterviewVideoRoomView from '@/views/interview/InterviewVideoRoomView.vue'
 import ProfileActivitiesView from '@/views/profile/ActivitiesView.vue'
 import ProfileResumeEditorView from '@/views/profile/ResumeEditorView.vue'
 import ProfileAdminIndexView from '@/views/profile/admin/IndexView.vue'
@@ -211,6 +212,12 @@ const router = createRouter({
               meta: { title: '面试邀请', ...studentRoute },
             },
             {
+              path: 'interviews/:id/video',
+              name: 'profile-interview-video',
+              component: InterviewVideoRoomView,
+              meta: { title: '视频面试', scope: 'profile', ...studentRoute },
+            },
+            {
               path: 'activities',
               name: 'profile-activities',
               component: ProfileActivitiesView,
@@ -313,6 +320,12 @@ const router = createRouter({
               name: 'profile-enterprise-interviews',
               component: ProfileEnterpriseInterviewsView,
               meta: { title: '面试邀请', ...enterpriseRoute },
+            },
+            {
+              path: 'enterprise/interviews/:id/video',
+              name: 'profile-enterprise-interview-video',
+              component: InterviewVideoRoomView,
+              meta: { title: '视频面试', scope: 'enterprise', ...enterpriseRoute },
             },
             {
               path: 'enterprise/activity-invitations',

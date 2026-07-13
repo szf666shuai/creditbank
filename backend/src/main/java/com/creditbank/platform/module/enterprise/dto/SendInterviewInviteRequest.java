@@ -1,6 +1,5 @@
 package com.creditbank.platform.module.enterprise.dto;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
@@ -19,8 +18,10 @@ public class SendInterviewInviteRequest {
     @NotNull(message = "面试时间不能为空")
     private LocalDateTime inviteTime;
 
-    @NotBlank(message = "面试地点/方式不能为空")
     private String location;
+
+    /** 0现场 1视频，默认视频 */
+    private Integer interviewMode;
 
     /** 补充说明，写入私信内容 */
     private String remark;

@@ -67,7 +67,11 @@ onMounted(fetchApplications)
     </div>
 
     <el-table :data="applications" border stripe>
-      <el-table-column prop="jobTitle" label="应聘职位" min-width="160" show-overflow-tooltip />
+      <el-table-column prop="jobTitle" label="应聘职位" min-width="160" show-overflow-tooltip>
+        <template #default="{ row }">
+          <span :class="{ 'page-text-muted': row.jobUnavailable }">{{ row.jobTitle || '-' }}</span>
+        </template>
+      </el-table-column>
       <el-table-column prop="orgName" label="企业" min-width="140" show-overflow-tooltip />
       <el-table-column prop="jobLocation" label="工作地点" width="120" show-overflow-tooltip />
       <el-table-column prop="salaryRange" label="薪资范围" width="120" show-overflow-tooltip />

@@ -2,6 +2,7 @@ package com.creditbank.platform.module.profile.controller;
 
 import com.creditbank.platform.common.Result;
 import com.creditbank.platform.module.enterprise.dto.InterviewInvitationVO;
+import com.creditbank.platform.module.enterprise.dto.InterviewRtcCredentialsVO;
 import com.creditbank.platform.module.profile.service.ProfileInterviewService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,5 +38,10 @@ public class ProfileInterviewController {
     @PostMapping("/{id}/reject")
     public Result<InterviewInvitationVO> rejectInvitation(@PathVariable Long id) {
         return Result.ok(profileInterviewService.rejectInvitation(id));
+    }
+
+    @GetMapping("/{id}/rtc-credentials")
+    public Result<InterviewRtcCredentialsVO> getRtcCredentials(@PathVariable Long id) {
+        return Result.ok(profileInterviewService.getRtcCredentials(id));
     }
 }

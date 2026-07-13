@@ -19,6 +19,7 @@ public class MyJobApplicationVO {
     private String coverMessage;
     private Integer status;
     private String statusName;
+    private Boolean jobUnavailable;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
 }

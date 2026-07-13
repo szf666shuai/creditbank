@@ -1,6 +1,8 @@
 package com.creditbank.platform.module.profile.controller;
 
 import com.creditbank.platform.common.Result;
+import com.creditbank.platform.module.profile.dto.ResumeAiGenerateRequest;
+import com.creditbank.platform.module.profile.dto.ResumeContentVO;
 import com.creditbank.platform.module.profile.dto.UpdateUserResumeRequest;
 import com.creditbank.platform.module.profile.dto.UserResumeSummaryVO;
 import com.creditbank.platform.module.profile.dto.UserResumeVO;
@@ -32,6 +34,11 @@ public class ProfileResumeController {
     @GetMapping("/default")
     public Result<UserResumeVO> getMyDefaultResume() {
         return Result.ok(profileResumeService.getMyDefaultResume());
+    }
+
+    @PostMapping("/ai-generate")
+    public Result<ResumeContentVO> generateResumeWithAi(@RequestBody(required = false) ResumeAiGenerateRequest request) {
+        return Result.ok(profileResumeService.generateResumeWithAi(request));
     }
 
     @GetMapping("/{id}")

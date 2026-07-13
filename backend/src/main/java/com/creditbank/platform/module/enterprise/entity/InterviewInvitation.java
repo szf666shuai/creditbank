@@ -22,5 +22,8 @@ public class InterviewInvitation {
     private Integer status;
     private LocalDateTime inviteTime;
     private String location;
+    /** 0现场 1视频 */
+    private Integer interviewMode;
+    private String roomId;
     private LocalDateTime createTime;
 }
