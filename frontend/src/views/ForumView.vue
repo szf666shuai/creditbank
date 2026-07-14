@@ -31,6 +31,8 @@ const loadError = ref<string | null>(null)
 const boardList = ref<ForumBoard[]>([])
 const postList = ref<ForumPost[]>([])
 const hotPosts = ref<ForumPost[]>([])
+const boardHotPosts = ref<ForumPost[]>([])
+const boardHotLoading = ref(false)
 const boardHighlights = ref<Record<number, ForumPost[]>>({})
 const replyList = ref<ForumReply[]>([])
 const selectedBoardId = ref<number | undefined>(undefined)
@@ -126,8 +128,41 @@ function truncate(text?: string, max = 72) {
   return normalized.length > max ? `${normalized.slice(0, max)}…` : normalized
 }
 
+function heatValue(post: ForumPost) {
+  return (post.likeCount || 0) + (post.replyCount || 0)
+}
+
+function boardBadgeName(post: ForumPost) {
+  const boardName = post.boardName || activeBoard.value?.name || ''
+  const badgeMap: Record<string, string> = {
+    校园频道: '校',
+    校园集市: '市',
+    求职经验: '职',
+    政策解读: '策',
+  }
+  return badgeMap[boardName] || boardName.charAt(0) || '帖'
+}
+
+function postBadge(post: ForumPost) {
+  if (post.isTop) return '顶'
+  if (heatValue(post) > 0 && boardHotPosts.value.some((item) => item.id === post.id)) return '热'
+  return boardBadgeName(post)
+}
+
+function postBadgeClass(post: ForumPost) {
+  if (post.isTop) return 'is-top'
+  if (heatValue(post) > 0 && boardHotPosts.value.some((item) => item.id === post.id)) return 'is-hot'
+  return `is-board-${boardMeta(post.boardName || activeBoard.value?.name).key || 'default'}`
+}
+
 function scorePost(post: ForumPost) {
-  return (post.isTop ? 1000 : 0) + post.likeCount * 3 + post.replyCount * 2 + post.viewCount
+  return heatValue(post)
+}
+
+function compareHotPosts(a: ForumPost, b: ForumPost) {
+  const heatDiff = scorePost(b) - scorePost(a)
+  if (heatDiff !== 0) return heatDiff
+  return new Date(b.createTime || 0).getTime() - new Date(a.createTime || 0).getTime()
 }
 
 async function fetchBoards() {
@@ -159,6 +194,29 @@ async function fetchPosts() {
   }
 }
 
+async function fetchBoardHotPosts() {
+  if (!selectedBoardId.value) {
+    boardHotPosts.value = []
+    return
+  }
+  boardHotLoading.value = true
+  try {
+    const data = unwrapApi(
+      await pageForumPostsApi({
+        page: 1,
+        pageSize: 100,
+        boardId: selectedBoardId.value,
+      }),
+    )
+    boardHotPosts.value = [...data.records].sort(compareHotPosts).slice(0, 5)
+  } catch (e) {
+    boardHotPosts.value = []
+    ElMessage.error(getErrorMessage(e, '近期热门加载失败'))
+  } finally {
+    boardHotLoading.value = false
+  }
+}
+
 async function fetchHubData() {
   hubLoading.value = true
   loadError.value = null
@@ -170,7 +228,7 @@ async function fetchHubData() {
       ),
     ])
     const hotData = unwrapApi(hotRes)
-    hotPosts.value = [...hotData.records].sort((a, b) => scorePost(b) - scorePost(a))
+    hotPosts.value = [...hotData.records].sort(compareHotPosts)
 
     const highlights: Record<number, ForumPost[]> = {}
     boardList.value.forEach((board, index) => {
@@ -408,7 +466,7 @@ async function refreshCurrentView() {
   if (isHub.value) {
     await fetchHubData()
   } else {
-    await fetchPosts()
+    await Promise.all([fetchPosts(), fetchBoardHotPosts()])
   }
 }
 
@@ -643,6 +701,38 @@ onMounted(async () => {
             </div>
           </div>
 
+          <section class="recent-hot" v-loading="boardHotLoading">
+            <div class="recent-hot__head">
+              <div>
+                <p class="eyebrow">Hot</p>
+                <h2>近期热门</h2>
+              </div>
+              <span>按点赞数 + 评论数降序</span>
+            </div>
+            <el-empty
+              v-if="!boardHotLoading && boardHotPosts.length === 0"
+              :image-size="56"
+              description="暂无热门帖子"
+            />
+            <div v-else class="recent-hot__list">
+              <button
+                v-for="(post, index) in boardHotPosts"
+                :key="post.id"
+                type="button"
+                class="recent-hot__item"
+                @click="openPost(post)"
+              >
+                <span class="recent-hot__rank" :class="{ top: index < 3 }">{{ index + 1 }}</span>
+                <span class="recent-hot__content">
+                  <strong>{{ post.title }}</strong>
+                  <small>
+                    {{ post.authorName }} · {{ post.likeCount }} 赞 · {{ post.replyCount }} 评论 · 热度 {{ heatValue(post) }}
+                  </small>
+                </span>
+              </button>
+            </div>
+          </section>
+
           <el-alert
             v-if="loadError"
             :title="loadError"
@@ -668,7 +758,7 @@ onMounted(async () => {
             class="post-row"
             @click="openPost(post)"
           >
-            <div class="post-avatar">{{ (post.authorName || '匿').charAt(0) }}</div>
+            <div class="post-avatar" :class="postBadgeClass(post)">{{ postBadge(post) }}</div>
             <div class="post-main">
               <div class="post-title-line">
                 <el-tag v-if="post.isTop" size="small" type="danger">置顶</el-tag>
@@ -1274,6 +1364,105 @@ onMounted(async () => {
   margin-bottom: 16px;
 }
 
+.recent-hot {
+  margin-bottom: 16px;
+  padding: 14px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(251, 146, 60, 0.18);
+}
+
+.recent-hot__head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.recent-hot__head .eyebrow {
+  margin-bottom: 4px;
+}
+
+.recent-hot__head h2 {
+  margin: 0;
+  color: #fff7ed;
+  font-size: 18px;
+}
+
+.recent-hot__head span {
+  color: rgba(255, 237, 213, 0.56);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.recent-hot__list {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.recent-hot__item {
+  min-width: 0;
+  min-height: 86px;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 237, 213, 0.12);
+  background: rgba(15, 23, 42, 0.24);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, transform 0.15s;
+}
+
+.recent-hot__item:hover {
+  border-color: rgba(251, 146, 60, 0.42);
+  background: rgba(15, 23, 42, 0.38);
+  transform: translateY(-1px);
+}
+
+.recent-hot__rank {
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  color: rgba(255, 237, 213, 0.72);
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.recent-hot__rank.top {
+  color: #431407;
+  background: linear-gradient(135deg, #fed7aa, #fb923c);
+}
+
+.recent-hot__content {
+  min-width: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.recent-hot__content strong {
+  color: #fff7ed;
+  font-size: 14px;
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.recent-hot__content small {
+  color: rgba(255, 237, 213, 0.58);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
 .forum-search {
   width: 260px;
 }
@@ -1330,7 +1519,46 @@ onMounted(async () => {
   align-items: center;
   justify-content: center;
   font-weight: 700;
+  font-size: 16px;
   flex-shrink: 0;
+  border: 1px solid rgba(251, 146, 60, 0.28);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.post-avatar.is-top {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.9), rgba(249, 115, 22, 0.88));
+  color: #fff7ed;
+  border-color: rgba(254, 202, 202, 0.55);
+}
+
+.post-avatar.is-hot {
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.92), rgba(251, 146, 60, 0.9));
+  color: #431407;
+  border-color: rgba(254, 215, 170, 0.65);
+}
+
+.post-avatar.is-board-campus {
+  background: rgba(59, 130, 246, 0.2);
+  color: #93c5fd;
+  border-color: rgba(147, 197, 253, 0.36);
+}
+
+.post-avatar.is-board-market {
+  background: rgba(16, 185, 129, 0.2);
+  color: #86efac;
+  border-color: rgba(134, 239, 172, 0.34);
+}
+
+.post-avatar.is-board-jobs {
+  background: rgba(168, 85, 247, 0.2);
+  color: #d8b4fe;
+  border-color: rgba(216, 180, 254, 0.36);
+}
+
+.post-avatar.is-board-policy {
+  background: rgba(14, 165, 233, 0.2);
+  color: #7dd3fc;
+  border-color: rgba(125, 211, 252, 0.36);
 }
 
 .post-main {
@@ -1592,6 +1820,10 @@ onMounted(async () => {
     grid-template-columns: 1fr;
   }
 
+  .recent-hot__list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .section-head,
   .board-detail-head__row {
     flex-direction: column;
@@ -1605,6 +1837,21 @@ onMounted(async () => {
 
   .post-row {
     flex-direction: column;
+  }
+}
+
+@media (max-width: 640px) {
+  .recent-hot__head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .recent-hot__head span {
+    white-space: normal;
+  }
+
+  .recent-hot__list {
+    grid-template-columns: 1fr;
   }
 }
 </style>
