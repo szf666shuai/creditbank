@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch, type CSSProperties } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ArrowLeft, ChatDotRound, EditPen, Pointer, Search, Warning } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -120,6 +120,12 @@ function boardMeta(name?: string) {
 function boardKeyOf(board?: ForumBoard | null) {
   if (!board) return ''
   return boardMeta(board.name).key
+}
+
+function boardAccentStyle(board: ForumBoard): CSSProperties {
+  return {
+    '--board-accent': boardMeta(board.name).accent,
+  } as CSSProperties
 }
 
 function truncate(text?: string, max = 72) {
@@ -609,7 +615,7 @@ onMounted(async () => {
             v-for="board in boardList"
             :key="board.id"
             class="board-block"
-            :style="{ '--board-accent': boardMeta(board.name).accent }"
+            :style="boardAccentStyle(board)"
           >
             <div class="board-block__head">
               <div class="board-block__title">
@@ -1215,6 +1221,7 @@ onMounted(async () => {
 }
 
 .board-block {
+  --board-accent: #fb923c;
   padding: 20px 22px;
   border-radius: 20px;
   background: rgba(255, 255, 255, 0.08);
