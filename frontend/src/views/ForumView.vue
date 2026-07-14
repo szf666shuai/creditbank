@@ -47,46 +47,46 @@ const submittingPost = ref(false)
 const submittingReply = ref(false)
 const newPost = ref({ boardId: undefined as number | undefined, title: '', content: '' })
 const replyContent = ref('')
-/** ??????????????????? */
+/** 正在回复的楼中楼目标；为空表示直接回帖 */
 const replyTarget = ref<ForumReply | null>(null)
 
 const replyPlaceholder = computed(() =>
   replyTarget.value
-    ? `?? @${replyTarget.value.authorName}`
-    : '??????',
+    ? `回复 @${replyTarget.value.authorName}`
+    : '写下你的回复',
 )
 
 const boardQueryMap: Record<string, string> = {
-  campus: '????',
-  market: '????',
-  jobs: '????',
-  policy: '????',
+  campus: '校园频道',
+  market: '校园集市',
+  jobs: '求职经验',
+  policy: '政策解读',
 }
 
 const boardVisuals: Record<string, { key: string; icon: string; accent: string; blurb: string }> = {
-  ????: {
+  校园频道: {
     key: 'campus',
     icon: 'course',
-    accent: '#22c55e',
-    blurb: '??????????????',
+    accent: '#86efac',
+    blurb: '课程讨论、学习打卡与经验分享',
   },
-  ????: {
+  校园集市: {
     key: 'market',
     icon: 'cart',
-    accent: '#d97706',
-    blurb: '??????????????',
+    accent: '#fde047',
+    blurb: '二手转让、拼单互助与校园生活',
   },
-  ????: {
+  求职经验: {
     key: 'jobs',
     icon: 'job',
-    accent: '#0284c7',
-    blurb: '??????????????',
+    accent: '#93c5fd',
+    blurb: '面试复盘、简历建议与求职路线',
   },
-  ????: {
+  政策解读: {
     key: 'policy',
     icon: 'document',
-    accent: '#16a34a',
-    blurb: '??????????????',
+    accent: '#fda4af',
+    blurb: '学分认定、诚信规则与政策讨论',
   },
 }
 
@@ -96,7 +96,7 @@ const activeBoard = computed(() =>
   boardList.value.find((item) => item.id === selectedBoardId.value) ?? null,
 )
 
-const activeBoardName = computed(() => activeBoard.value?.name ?? '????')
+const activeBoardName = computed(() => activeBoard.value?.name ?? '全部板块')
 
 const heroFeatured = computed(() => hotPosts.value[0] ?? null)
 
@@ -110,8 +110,8 @@ function boardMeta(name?: string) {
   return boardVisuals[name || ''] ?? {
     key: '',
     icon: 'forum',
-    accent: '#22c55e',
-    blurb: '????????',
+    accent: '#fb923c',
+    blurb: '学员自由发帖交流',
   }
 }
 
@@ -123,7 +123,7 @@ function boardKeyOf(board?: ForumBoard | null) {
 function truncate(text?: string, max = 72) {
   if (!text) return ''
   const normalized = text.replace(/\s+/g, ' ').trim()
-  return normalized.length > max ? `${normalized.slice(0, max)}?` : normalized
+  return normalized.length > max ? `${normalized.slice(0, max)}…` : normalized
 }
 
 function scorePost(post: ForumPost) {
@@ -153,7 +153,7 @@ async function fetchPosts() {
     postList.value = data.records
     total.value = data.total
   } catch (e) {
-    loadError.value = getErrorMessage(e, '??????')
+    loadError.value = getErrorMessage(e, '论坛加载失败')
   } finally {
     loading.value = false
   }
@@ -178,7 +178,7 @@ async function fetchHubData() {
     })
     boardHighlights.value = highlights
   } catch (e) {
-    loadError.value = getErrorMessage(e, '??????')
+    loadError.value = getErrorMessage(e, '论坛加载失败')
   } finally {
     hubLoading.value = false
   }
@@ -187,7 +187,7 @@ async function fetchHubData() {
 async function openPost(post: ForumPost) {
   detailVisible.value = true
   detailLoading.value = true
-  // ???????????????????????
+  // 先展示列表里的数据，避免接口短暂失败时抽屉空白
   selectedPost.value = post
   replyList.value = []
   replyTarget.value = null
@@ -196,10 +196,10 @@ async function openPost(post: ForumPost) {
     selectedPost.value = unwrapApi(await getForumPostApi(post.id))
     await fetchReplies(post.id)
   } catch (e) {
-    const tip = getErrorMessage(e, '????????')
+    const tip = getErrorMessage(e, '帖子详情加载失败')
     ElMessage.error(tip)
-    // ??????????????? ID ???????
-    if (tip.includes('???')) {
+    // 帖子可能因后端重启重种数据导致 ID 失效，刷新列表
+    if (tip.includes('不存在')) {
       await refreshCurrentView()
     }
   } finally {
@@ -213,7 +213,7 @@ async function fetchReplies(postId: number) {
     const data = unwrapApi(await pageForumRepliesApi(postId, { page: 1, pageSize: 50 }))
     replyList.value = data.records
   } catch (e) {
-    ElMessage.error(getErrorMessage(e, '??????'))
+    ElMessage.error(getErrorMessage(e, '回复加载失败'))
   } finally {
     repliesLoading.value = false
   }
@@ -221,11 +221,11 @@ async function fetchReplies(postId: number) {
 
 function ensureStudent() {
   if (!authStore.isLoggedIn) {
-    ElMessage.warning('????')
+    ElMessage.warning('请先登录')
     return false
   }
   if (!authStore.isStudent) {
-    ElMessage.warning('??????????')
+    ElMessage.warning('仅学员可参与论坛互动')
     return false
   }
   return true
@@ -243,7 +243,7 @@ function openPostDialog() {
 
 async function submitPost() {
   if (!newPost.value.boardId) {
-    ElMessage.warning('?????')
+    ElMessage.warning('请选择板块')
     return
   }
   submittingPost.value = true
@@ -255,7 +255,7 @@ async function submitPost() {
         content: newPost.value.content,
       }),
     )
-    ElMessage.success('????')
+    ElMessage.success('发布成功')
     postDialogVisible.value = false
     selectedBoardId.value = post.boardId
     page.value = 1
@@ -263,7 +263,7 @@ async function submitPost() {
     await refreshCurrentView()
     openPost(post)
   } catch (e) {
-    ElMessage.error(getErrorMessage(e, '????'))
+    ElMessage.error(getErrorMessage(e, '发布失败'))
   } finally {
     submittingPost.value = false
   }
@@ -273,7 +273,7 @@ async function submitReply() {
   if (!selectedPost.value || !ensureStudent()) return
   const content = replyContent.value.trim()
   if (content.length < 2) {
-    ElMessage.warning('???? 2 ???')
+    ElMessage.warning('回复至少 2 个字符')
     return
   }
   submittingReply.value = true
@@ -284,14 +284,14 @@ async function submitReply() {
         parentId: replyTarget.value?.id,
       }),
     )
-    ElMessage.success(replyTarget.value ? '???????' : '????')
+    ElMessage.success(replyTarget.value ? '楼中楼回复成功' : '回复成功')
     replyContent.value = ''
     replyTarget.value = null
     selectedPost.value.replyCount += 1
     await fetchReplies(selectedPost.value.id)
     await refreshCurrentView()
   } catch (e) {
-    ElMessage.error(getErrorMessage(e, '????'))
+    ElMessage.error(getErrorMessage(e, '回复失败'))
   } finally {
     submittingReply.value = false
   }
@@ -300,7 +300,7 @@ async function submitReply() {
 function startReplyTo(reply: ForumReply) {
   if (!ensureStudent()) return
   replyTarget.value = reply
-  // ????????
+  // 滚到编辑区并聚焦
   window.requestAnimationFrame(() => {
     const el = document.querySelector('.reply-editor textarea') as HTMLTextAreaElement | null
     el?.focus()
@@ -326,7 +326,7 @@ async function togglePostLike(post: ForumPost) {
       selectedPost.value.likeCount = post.likeCount
     }
   } catch (e) {
-    ElMessage.error(getErrorMessage(e, '????'))
+    ElMessage.error(getErrorMessage(e, '点赞失败'))
   }
 }
 
@@ -337,27 +337,27 @@ async function toggleReplyLike(reply: ForumReply) {
     reply.liked = liked
     reply.likeCount += liked ? 1 : -1
   } catch (e) {
-    ElMessage.error(getErrorMessage(e, '????'))
+    ElMessage.error(getErrorMessage(e, '点赞失败'))
   }
 }
 
 async function reportTarget(targetType: 1 | 2, targetId: number) {
   if (!authStore.isLoggedIn) {
-    ElMessage.warning('????')
+    ElMessage.warning('请先登录')
     return
   }
   try {
-    const { value } = await ElMessageBox.prompt('???????', '????', {
-      confirmButtonText: '????',
-      cancelButtonText: '??',
+    const { value } = await ElMessageBox.prompt('请填写举报原因', '举报内容', {
+      confirmButtonText: '提交举报',
+      cancelButtonText: '取消',
       inputType: 'textarea',
-      inputValidator: (value) => value.trim().length >= 2 || '???? 2 ???',
+      inputValidator: (value) => value.trim().length >= 2 || '至少输入 2 个字符',
     })
     unwrapApi(await reportForumApi(targetType, targetId, value))
-    ElMessage.success('?????')
+    ElMessage.success('举报已提交')
   } catch (e) {
     if (e !== 'cancel') {
-      ElMessage.error(getErrorMessage(e, '????'))
+      ElMessage.error(getErrorMessage(e, '举报失败'))
     }
   }
 }
@@ -448,36 +448,36 @@ onMounted(async () => {
 <template>
   <div class="forum-page" v-loading="hubLoading || loading">
     <div class="forum-inner">
-      <!-- ??????? + ?? + ????? -->
+      <!-- 总览：大展示区 + 热门 + 各板块精选 -->
       <template v-if="isHub">
         <section class="hero-stage">
           <div class="hero-stage__main">
             <div class="hero-stage__glow" aria-hidden="true" />
-            <p class="hero-kicker">????</p>
-            <h1>????</h1>
+            <p class="hero-kicker">Community Forum</p>
+            <h1>学员论坛</h1>
             <p class="hero-lead">
-              ?????????????????????????????????????????
+              课程讨论、校园互助、求职经验与政策解读汇聚于此。先浏览热门，再进入各板块深入交流。
             </p>
             <div class="hero-stats">
               <div>
                 <strong>{{ boardList.length }}</strong>
-                <span>????</span>
+                <span>活跃板块</span>
               </div>
               <div>
                 <strong>{{ allBoardPostCount }}</strong>
-                <span>????</span>
+                <span>公开帖子</span>
               </div>
               <div>
                 <strong>{{ hotPosts.length }}</strong>
-                <span>????</span>
+                <span>热议内容</span>
               </div>
             </div>
             <div class="hero-actions">
-              <el-button type="primary" size="large" :icon="EditPen" @click="openPostDialog">
-                ????
+              <el-button type="warning" size="large" :icon="EditPen" @click="openPostDialog">
+                发布新帖
               </el-button>
               <el-button size="large" plain @click="boardList[0] && openBoard(boardList[0])">
-                ??????
+                浏览校园频道
               </el-button>
             </div>
 
@@ -486,26 +486,26 @@ onMounted(async () => {
               class="hero-feature"
               @click="openPost(heroFeatured)"
             >
-              <span class="hero-feature__badge">????</span>
+              <span class="hero-feature__badge">本周热议</span>
               <h2>{{ heroFeatured.title }}</h2>
               <p>{{ truncate(heroFeatured.content, 110) }}</p>
               <div class="hero-feature__meta">
                 <span>{{ heroFeatured.boardName }}</span>
                 <span>{{ heroFeatured.authorName }}</span>
-                <span>{{ heroFeatured.likeCount }} ? ? {{ heroFeatured.replyCount }} ??</span>
+                <span>{{ heroFeatured.likeCount }} 赞 · {{ heroFeatured.replyCount }} 回复</span>
               </div>
             </article>
           </div>
 
           <aside class="hero-hot-panel">
             <div class="hero-hot-panel__head">
-              <h3>????</h3>
-              <span>?????</span>
+              <h3>热门帖子</h3>
+              <span>按热度排序</span>
             </div>
             <el-empty
               v-if="!hubLoading && heroHotList.length === 0"
               :image-size="64"
-              description="??????"
+              description="暂无热门帖子"
             />
             <button
               v-for="(post, index) in heroHotList"
@@ -518,7 +518,7 @@ onMounted(async () => {
               <span class="hot-body">
                 <strong>{{ post.title }}</strong>
                 <small>
-                  {{ post.boardName }} ? {{ post.likeCount }} ? ? {{ post.replyCount }} ??
+                  {{ post.boardName }} · {{ post.likeCount }} 赞 · {{ post.replyCount }} 回复
                 </small>
               </span>
             </button>
@@ -534,17 +534,17 @@ onMounted(async () => {
           class="forum-alert"
         >
           <template #default>
-            <el-button link type="primary" @click="refreshCurrentView">????</el-button>
+            <el-button link type="primary" @click="refreshCurrentView">重新加载</el-button>
           </template>
         </el-alert>
 
         <section class="board-showcase">
           <header class="section-head">
             <div>
-              <p class="eyebrow">????</p>
-              <h2>?????</h2>
+              <p class="eyebrow">Boards</p>
+              <h2>各板块精选</h2>
             </div>
-            <p>??????????????????????????</p>
+            <p>可从导航栏直接进入对应板块，或点击「更多」查看全部。</p>
           </header>
 
           <div
@@ -562,14 +562,14 @@ onMounted(async () => {
                 </div>
               </div>
               <el-button class="more-btn" text @click="openBoard(board)">
-                ??
+                更多
               </el-button>
             </div>
 
             <el-empty
               v-if="!(boardHighlights[board.id] || []).length"
               :image-size="56"
-              description="???????"
+              description="该板块暂无帖子"
             />
             <div v-else class="board-posts">
               <article
@@ -579,14 +579,14 @@ onMounted(async () => {
                 @click="openPost(post)"
               >
                 <div class="board-post-card__top">
-                  <el-tag v-if="post.isTop" size="small" type="danger" effect="dark">??</el-tag>
+                  <el-tag v-if="post.isTop" size="small" type="danger" effect="dark">置顶</el-tag>
                   <h4>{{ post.title }}</h4>
                 </div>
                 <p>{{ truncate(post.content, 88) }}</p>
                 <div class="board-post-card__meta">
                   <span>{{ post.authorName }}</span>
                   <span>{{ formatTime(post.createTime) }}</span>
-                  <span>{{ post.likeCount }} ? ? {{ post.replyCount }} ??</span>
+                  <span>{{ post.likeCount }} 赞 · {{ post.replyCount }} 回复</span>
                 </div>
               </article>
             </div>
@@ -594,22 +594,22 @@ onMounted(async () => {
         </section>
       </template>
 
-      <!-- ?????? -->
+      <!-- 板块详情列表 -->
       <template v-else>
         <section class="board-detail-head">
           <button type="button" class="back-link" @click="goHub">
             <el-icon><ArrowLeft /></el-icon>
-            ??????
+            返回论坛总览
           </button>
           <div class="board-detail-head__row">
             <div>
-              <p class="eyebrow">??</p>
+              <p class="eyebrow">Board</p>
               <h1>{{ activeBoardName }}</h1>
               <p class="hero-lead">
                 {{ activeBoard?.description || boardMeta(activeBoard?.name).blurb }}
               </p>
             </div>
-            <el-button type="primary" :icon="EditPen" @click="openPostDialog">??</el-button>
+            <el-button type="warning" :icon="EditPen" @click="openPostDialog">发帖</el-button>
           </div>
         </section>
 
@@ -619,7 +619,7 @@ onMounted(async () => {
               <el-input
                 v-model="keyword"
                 clearable
-                placeholder="???????"
+                placeholder="搜索本板块帖子"
                 @keyup.enter="handleSearch"
                 @clear="handleSearch"
               >
@@ -627,7 +627,7 @@ onMounted(async () => {
                   <el-icon><Search /></el-icon>
                 </template>
               </el-input>
-              <el-button class="glass-search__btn" type="primary" @click="handleSearch">??</el-button>
+              <el-button class="glass-search__btn" type="warning" @click="handleSearch">搜索</el-button>
             </div>
             <div class="board-tabs">
               <button
@@ -652,14 +652,14 @@ onMounted(async () => {
             class="forum-alert"
           >
             <template #default>
-              <el-button link type="primary" @click="fetchPosts">????</el-button>
+              <el-button link type="primary" @click="fetchPosts">重新加载</el-button>
             </template>
           </el-alert>
 
           <el-empty
             v-if="!loading && postList.length === 0"
             :image-size="80"
-            description="????"
+            description="暂无帖子"
           />
 
           <article
@@ -668,10 +668,10 @@ onMounted(async () => {
             class="post-row"
             @click="openPost(post)"
           >
-            <div class="post-avatar">{{ (post.authorName || '?').charAt(0) }}</div>
+            <div class="post-avatar">{{ (post.authorName || '匿').charAt(0) }}</div>
             <div class="post-main">
               <div class="post-title-line">
-                <el-tag v-if="post.isTop" size="small" type="danger">??</el-tag>
+                <el-tag v-if="post.isTop" size="small" type="danger">置顶</el-tag>
                 <h3>{{ post.title }}</h3>
               </div>
               <p>{{ truncate(post.content, 140) }}</p>
@@ -693,7 +693,7 @@ onMounted(async () => {
                 <el-icon><ChatDotRound /></el-icon>
                 {{ post.replyCount }}
               </span>
-              <el-button text :icon="Warning" @click="reportTarget(1, post.id)">??</el-button>
+              <el-button text :icon="Warning" @click="reportTarget(1, post.id)">举报</el-button>
             </div>
           </article>
 
@@ -718,8 +718,8 @@ onMounted(async () => {
     >
       <template #header>
         <div class="drawer-head">
-          <p class="drawer-kicker">????</p>
-          <h2 class="drawer-title">{{ selectedPost?.title || '????' }}</h2>
+          <p class="drawer-kicker">帖子详情</p>
+          <h2 class="drawer-title">{{ selectedPost?.title || '帖子详情' }}</h2>
         </div>
       </template>
       <div v-loading="detailLoading" class="post-detail">
@@ -738,22 +738,22 @@ onMounted(async () => {
                 :icon="Pointer"
                 @click="togglePostLike(selectedPost)"
               >
-                ?? {{ selectedPost.likeCount }}
+                点赞 {{ selectedPost.likeCount }}
               </el-button>
               <el-button
                 class="detail-btn detail-btn--ghost"
                 :icon="Warning"
                 @click="reportTarget(1, selectedPost.id)"
               >
-                ??
+                举报
               </el-button>
             </div>
           </section>
 
           <section class="reply-editor">
             <div v-if="replyTarget" class="reply-target-bar">
-              <span>?? @{{ replyTarget.authorName }}</span>
-              <button type="button" class="reply-target-cancel" @click="cancelReplyTarget">??</button>
+              <span>回复 @{{ replyTarget.authorName }}</span>
+              <button type="button" class="reply-target-cancel" @click="cancelReplyTarget">取消</button>
             </div>
             <el-input
               v-model="replyContent"
@@ -769,20 +769,20 @@ onMounted(async () => {
                 :loading="submittingReply"
                 @click="submitReply"
               >
-                {{ replyTarget ? '?????' : '????' }}
+                {{ replyTarget ? '回复楼中楼' : '发表回复' }}
               </el-button>
             </div>
           </section>
 
           <section v-loading="repliesLoading" class="reply-list">
             <div class="reply-list__head">
-              <h3>????</h3>
-              <span>{{ replyList.length }} ?</span>
+              <h3>全部回复</h3>
+              <span>{{ replyList.length }} 条</span>
             </div>
             <el-empty
               v-if="!repliesLoading && replyList.length === 0"
               :image-size="72"
-              description="??????????"
+              description="暂无回复，来抢沙发吧"
             />
             <article
               v-for="reply in replyList"
@@ -793,7 +793,7 @@ onMounted(async () => {
               <div class="reply-header">
                 <strong>{{ reply.authorName }}</strong>
                 <span v-if="isNestedReply(reply)" class="reply-to">
-                  ?? @{{ reply.parentAuthorName || '??' }}
+                  回复 @{{ reply.parentAuthorName || '用户' }}
                 </span>
                 <span>{{ formatTime(reply.createTime) }}</span>
               </div>
@@ -809,10 +809,10 @@ onMounted(async () => {
                   {{ reply.likeCount }}
                 </el-button>
                 <el-button text class="reply-action" :icon="ChatDotRound" @click="startReplyTo(reply)">
-                  ??
+                  回复
                 </el-button>
                 <el-button text class="reply-action" :icon="Warning" @click="reportTarget(2, reply.id)">
-                  ??
+                  举报
                 </el-button>
               </div>
             </article>
@@ -824,13 +824,13 @@ onMounted(async () => {
     <el-dialog
       v-model="postDialogVisible"
       class="forum-post-dialog"
-      title="????"
+      title="发布帖子"
       width="560px"
       destroy-on-close
     >
       <el-form label-position="top">
-        <el-form-item label="??">
-          <el-select v-model="newPost.boardId" class="full-width" placeholder="????">
+        <el-form-item label="板块">
+          <el-select v-model="newPost.boardId" class="full-width" placeholder="选择板块">
             <el-option
               v-for="board in boardList"
               :key="board.id"
@@ -839,23 +839,23 @@ onMounted(async () => {
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="??">
-          <el-input v-model="newPost.title" maxlength="100" show-word-limit placeholder="??????" />
+        <el-form-item label="标题">
+          <el-input v-model="newPost.title" maxlength="100" show-word-limit placeholder="输入帖子标题" />
         </el-form-item>
-        <el-form-item label="??">
+        <el-form-item label="正文">
           <el-input
             v-model="newPost.content"
             type="textarea"
             :rows="6"
             maxlength="5000"
             show-word-limit
-            placeholder="????????????"
+            placeholder="分享内容、问题或集市信息"
           />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="postDialogVisible = false">??</el-button>
-        <el-button type="primary" :loading="submittingPost" @click="submitPost">??</el-button>
+        <el-button @click="postDialogVisible = false">取消</el-button>
+        <el-button type="primary" :loading="submittingPost" @click="submitPost">发布</el-button>
       </template>
     </el-dialog>
   </div>
@@ -864,8 +864,9 @@ onMounted(async () => {
 <style scoped>
 .forum-page {
   padding: 20px 16px 56px;
-  background: var(--color-background);
+  background: transparent;
   min-height: calc(100vh - var(--header-height));
+  color: var(--nb-ink, #1a202c);
 }
 
 .forum-inner {
@@ -877,19 +878,22 @@ onMounted(async () => {
   display: grid;
   grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.9fr);
   gap: 18px;
-  min-height: 380px;
+  min-height: 420px;
   margin-bottom: 28px;
 }
 
 .hero-stage__main {
   position: relative;
   overflow: hidden;
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-xl, 24px);
   padding: 36px 36px 28px;
-  color: var(--color-foreground);
-  background: #fff;
-  border: 2.5px solid var(--nb-ink, var(--color-border-neutral));
-  box-shadow: var(--nb-shadow-lg, var(--shadow-md));
+  color: var(--nb-ink, #1a202c);
+  background:
+    radial-gradient(ellipse at 16% 18%, rgba(253, 164, 175, 0.35), transparent 48%),
+    radial-gradient(ellipse at 88% 8%, rgba(190, 227, 248, 0.55), transparent 42%),
+    linear-gradient(145deg, #ffffff 0%, #fff7ed 55%, #fef3c7 100%);
+  border: 2px solid var(--nb-ink, #1a202c);
+  box-shadow: var(--nb-shadow-lg, 6px 6px 0 0 #1a202c);
 }
 
 .hero-stage__glow {
@@ -903,28 +907,28 @@ onMounted(async () => {
 .hero-kicker,
 .eyebrow {
   margin: 0 0 8px;
-  font-size: 0.75rem;
-  letter-spacing: 0.08em;
+  font-size: 12px;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--color-primary);
-  font-weight: 700;
+  color: #b45309;
+  font-weight: 800;
 }
 
 .hero-stage__main h1,
 .board-detail-head h1 {
   margin: 0 0 12px;
   font-family: var(--font-heading);
-  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-size: clamp(32px, 4vw, 44px);
   line-height: 1.15;
-  color: var(--color-foreground);
-  text-shadow: none;
+  color: var(--nb-ink, #1a202c);
+  font-weight: 900;
 }
 
 .hero-lead {
   margin: 0;
   max-width: 520px;
   line-height: 1.75;
-  color: var(--color-text-secondary);
+  color: var(--color-text-secondary, #475569);
 }
 
 .hero-stats {
@@ -940,14 +944,15 @@ onMounted(async () => {
 
 .hero-stats strong {
   display: block;
-  font-size: 1.5rem;
+  font-size: 26px;
   line-height: 1.1;
-  color: var(--color-primary-dark);
+  color: var(--nb-ink, #1a202c);
 }
 
 .hero-stats span {
   font-size: 12px;
-  color: var(--color-muted-foreground);
+  color: var(--color-text-muted, #64748b);
+  font-weight: 600;
 }
 
 .hero-actions {
@@ -961,17 +966,17 @@ onMounted(async () => {
   position: relative;
   z-index: 1;
   padding: 18px 20px;
-  border-radius: var(--radius-lg);
-  background: var(--nb-cream, #fff9f0);
-  border: 2.5px solid var(--nb-ink, var(--color-border-neutral));
-  box-shadow: var(--nb-shadow-sm, var(--shadow-sm));
+  border-radius: var(--radius-lg, 18px);
+  background: #ffffff;
+  border: 2px solid var(--nb-ink, #1a202c);
+  box-shadow: var(--nb-shadow-sm, 3px 3px 0 0 #1a202c);
   cursor: pointer;
-  transition: transform 0.12s ease, box-shadow 0.12s ease;
+  transition: transform 0.15s, box-shadow 0.15s;
 }
 
 .hero-feature:hover {
-  transform: translate(2px, 2px);
-  box-shadow: 2px 2px 0 0 var(--nb-ink, #1a202c);
+  transform: translate(-2px, -2px);
+  box-shadow: var(--nb-shadow, 4px 4px 0 0 #1a202c);
 }
 
 .hero-feature__badge {
@@ -980,23 +985,22 @@ onMounted(async () => {
   padding: 2px 10px;
   border-radius: 999px;
   font-size: 12px;
-  font-weight: 600;
-  background: var(--color-primary-light);
-  border: 1px solid var(--color-border);
-  color: var(--color-primary-dark);
+  font-weight: 800;
+  background: var(--nb-yellow, #fef08a);
+  border: 2px solid var(--nb-ink, #1a202c);
+  color: var(--nb-ink, #1a202c);
 }
 
 .hero-feature h2 {
   margin: 0 0 8px;
-  font-family: var(--font-heading);
-  font-size: 1.2rem;
-  color: var(--color-foreground);
+  font-size: 20px;
+  color: var(--nb-ink, #1a202c);
 }
 
 .hero-feature p,
 .hero-feature__meta {
   margin: 0;
-  color: var(--color-muted-foreground);
+  color: var(--color-text-secondary, #475569);
   line-height: 1.6;
 }
 
@@ -1006,14 +1010,15 @@ onMounted(async () => {
   gap: 12px;
   margin-top: 10px;
   font-size: 12px;
+  color: var(--color-text-muted, #64748b);
 }
 
 .hero-hot-panel {
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-xl, 24px);
   padding: 22px 18px;
-  background: #fff;
-  border: 2.5px solid var(--nb-ink, var(--color-border-neutral));
-  box-shadow: var(--nb-shadow, var(--shadow-md));
+  background: #ffffff;
+  border: 2px solid var(--nb-ink, #1a202c);
+  box-shadow: var(--nb-shadow-lg, 6px 6px 0 0 #1a202c);
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -1029,14 +1034,15 @@ onMounted(async () => {
 
 .hero-hot-panel__head h3 {
   margin: 0;
-  font-family: var(--font-heading);
-  color: var(--color-foreground);
-  font-size: 1.125rem;
+  color: var(--nb-ink, #1a202c);
+  font-size: 18px;
+  font-weight: 800;
 }
 
 .hero-hot-panel__head span {
-  color: var(--color-muted-foreground);
+  color: var(--color-text-muted, #64748b);
   font-size: 12px;
+  font-weight: 600;
 }
 
 .hot-item {
@@ -1046,16 +1052,15 @@ onMounted(async () => {
   width: 100%;
   padding: 12px 10px;
   border: none;
-  border-radius: var(--radius-md);
+  border-radius: 12px;
   background: transparent;
   text-align: left;
   cursor: pointer;
-  transition: background 0.15s ease;
-  font: inherit;
+  transition: background 0.15s;
 }
 
 .hot-item:hover {
-  background: var(--color-primary-light);
+  background: #fff7ed;
 }
 
 .hot-rank {
@@ -1066,14 +1071,16 @@ onMounted(async () => {
   place-items: center;
   flex-shrink: 0;
   font-size: 12px;
-  font-weight: 700;
-  color: var(--color-muted-foreground);
-  background: var(--color-muted);
+  font-weight: 800;
+  color: var(--nb-ink, #1a202c);
+  background: #f5efe6;
+  border: 2px solid var(--nb-ink, #1a202c);
 }
 
 .hot-rank.top {
-  color: var(--color-on-primary);
-  background: var(--color-primary);
+  color: #fff;
+  background: #ea580c;
+  border-color: var(--nb-ink, #1a202c);
 }
 
 .hot-body {
@@ -1083,7 +1090,7 @@ onMounted(async () => {
 }
 
 .hot-body strong {
-  color: var(--color-foreground);
+  color: var(--nb-ink, #1a202c);
   font-size: 14px;
   line-height: 1.45;
   display: -webkit-box;
@@ -1093,7 +1100,7 @@ onMounted(async () => {
 }
 
 .hot-body small {
-  color: var(--color-muted-foreground);
+  color: var(--color-text-muted, #64748b);
   font-size: 12px;
 }
 
@@ -1111,15 +1118,15 @@ onMounted(async () => {
   justify-content: space-between;
   gap: 16px;
   align-items: end;
-  color: var(--color-muted-foreground);
+  color: var(--color-text-secondary, #475569);
 }
 
 .section-head h2 {
   margin: 0;
+  color: var(--nb-ink, #1a202c);
+  font-size: 28px;
+  font-weight: 900;
   font-family: var(--font-heading);
-  color: var(--color-foreground);
-  font-size: 1.75rem;
-  text-shadow: none;
 }
 
 .section-head p {
@@ -1127,14 +1134,15 @@ onMounted(async () => {
   max-width: 360px;
   line-height: 1.6;
   font-size: 14px;
+  color: var(--color-text-muted, #64748b);
 }
 
 .board-block {
   padding: 20px 22px;
-  border-radius: var(--radius-lg);
-  background: var(--color-card);
-  border: 1px solid var(--color-border-neutral);
-  box-shadow: var(--shadow-md);
+  border-radius: var(--radius-xl, 24px);
+  background: #ffffff;
+  border: 2px solid var(--nb-ink, #1a202c);
+  box-shadow: var(--nb-shadow, 4px 4px 0 0 #1a202c);
 }
 
 .board-block__head {
@@ -1158,27 +1166,27 @@ onMounted(async () => {
   border-radius: 14px;
   display: grid;
   place-items: center;
-  color: var(--board-accent, var(--color-primary));
-  background: color-mix(in srgb, var(--board-accent, var(--color-primary)) 16%, white);
-  border: 1px solid color-mix(in srgb, var(--board-accent, var(--color-primary)) 28%, transparent);
+  font-size: 24px;
+  background: color-mix(in srgb, var(--board-accent) 28%, #ffffff);
+  border: 2px solid var(--nb-ink, #1a202c);
 }
 
 .board-block__title h3 {
   margin: 0 0 4px;
-  font-family: var(--font-heading);
-  color: var(--color-foreground);
-  font-size: 1.2rem;
+  color: var(--nb-ink, #1a202c);
+  font-size: 20px;
+  font-weight: 800;
 }
 
 .board-block__title p {
   margin: 0;
-  color: var(--color-muted-foreground);
+  color: var(--color-text-muted, #64748b);
   font-size: 13px;
 }
 
 .more-btn {
-  color: var(--color-primary) !important;
-  font-weight: 600;
+  color: #c2410c !important;
+  font-weight: 700;
 }
 
 .board-posts {
@@ -1189,17 +1197,17 @@ onMounted(async () => {
 
 .board-post-card {
   padding: 16px;
-  border-radius: var(--radius-md);
-  background: var(--color-background);
-  border: 1px solid var(--color-border-neutral);
+  border-radius: var(--radius-md, 14px);
+  background: #fff9f0;
+  border: 2px solid var(--nb-ink, #1a202c);
   cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  transition: transform 0.15s, box-shadow 0.15s;
 }
 
 .board-post-card:hover {
-  transform: translateY(-2px);
-  border-color: var(--color-border);
-  box-shadow: var(--shadow-md);
+  transform: translate(-2px, -2px);
+  box-shadow: var(--nb-shadow-sm, 3px 3px 0 0 #1a202c);
+  background: #ffffff;
 }
 
 .board-post-card__top {
@@ -1212,13 +1220,13 @@ onMounted(async () => {
 .board-post-card h4 {
   margin: 0;
   font-size: 15px;
-  color: var(--color-foreground);
+  color: var(--nb-ink, #1a202c);
   line-height: 1.4;
 }
 
 .board-post-card p {
   margin: 0;
-  color: var(--color-muted-foreground);
+  color: var(--color-text-secondary, #475569);
   font-size: 13px;
   line-height: 1.6;
   display: -webkit-box;
@@ -1233,13 +1241,13 @@ onMounted(async () => {
   flex-wrap: wrap;
   gap: 10px;
   margin-top: 12px;
-  color: var(--color-muted-foreground);
+  color: var(--color-text-muted, #64748b);
   font-size: 12px;
 }
 
 .board-detail-head {
   margin-bottom: 18px;
-  color: var(--color-foreground);
+  color: var(--nb-ink, #1a202c);
 }
 
 .back-link {
@@ -1249,10 +1257,10 @@ onMounted(async () => {
   margin-bottom: 14px;
   border: none;
   background: transparent;
-  color: var(--color-primary);
+  color: #c2410c;
   cursor: pointer;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .board-detail-head__row {
@@ -1264,10 +1272,10 @@ onMounted(async () => {
 
 .board-list-panel {
   padding: 18px;
-  border-radius: var(--radius-lg);
-  background: var(--color-card);
-  border: 1px solid var(--color-border-neutral);
-  box-shadow: var(--shadow-md);
+  border-radius: var(--radius-xl, 24px);
+  background: #ffffff;
+  border: 2px solid var(--nb-ink, #1a202c);
+  box-shadow: var(--nb-shadow, 4px 4px 0 0 #1a202c);
 }
 
 .list-toolbar {
@@ -1290,51 +1298,53 @@ onMounted(async () => {
 }
 
 .board-tab {
-  border: 1px solid var(--color-border-neutral);
-  background: var(--color-background);
-  color: var(--color-foreground);
+  border: 2px solid var(--nb-ink, #1a202c);
+  background: #fff9f0;
+  color: var(--nb-ink, #1a202c);
   border-radius: 999px;
   padding: 6px 12px;
   cursor: pointer;
   font-size: 13px;
-  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  font-weight: 700;
 }
 
 .board-tab.active {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
-  color: var(--color-on-primary);
-  font-weight: 600;
+  background: #fb923c;
+  border-color: var(--nb-ink, #1a202c);
+  color: #fff;
+  box-shadow: var(--nb-shadow-sm, 3px 3px 0 0 #1a202c);
 }
 
 .post-row {
   display: flex;
   align-items: flex-start;
   gap: 14px;
-  border: 1px solid var(--color-border-neutral);
-  border-radius: var(--radius-md);
+  border: 2px solid var(--nb-ink, #1a202c);
+  border-radius: 12px;
   padding: 14px;
   margin-bottom: 10px;
   cursor: pointer;
-  background: var(--color-background);
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  background: #fff9f0;
+  transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
 }
 
 .post-row:hover {
-  border-color: var(--color-border);
-  box-shadow: var(--shadow-sm);
+  background: #ffffff;
+  transform: translate(-2px, -2px);
+  box-shadow: var(--nb-shadow-sm, 3px 3px 0 0 #1a202c);
 }
 
 .post-avatar {
   width: 42px;
   height: 42px;
   border-radius: 50%;
-  background: var(--color-primary-light);
-  color: var(--color-primary-dark);
+  background: #fed7aa;
+  color: #9a3412;
+  border: 2px solid var(--nb-ink, #1a202c);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 700;
+  font-weight: 800;
   flex-shrink: 0;
 }
 
@@ -1352,14 +1362,12 @@ onMounted(async () => {
 
 .post-title-line h3 {
   font-size: 16px;
-  color: var(--color-foreground);
-  margin: 0;
+  color: var(--nb-ink, #1a202c);
 }
 
 .post-main p {
-  color: var(--color-muted-foreground);
+  color: var(--color-text-secondary, #475569);
   line-height: 1.55;
-  margin: 0;
 }
 
 .post-meta {
@@ -1367,7 +1375,7 @@ onMounted(async () => {
   flex-wrap: wrap;
   gap: 12px;
   margin-top: 8px;
-  color: var(--color-muted-foreground);
+  color: var(--color-text-muted, #64748b);
   font-size: 12px;
 }
 
@@ -1382,7 +1390,7 @@ onMounted(async () => {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  color: var(--color-muted-foreground);
+  color: var(--color-text-muted, #64748b);
   font-size: 13px;
 }
 
@@ -1408,28 +1416,27 @@ onMounted(async () => {
 .drawer-kicker {
   margin: 0 0 4px;
   font-size: 11px;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--color-primary);
-  font-weight: 700;
+  color: #c2410c;
+  font-weight: 800;
 }
 
 .drawer-title {
   margin: 0;
   font-size: 18px;
   line-height: 1.4;
-  color: var(--color-foreground);
-  font-weight: 700;
-  font-family: var(--font-heading);
+  color: var(--nb-ink, #1a202c);
+  font-weight: 800;
 }
 
 .detail-post,
 .reply-editor,
 .reply-list {
   padding: 16px;
-  border-radius: var(--radius-md);
-  background: var(--color-background);
-  border: 1px solid var(--color-border-neutral);
+  border-radius: var(--radius-md, 14px);
+  background: #fff9f0;
+  border: 2px solid var(--nb-ink, #1a202c);
 }
 
 .detail-meta,
@@ -1438,7 +1445,7 @@ onMounted(async () => {
   flex-wrap: wrap;
   align-items: center;
   gap: 10px;
-  color: var(--color-muted-foreground);
+  color: var(--color-text-muted, #64748b);
   font-size: 12px;
 }
 
@@ -1447,14 +1454,14 @@ onMounted(async () => {
   align-items: center;
   padding: 3px 10px;
   border-radius: 999px;
-  background: var(--color-primary-light);
-  border: 1px solid var(--color-border);
-  color: var(--color-primary-dark);
-  font-weight: 600;
+  background: #ffedd5;
+  border: 2px solid var(--nb-ink, #1a202c);
+  color: #9a3412;
+  font-weight: 700;
 }
 
 .detail-content {
-  color: var(--color-foreground);
+  color: var(--nb-ink, #1a202c);
   line-height: 1.8;
   white-space: pre-wrap;
   margin: 14px 0 16px;
@@ -1470,28 +1477,28 @@ onMounted(async () => {
 }
 
 .detail-btn {
-  --el-button-bg-color: var(--color-primary-light);
-  --el-button-border-color: var(--color-border);
-  --el-button-text-color: var(--color-primary-dark);
-  --el-button-hover-bg-color: #b2f5ea;
-  --el-button-hover-border-color: var(--color-primary);
-  --el-button-hover-text-color: var(--color-primary-dark);
+  --el-button-bg-color: #ffedd5;
+  --el-button-border-color: #1a202c;
+  --el-button-text-color: #9a3412;
+  --el-button-hover-bg-color: #fed7aa;
+  --el-button-hover-border-color: #1a202c;
+  --el-button-hover-text-color: #7c2d12;
 }
 
 .detail-btn.is-liked,
 .detail-btn--primary {
-  --el-button-bg-color: var(--color-primary);
-  --el-button-border-color: var(--color-primary);
-  --el-button-text-color: var(--color-on-primary);
-  --el-button-hover-bg-color: var(--color-primary-dark);
-  --el-button-hover-border-color: var(--color-primary-dark);
-  --el-button-hover-text-color: var(--color-on-primary);
+  --el-button-bg-color: #ea580c;
+  --el-button-border-color: #1a202c;
+  --el-button-text-color: #ffffff;
+  --el-button-hover-bg-color: #c2410c;
+  --el-button-hover-border-color: #1a202c;
+  --el-button-hover-text-color: #fff;
 }
 
 .detail-btn--ghost {
-  --el-button-bg-color: transparent;
-  --el-button-border-color: var(--color-border-neutral);
-  --el-button-text-color: var(--color-muted-foreground);
+  --el-button-bg-color: #ffffff;
+  --el-button-border-color: #1a202c;
+  --el-button-text-color: #475569;
 }
 
 .reply-editor {
@@ -1512,22 +1519,22 @@ onMounted(async () => {
   gap: 12px;
   padding: 8px 12px;
   border-radius: 10px;
-  background: var(--color-primary-light);
-  border: 1px solid var(--color-border);
-  color: var(--color-primary-dark);
+  background: #ffedd5;
+  border: 2px solid var(--nb-ink, #1a202c);
+  color: #9a3412;
   font-size: 13px;
 }
 
 .reply-target-cancel {
   border: 0;
   background: transparent;
-  color: var(--color-muted-foreground);
+  color: var(--color-text-muted, #64748b);
   cursor: pointer;
   font-size: 12px;
 }
 
 .reply-target-cancel:hover {
-  color: var(--color-primary-dark);
+  color: var(--nb-ink, #1a202c);
 }
 
 .reply-list__head {
@@ -1541,16 +1548,16 @@ onMounted(async () => {
 .reply-list__head h3 {
   margin: 0;
   font-size: 16px;
-  color: var(--color-foreground);
+  color: var(--nb-ink, #1a202c);
 }
 
 .reply-list__head span {
   font-size: 12px;
-  color: var(--color-muted-foreground);
+  color: var(--color-text-muted, #64748b);
 }
 
 .reply-card {
-  border-top: 1px solid var(--color-border-neutral);
+  border-top: 1px solid #e7e5e4;
   padding: 14px 0;
 }
 
@@ -1562,32 +1569,32 @@ onMounted(async () => {
 .reply-card--nested {
   margin-left: 12px;
   padding-left: 12px;
-  border-left: 2px solid var(--color-border);
+  border-left: 3px solid #fb923c;
 }
 
 .reply-header strong {
-  color: var(--color-foreground);
+  color: var(--nb-ink, #1a202c);
   font-size: 13px;
 }
 
 .reply-card p {
   margin: 8px 0 10px;
-  color: var(--color-text-secondary);
+  color: var(--color-text-secondary, #475569);
   line-height: 1.7;
   white-space: pre-wrap;
 }
 
 .reply-to {
-  color: var(--color-primary);
+  color: #c2410c;
 }
 
 .reply-action {
-  color: var(--color-muted-foreground) !important;
+  color: var(--color-text-muted, #64748b) !important;
 }
 
 .reply-action:hover,
 .reply-action.is-liked {
-  color: var(--color-primary) !important;
+  color: #ea580c !important;
 }
 
 .full-width {
@@ -1618,114 +1625,113 @@ onMounted(async () => {
 </style>
 
 <style>
-/* Drawer / Dialog teleport ? body??? scoped */
+/* Drawer / Dialog teleport 到 body，需非 scoped */
 .forum-detail-drawer.el-drawer {
-  background: var(--color-card);
-  border-left: 1px solid var(--color-border-neutral);
-  box-shadow: var(--shadow-lg);
+  background: #fff9f0;
+  border-left: 2px solid var(--nb-ink, #1a202c);
+  box-shadow: -8px 0 0 0 rgba(26, 32, 44, 0.08);
 }
 
 .forum-detail-drawer .el-drawer__header {
   margin-bottom: 12px;
   padding: 18px 20px 12px;
-  border-bottom: 1px solid var(--color-border-neutral);
-  color: var(--color-foreground);
+  border-bottom: 2px solid var(--nb-ink, #1a202c);
+  color: var(--nb-ink, #1a202c);
 }
 
 .forum-detail-drawer .el-drawer__close-btn,
 .forum-detail-drawer .el-drawer__close-btn .el-icon {
-  color: var(--color-muted-foreground);
+  color: var(--color-text-muted, #64748b);
 }
 
 .forum-detail-drawer .el-drawer__close-btn:hover,
 .forum-detail-drawer .el-drawer__close-btn:hover .el-icon {
-  color: var(--color-primary);
+  color: var(--nb-ink, #1a202c);
 }
 
 .forum-detail-drawer .el-drawer__body {
   padding: 16px 20px 24px;
-  color: var(--color-foreground);
-  background: var(--color-card);
+  color: var(--nb-ink, #1a202c);
 }
 
 .forum-detail-drawer .el-textarea__inner {
-  background: var(--color-background);
-  border: 1px solid var(--color-border-neutral);
+  background: #ffffff;
+  border: 2px solid var(--nb-ink, #1a202c);
   box-shadow: none;
-  color: var(--color-foreground);
+  color: var(--nb-ink, #1a202c);
   border-radius: 12px;
 }
 
 .forum-detail-drawer .el-textarea__inner:hover,
 .forum-detail-drawer .el-textarea__inner:focus {
-  border-color: var(--color-primary);
+  border-color: #ea580c;
 }
 
 .forum-detail-drawer .el-textarea__inner::placeholder {
-  color: var(--color-muted-foreground);
+  color: #94a3b8;
 }
 
 .forum-detail-drawer .el-input__count {
   background: transparent;
-  color: var(--color-muted-foreground);
+  color: #94a3b8;
 }
 
 .forum-detail-drawer .el-loading-mask {
-  background: rgba(240, 253, 250, 0.55);
+  background: rgba(255, 249, 240, 0.7);
 }
 
 .forum-detail-drawer .el-empty__description p {
-  color: var(--color-muted-foreground);
+  color: var(--color-text-muted, #64748b);
 }
 
 .forum-post-dialog.el-dialog {
-  background: var(--color-card);
-  border: 1px solid var(--color-border-neutral);
+  background: #ffffff;
+  border: 2px solid var(--nb-ink, #1a202c);
   border-radius: 16px;
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--nb-shadow-lg, 6px 6px 0 0 #1a202c);
 }
 
 .forum-post-dialog .el-dialog__header {
-  border-bottom: 1px solid var(--color-border-neutral);
+  border-bottom: 2px solid var(--nb-ink, #1a202c);
   margin-right: 0;
   padding: 16px 20px;
 }
 
 .forum-post-dialog .el-dialog__title,
 .forum-post-dialog .el-form-item__label {
-  color: var(--color-foreground);
+  color: var(--nb-ink, #1a202c);
 }
 
 .forum-post-dialog .el-dialog__headerbtn .el-dialog__close {
-  color: var(--color-muted-foreground);
+  color: var(--color-text-muted, #64748b);
 }
 
 .forum-post-dialog .el-dialog__body {
   padding: 18px 20px;
-  color: var(--color-foreground);
+  color: var(--nb-ink, #1a202c);
 }
 
 .forum-post-dialog .el-dialog__footer {
-  border-top: 1px solid var(--color-border-neutral);
+  border-top: 2px solid var(--nb-ink, #1a202c);
   padding: 14px 20px;
 }
 
 .forum-post-dialog .el-input__wrapper,
 .forum-post-dialog .el-textarea__inner,
 .forum-post-dialog .el-select__wrapper {
-  background: var(--color-background);
-  box-shadow: 0 0 0 1px var(--color-border-neutral) inset;
+  background: #fff9f0;
+  box-shadow: 0 0 0 2px var(--nb-ink, #1a202c) inset;
 }
 
 .forum-post-dialog .el-input__inner,
 .forum-post-dialog .el-textarea__inner,
 .forum-post-dialog .el-select__placeholder,
 .forum-post-dialog .el-select__selected-item {
-  color: var(--color-foreground);
+  color: var(--nb-ink, #1a202c);
 }
 
 .forum-post-dialog .el-input__inner::placeholder,
 .forum-post-dialog .el-textarea__inner::placeholder {
-  color: var(--color-muted-foreground);
+  color: #94a3b8;
 }
 </style>

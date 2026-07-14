@@ -55,23 +55,23 @@ const typeConfig: Record<
   job: {
     label: '招聘信息',
     title: '招聘信息',
-    description: '机构正式发布的岗位公告，可在详情中投递简�?,
+    description: '机构正式发布的岗位公告，可在详情中投递简历',
     icon: 'job',
-    accent: '#0284c7',
+    accent: '#2563eb',
   },
   activity: {
     label: '活动信息',
     title: '活动信息',
-    description: '机构正式发布的活动日程，可在详情中报名参�?,
+    description: '机构正式发布的活动日程，可在详情中报名参加',
     icon: 'activity',
-    accent: '#22c55e',
+    accent: '#3b82f6',
   },
   policy: {
     label: '政策资讯',
     title: '政策资讯',
     description: '平台与官方政策原文，与论坛讨论帖分开阅读',
     icon: 'news',
-    accent: '#0f766e',
+    accent: '#1d4ed8',
   },
 }
 
@@ -84,10 +84,10 @@ const heroSlides = [
   {
     badge: '汇聚',
     title: BRAND_NAME,
-    subtitle: '官方招聘 · 活动 · 政策一站发�?,
+    subtitle: '官方招聘 · 活动 · 政策一站发布',
   },
   {
-    badge: '互�?,
+    badge: '互通',
     title: '学习成果互认',
     subtitle: BRAND_SLOGAN,
   },
@@ -120,12 +120,6 @@ const canRegisterCurrentActivity = computed(() => {
     && (detail.value.status === 1 || detail.value.status === 2)
   )
 })
-
-function truncate(text?: string, max = 88) {
-  if (!text) return ''
-  const normalized = text.replace(/\s+/g, ' ').trim()
-  return normalized.length > max ? `${normalized.slice(0, max)}…` : normalized
-}
 
 function dateParts(value?: string) {
   const raw = value ? String(value) : ''
@@ -252,7 +246,7 @@ function ensureStudent() {
     return false
   }
   if (!authStore.isStudent) {
-    ElMessage.warning('仅学员可进行该操�?)
+    ElMessage.warning('仅学员可进行该操作')
     return false
   }
   return true
@@ -264,9 +258,9 @@ async function handleApply() {
   try {
     unwrapApi(await applyJobApi(detail.value.id, { coverMessage: coverMessage.value.trim() || undefined }))
     appliedJobIds.value = [...appliedJobIds.value, detail.value.id]
-    ElMessage.success('简历已发�?)
+    ElMessage.success('简历已发送')
   } catch (e) {
-    ElMessage.error(getErrorMessage(e, '投递失�?))
+    ElMessage.error(getErrorMessage(e, '投递失败'))
   } finally {
     actionLoading.value = false
   }
@@ -274,7 +268,7 @@ async function handleApply() {
 
 async function handleRegister() {
   if (!detail.value || !ensureStudent()) return
-  await ElMessageBox.confirm(`确定报名参加�?{detail.value.title}」吗？`, '参加活动', {
+  await ElMessageBox.confirm(`确定报名参加「${detail.value.title}」吗？`, '参加活动', {
     type: 'info',
     confirmButtonText: '确认参加',
     cancelButtonText: '取消',
@@ -361,7 +355,7 @@ onUnmounted(stopHeroTimer)
 
 <template>
   <div class="news-page" v-loading="hubLoading || loading">
-    <!-- 总览：科技�?Banner + 资讯动�?-->
+    <!-- 总览：科技蓝 Banner + 资讯动态 -->
     <template v-if="isHub">
       <section class="tech-banner">
         <div class="tech-banner__grid" aria-hidden="true" />
@@ -392,7 +386,7 @@ onUnmounted(stopHeroTimer)
           <aside class="news-panel">
             <div class="news-panel__mark" aria-hidden="true" />
             <div class="news-panel__head">
-              <h2>资讯动�?/h2>
+              <h2>资讯动态</h2>
               <button type="button" class="more-link" @click="openType('policy')">
                 更多 &gt;
               </button>
@@ -444,10 +438,10 @@ onUnmounted(stopHeroTimer)
         <section class="section-showcase">
           <header class="section-head">
             <div>
-              <p class="eyebrow">资讯栏目</p>
-              <h2>栏目精�?/h2>
+              <p class="eyebrow">Channels</p>
+              <h2>栏目精选</h2>
             </div>
-            <p>点击条目查看详情，或进入栏目浏览全部官方发布信息�?/p>
+            <p>点击条目查看详情，或进入栏目浏览全部官方发布信息。</p>
           </header>
 
           <div
@@ -470,7 +464,7 @@ onUnmounted(stopHeroTimer)
             <el-empty
               v-if="!sectionHighlights[type].length"
               :image-size="56"
-              description="该栏目暂无内�?
+              description="该栏目暂无内容"
             />
             <div v-else class="type-list">
               <button
@@ -504,7 +498,7 @@ onUnmounted(stopHeroTimer)
         </button>
         <div class="list-head__row">
           <div>
-            <p class="eyebrow">栏目</p>
+            <p class="eyebrow">Channel</p>
             <h1>{{ currentTitle }}</h1>
             <p class="list-desc">{{ currentDescription }}</p>
           </div>
@@ -664,7 +658,7 @@ onUnmounted(stopHeroTimer)
               </div>
               <div v-if="detail.maxParticipants">
                 <dt>人数上限</dt>
-                <dd>{{ detail.maxParticipants }} �?/dd>
+                <dd>{{ detail.maxParticipants }} 人</dd>
               </div>
               <div v-if="detail.creditReward">
                 <dt>秩点奖励</dt>
@@ -690,10 +684,10 @@ onUnmounted(stopHeroTimer)
           :loading="actionLoading"
           @click="handleApply"
         >
-          发送简�?
+          发送简历
         </el-button>
         <el-button v-else-if="detail?.type === 'job'" class="news-btn news-btn--done" disabled>
-          已投�?
+          已投递
         </el-button>
         <el-button
           v-if="detail?.type === 'activity' && canRegisterCurrentActivity"
@@ -708,7 +702,7 @@ onUnmounted(stopHeroTimer)
           class="news-btn news-btn--done"
           disabled
         >
-          已报�?
+          已报名
         </el-button>
       </template>
     </el-dialog>
@@ -720,26 +714,29 @@ onUnmounted(stopHeroTimer)
   background: transparent;
   min-height: calc(100vh - var(--header-height));
   padding-bottom: 48px;
+  color: var(--nb-ink, #1a202c);
 }
 
 .tech-banner {
   position: relative;
   overflow: hidden;
-  min-height: 320px;
+  min-height: 360px;
   margin-bottom: 28px;
-  background: var(--nb-cream, var(--color-background));
-  border-bottom: 2.5px solid var(--nb-ink, var(--color-border-neutral));
+  background:
+    radial-gradient(circle at 12% 18%, rgba(190, 227, 248, 0.75), transparent 42%),
+    radial-gradient(circle at 88% 12%, rgba(253, 164, 175, 0.35), transparent 40%),
+    linear-gradient(135deg, #ffffff 0%, #eff6ff 48%, #fff7ed 100%);
+  border-bottom: 2px solid var(--nb-ink, #1a202c);
 }
 
 .tech-banner__grid {
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(26, 32, 44, 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(26, 32, 44, 0.06) 1px, transparent 1px);
+    linear-gradient(rgba(26, 32, 44, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(26, 32, 44, 0.05) 1px, transparent 1px);
   background-size: 42px 42px;
-  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.28), transparent 90%);
-  opacity: 0.55;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.55), transparent 90%);
   pointer-events: none;
 }
 
@@ -747,8 +744,10 @@ onUnmounted(stopHeroTimer)
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 12% 70%, rgba(34, 197, 94, 0.14), transparent 28%),
-    radial-gradient(circle at 88% 30%, rgba(190, 227, 248, 0.5), transparent 32%);
+    radial-gradient(circle at 8% 82%, rgba(34, 197, 94, 0.18) 0 2px, transparent 3px),
+    radial-gradient(circle at 18% 70%, rgba(37, 99, 235, 0.16) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 78% 78%, rgba(251, 146, 60, 0.18) 0 2px, transparent 3px),
+    radial-gradient(circle at 90% 60%, rgba(124, 58, 237, 0.12) 0 1px, transparent 2px);
   pointer-events: none;
 }
 
@@ -766,7 +765,7 @@ onUnmounted(stopHeroTimer)
 }
 
 .banner-left {
-  color: var(--color-foreground);
+  color: var(--nb-ink, #1a202c);
   min-height: 220px;
   display: flex;
   flex-direction: column;
@@ -789,30 +788,30 @@ onUnmounted(stopHeroTimer)
   display: grid;
   place-items: center;
   padding: 10px 0;
-  border-radius: 12px;
+  border-radius: 8px;
   font-size: 14px;
   font-weight: 800;
-  background: var(--nb-green, var(--color-primary));
-  color: #fff;
-  border: 2.5px solid var(--nb-ink, #1a202c);
-  box-shadow: var(--nb-shadow-sm, var(--shadow-md));
+  color: #ffffff;
+  background: #2563eb;
+  border: 2px solid var(--nb-ink, #1a202c);
+  box-shadow: var(--nb-shadow-sm, 3px 3px 0 0 #1a202c);
 }
 
 .slogan-copy h1 {
   margin: 0 0 10px;
   font-size: clamp(34px, 4.5vw, 48px);
   line-height: 1.2;
-  font-weight: 800;
-  text-shadow: none;
+  font-weight: 900;
   font-family: var(--font-heading);
-  color: var(--color-foreground);
+  color: var(--nb-ink, #1a202c);
 }
 
 .slogan-copy p {
   margin: 0;
   font-size: clamp(18px, 2vw, 24px);
   line-height: 1.5;
-  color: var(--color-text-secondary);
+  color: var(--color-text-secondary, #475569);
+  font-weight: 600;
 }
 
 .banner-dots {
@@ -824,9 +823,9 @@ onUnmounted(stopHeroTimer)
 .banner-dot {
   width: 8px;
   height: 8px;
-  border: none;
+  border: 2px solid var(--nb-ink, #1a202c);
   border-radius: 999px;
-  background: rgba(13, 148, 136, 0.25);
+  background: #cbd5e1;
   cursor: pointer;
   padding: 0;
   transition: width 0.2s, background 0.2s;
@@ -834,17 +833,17 @@ onUnmounted(stopHeroTimer)
 
 .banner-dot.active {
   width: 28px;
-  background: var(--color-primary);
+  background: #2563eb;
 }
 
 .news-panel {
   position: relative;
   overflow: hidden;
-  border-radius: 8px;
+  border-radius: var(--radius-lg, 18px);
   padding: 18px 18px 12px;
-  background: var(--color-card);
-  border: 1px solid var(--color-border-neutral);
-  box-shadow: var(--shadow-md);
+  background: #ffffff;
+  border: 2px solid var(--nb-ink, #1a202c);
+  box-shadow: var(--nb-shadow-lg, 6px 6px 0 0 #1a202c);
   min-height: 260px;
 }
 
@@ -855,9 +854,8 @@ onUnmounted(stopHeroTimer)
   width: 180px;
   height: 180px;
   border-radius: 50%;
-  border: 2px solid rgba(13, 148, 136, 0.12);
-  background:
-    radial-gradient(circle at center, rgba(45, 212, 191, 0.16), transparent 62%);
+  border: 2px solid rgba(37, 99, 235, 0.18);
+  background: radial-gradient(circle at center, rgba(190, 227, 248, 0.55), transparent 62%);
   pointer-events: none;
 }
 
@@ -866,7 +864,7 @@ onUnmounted(stopHeroTimer)
   position: absolute;
   inset: 18%;
   border-radius: 50%;
-  border: 2px solid rgba(13, 148, 136, 0.18);
+  border: 2px solid rgba(37, 99, 235, 0.22);
   opacity: 0.9;
 }
 
@@ -881,21 +879,22 @@ onUnmounted(stopHeroTimer)
 
 .news-panel__head h2 {
   margin: 0;
-  color: var(--color-foreground);
+  color: var(--nb-ink, #1a202c);
   font-size: 20px;
-  font-family: var(--font-heading);
+  font-weight: 800;
 }
 
 .more-link {
   border: none;
   background: transparent;
-  color: var(--color-primary);
+  color: #1d4ed8;
   cursor: pointer;
   font-size: 13px;
+  font-weight: 700;
 }
 
 .more-link:hover {
-  color: var(--color-primary-dark);
+  color: #1e3a8a;
 }
 
 .news-feed {
@@ -919,34 +918,36 @@ onUnmounted(stopHeroTimer)
   background: transparent;
   text-align: left;
   cursor: pointer;
-  border-radius: 6px;
+  border-radius: 8px;
   transition: background 0.15s;
 }
 
 .news-feed__item:hover {
-  background: var(--color-primary-light);
+  background: #eff6ff;
 }
 
 .rank {
   width: 22px;
   height: 22px;
-  border-radius: 4px;
+  border-radius: 6px;
   display: grid;
   place-items: center;
   font-size: 12px;
-  font-weight: 700;
-  color: var(--color-foreground);
+  font-weight: 800;
+  color: #fff;
+  border: 2px solid var(--nb-ink, #1a202c);
 }
 
-.rank-1 { background: var(--color-accent); color: var(--color-on-accent); }
-.rank-2 { background: var(--color-primary); color: var(--color-on-primary); }
-.rank-3 { background: var(--color-secondary); color: var(--color-on-secondary); }
-.rank-n { background: var(--color-muted); color: var(--color-muted-foreground); }
+.rank-1 { background: #ef4444; }
+.rank-2 { background: #f97316; }
+.rank-3 { background: #3b82f6; }
+.rank-n { background: #94a3b8; }
 
 .feed-title {
-  color: var(--color-foreground);
+  color: var(--nb-ink, #1a202c);
   font-size: 14px;
   line-height: 1.4;
+  font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -960,9 +961,9 @@ onUnmounted(stopHeroTimer)
 
 .eyebrow {
   margin: 0 0 8px;
-  color: var(--color-primary);
+  color: #1d4ed8;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.14em;
 }
@@ -984,19 +985,17 @@ onUnmounted(stopHeroTimer)
   gap: 6px;
   padding: 8px 16px;
   border-radius: 999px;
-  border: 1px solid var(--color-border-neutral);
-  background: var(--color-card);
-  color: var(--color-foreground);
+  border: 2px solid var(--nb-ink, #1a202c);
+  background: #ffffff;
+  color: var(--nb-ink, #1a202c);
   cursor: pointer;
-  box-shadow: var(--shadow-sm);
-  transition: background 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s;
+  font-weight: 700;
+  box-shadow: var(--nb-shadow-sm, 3px 3px 0 0 #1a202c);
 }
 
 .channel-pill:hover {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
-  color: var(--color-on-primary);
-  box-shadow: var(--shadow-md);
+  background: #dbeafe;
+  transform: translate(-1px, -1px);
 }
 
 .section-showcase {
@@ -1009,27 +1008,29 @@ onUnmounted(stopHeroTimer)
   justify-content: space-between;
   gap: 16px;
   align-items: end;
-  color: var(--color-muted-foreground);
+  color: var(--color-text-secondary, #475569);
   margin-bottom: 4px;
 }
 
 .section-head h2 {
   margin: 0;
-  color: var(--color-foreground);
+  color: var(--nb-ink, #1a202c);
   font-size: 28px;
+  font-weight: 900;
+  font-family: var(--font-heading);
 }
 
 .section-head p {
   margin: 0;
+  color: var(--color-text-muted, #64748b);
 }
 
 .type-block {
   padding: 18px 20px;
-  border-radius: 14px;
-  background: var(--color-card);
-  border: 1px solid var(--color-border-neutral);
-  box-shadow: var(--shadow-md);
-  
+  border-radius: var(--radius-lg, 18px);
+  background: #ffffff;
+  border: 2px solid var(--nb-ink, #1a202c);
+  box-shadow: var(--nb-shadow, 4px 4px 0 0 #1a202c);
 }
 
 .type-block__head {
@@ -1053,26 +1054,26 @@ onUnmounted(stopHeroTimer)
   display: grid;
   place-items: center;
   font-size: 22px;
-  background: color-mix(in srgb, var(--type-accent) 14%, white);
-  color: var(--type-accent);
-  border: 1px solid color-mix(in srgb, var(--type-accent) 40%, transparent);
+  background: color-mix(in srgb, var(--type-accent) 22%, #ffffff);
+  border: 2px solid var(--nb-ink, #1a202c);
 }
 
 .type-block__title h3 {
   margin: 0 0 4px;
-  color: var(--color-foreground);
+  color: var(--nb-ink, #1a202c);
   font-size: 18px;
+  font-weight: 800;
 }
 
 .type-block__title p {
   margin: 0;
-  color: var(--color-muted-foreground);
+  color: var(--color-text-muted, #64748b);
   font-size: 13px;
 }
 
 .more-btn {
-  color: var(--color-primary) !important;
-  font-weight: 600;
+  color: #1d4ed8 !important;
+  font-weight: 700;
 }
 
 .type-list {
@@ -1096,18 +1097,20 @@ onUnmounted(stopHeroTimer)
 }
 
 .type-row:hover {
-  background: var(--color-primary-light);
+  background: #eff6ff;
 }
 
 .type-row__rank {
   width: 22px;
   height: 22px;
-  border-radius: 4px;
+  border-radius: 6px;
   display: grid;
   place-items: center;
   font-size: 12px;
-  font-weight: 700;
-  color: var(--color-foreground);
+  font-weight: 800;
+  color: #fff;
+  border: 2px solid var(--nb-ink, #1a202c);
+  background: color-mix(in srgb, var(--type-accent) 85%, #1a202c);
 }
 
 .type-row__main {
@@ -1117,7 +1120,7 @@ onUnmounted(stopHeroTimer)
 }
 
 .type-row__main strong {
-  color: var(--color-foreground);
+  color: var(--nb-ink, #1a202c);
   font-size: 14px;
   white-space: nowrap;
   overflow: hidden;
@@ -1125,7 +1128,7 @@ onUnmounted(stopHeroTimer)
 }
 
 .type-row__main small {
-  color: var(--color-muted-foreground);
+  color: var(--color-text-muted, #64748b);
   font-size: 12px;
 }
 
@@ -1135,7 +1138,7 @@ onUnmounted(stopHeroTimer)
 
 .list-head {
   margin-bottom: 16px;
-  color: var(--color-foreground);
+  color: var(--nb-ink, #1a202c);
 }
 
 .back-link {
@@ -1145,8 +1148,9 @@ onUnmounted(stopHeroTimer)
   margin-bottom: 12px;
   border: none;
   background: transparent;
-  color: var(--color-primary);
+  color: #1d4ed8;
   cursor: pointer;
+  font-weight: 700;
 }
 
 .list-head__row {
@@ -1159,11 +1163,12 @@ onUnmounted(stopHeroTimer)
 .list-head h1 {
   margin: 0 0 8px;
   font-size: 32px;
+  font-weight: 900;
 }
 
 .list-desc {
   margin: 0;
-  color: var(--color-muted-foreground);
+  color: var(--color-text-secondary, #475569);
   line-height: 1.6;
 }
 
@@ -1174,27 +1179,28 @@ onUnmounted(stopHeroTimer)
 }
 
 .type-tab {
-  border: 1px solid var(--color-border-neutral);
-  background: var(--color-card);
-  color: var(--color-muted-foreground);
-  border-radius: 4px;
+  border: 2px solid var(--nb-ink, #1a202c);
+  background: #ffffff;
+  color: var(--nb-ink, #1a202c);
+  border-radius: 8px;
   padding: 7px 12px;
   cursor: pointer;
+  font-weight: 700;
 }
 
 .type-tab.active {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
-  color: var(--color-on-primary);
+  background: #2563eb;
+  border-color: var(--nb-ink, #1a202c);
+  color: #fff;
+  box-shadow: var(--nb-shadow-sm, 3px 3px 0 0 #1a202c);
 }
 
 .list-panel {
   padding: 18px;
-  border-radius: 12px;
-  background: var(--color-card);
-  border: 1px solid var(--color-border-neutral);
-  
-  box-shadow: var(--shadow-md);
+  border-radius: var(--radius-lg, 18px);
+  background: #ffffff;
+  border: 2px solid var(--nb-ink, #1a202c);
+  box-shadow: var(--nb-shadow, 4px 4px 0 0 #1a202c);
 }
 
 .list-toolbar {
@@ -1209,13 +1215,13 @@ onUnmounted(stopHeroTimer)
 .info-card {
   display: flex;
   gap: 18px;
-  border-bottom: 1px solid var(--color-border-neutral);
+  border-bottom: 1px solid #e2e8f0;
   padding: 16px 4px;
   cursor: pointer;
 }
 
 .info-card:hover {
-  background: var(--color-primary-light);
+  background: #eff6ff;
 }
 
 .info-date {
@@ -1224,8 +1230,9 @@ onUnmounted(stopHeroTimer)
   text-align: center;
   padding: 6px 0;
   border-radius: 8px;
-  background: var(--color-primary-light);
-  color: var(--color-muted-foreground);
+  background: #dbeafe;
+  color: #1e3a8a;
+  border: 2px solid var(--nb-ink, #1a202c);
 }
 
 .info-date strong {
@@ -1235,7 +1242,7 @@ onUnmounted(stopHeroTimer)
 
 .info-date small {
   font-size: 12px;
-  color: var(--color-primary);
+  color: #1d4ed8;
 }
 
 .info-main {
@@ -1253,12 +1260,12 @@ onUnmounted(stopHeroTimer)
 .info-title-line h3 {
   margin: 0;
   font-size: 16px;
-  color: var(--color-foreground);
+  color: var(--nb-ink, #1a202c);
 }
 
 .info-main p {
   margin: 0;
-  color: var(--color-muted-foreground);
+  color: var(--color-text-secondary, #475569);
   line-height: 1.6;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -1273,7 +1280,7 @@ onUnmounted(stopHeroTimer)
   flex-wrap: wrap;
   align-items: center;
   gap: 12px;
-  color: var(--color-muted-foreground);
+  color: var(--color-text-muted, #64748b);
   font-size: 12px;
   margin-top: 10px;
 }
@@ -1300,16 +1307,16 @@ onUnmounted(stopHeroTimer)
   font-size: 11px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--color-primary);
-  font-weight: 700;
+  color: #1d4ed8;
+  font-weight: 800;
 }
 
 .dialog-title {
   margin: 0;
   font-size: 18px;
   line-height: 1.4;
-  color: var(--color-foreground);
-  font-weight: 700;
+  color: var(--nb-ink, #1a202c);
+  font-weight: 800;
 }
 
 .detail-panel {
@@ -1321,16 +1328,16 @@ onUnmounted(stopHeroTimer)
   align-items: center;
   padding: 3px 10px;
   border-radius: 999px;
-  border: 1px solid var(--color-border);
-  background: var(--color-primary-light);
-  color: var(--color-primary-dark);
-  font-weight: 600;
+  border: 2px solid var(--nb-ink, #1a202c);
+  background: #e0f2fe;
+  color: #075985;
+  font-weight: 700;
 }
 
 .detail-chip--primary {
-  border-color: var(--color-primary);
-  background: var(--color-primary-light);
-  color: var(--color-primary-dark);
+  border-color: var(--nb-ink, #1a202c);
+  background: #dbeafe;
+  color: #1e3a8a;
 }
 
 .cover {
@@ -1339,7 +1346,7 @@ onUnmounted(stopHeroTimer)
   object-fit: cover;
   border-radius: 12px;
   margin: 16px 0;
-  border: 1px solid var(--color-border-neutral);
+  border: 2px solid var(--nb-ink, #1a202c);
 }
 
 .detail-section {
@@ -1347,7 +1354,7 @@ onUnmounted(stopHeroTimer)
 }
 
 .detail-section p {
-  color: var(--color-foreground);
+  color: var(--color-text-secondary, #475569);
   line-height: 1.8;
   white-space: pre-wrap;
   margin-bottom: 14px;
@@ -1355,7 +1362,7 @@ onUnmounted(stopHeroTimer)
 
 .detail-section h3 {
   font-size: 15px;
-  color: var(--color-foreground);
+  color: var(--nb-ink, #1a202c);
   margin: 16px 0 8px;
 }
 
@@ -1367,22 +1374,22 @@ onUnmounted(stopHeroTimer)
 }
 
 .detail-grid div {
-  border: 1px solid var(--color-border-neutral);
+  border: 2px solid var(--nb-ink, #1a202c);
   border-radius: 12px;
   padding: 12px;
-  background: var(--color-background);
+  background: #fff9f0;
 }
 
 .detail-grid dt {
-  color: var(--color-muted-foreground);
+  color: var(--color-text-muted, #64748b);
   font-size: 12px;
   margin-bottom: 6px;
 }
 
 .detail-grid dd {
-  color: var(--color-foreground);
+  color: var(--nb-ink, #1a202c);
   margin: 0;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .policy-content p {
@@ -1390,36 +1397,35 @@ onUnmounted(stopHeroTimer)
 }
 
 .news-btn {
-  --el-button-bg-color: var(--color-primary-light);
-  --el-button-border-color: var(--color-border);
-  --el-button-text-color: var(--color-primary-dark);
-  --el-button-hover-bg-color: #b2f5ea;
-  --el-button-hover-border-color: var(--color-primary);
-  --el-button-hover-text-color: var(--color-primary-dark);
+  --el-button-bg-color: #eff6ff;
+  --el-button-border-color: #1a202c;
+  --el-button-text-color: #1e3a8a;
+  --el-button-hover-bg-color: #dbeafe;
+  --el-button-hover-border-color: #1a202c;
+  --el-button-hover-text-color: #1e3a8a;
 }
 
 .news-btn--primary {
-  --el-button-bg-color: var(--color-primary);
-  --el-button-border-color: var(--color-primary);
-  --el-button-text-color: var(--color-on-primary);
-  --el-button-hover-bg-color: var(--color-primary-dark);
-  --el-button-hover-border-color: var(--color-primary-dark);
-  --el-button-hover-text-color: var(--color-on-primary);
+  --el-button-bg-color: #2563eb;
+  --el-button-border-color: #1a202c;
+  --el-button-text-color: #ffffff;
+  --el-button-hover-bg-color: #1d4ed8;
+  --el-button-hover-border-color: #1a202c;
 }
 
 .news-btn--ghost {
-  --el-button-bg-color: transparent;
-  --el-button-border-color: var(--color-border-neutral);
-  --el-button-text-color: var(--color-foreground);
+  --el-button-bg-color: #ffffff;
+  --el-button-border-color: #1a202c;
+  --el-button-text-color: #475569;
 }
 
 .news-btn--done {
-  --el-button-bg-color: color-mix(in srgb, #16a34a 14%, white);
-  --el-button-border-color: color-mix(in srgb, #16a34a 35%, transparent);
-  --el-button-text-color: #15803d;
-  --el-button-disabled-bg-color: color-mix(in srgb, #16a34a 14%, white);
-  --el-button-disabled-border-color: color-mix(in srgb, #16a34a 35%, transparent);
-  --el-button-disabled-text-color: #15803d;
+  --el-button-bg-color: #dcfce7;
+  --el-button-border-color: #1a202c;
+  --el-button-text-color: #166534;
+  --el-button-disabled-bg-color: #dcfce7;
+  --el-button-disabled-border-color: #1a202c;
+  --el-button-disabled-text-color: #166534;
 }
 
 @media (max-width: 960px) {
@@ -1442,55 +1448,55 @@ onUnmounted(stopHeroTimer)
 
 <style>
 .news-detail-dialog.el-dialog {
-  background: var(--color-card);
-  border: 1px solid var(--color-border-neutral);
+  background: #ffffff;
+  border: 2px solid var(--nb-ink, #1a202c);
   border-radius: 16px;
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--nb-shadow-lg, 6px 6px 0 0 #1a202c);
 }
 
 .news-detail-dialog .el-dialog__header {
   margin-right: 0;
   padding: 16px 20px 12px;
-  border-bottom: 1px solid var(--color-border-neutral);
+  border-bottom: 2px solid var(--nb-ink, #1a202c);
 }
 
 .news-detail-dialog .el-dialog__headerbtn .el-dialog__close {
-  color: var(--color-muted-foreground);
+  color: var(--color-text-muted, #64748b);
 }
 
 .news-detail-dialog .el-dialog__body {
   padding: 16px 20px;
-  color: var(--color-foreground);
+  color: var(--nb-ink, #1a202c);
 }
 
 .news-detail-dialog .el-dialog__footer {
   padding: 12px 20px 18px;
-  border-top: 1px solid var(--color-border-neutral);
+  border-top: 2px solid var(--nb-ink, #1a202c);
 }
 
 .news-detail-dialog .el-textarea__inner {
-  background: var(--color-background);
-  border: 1px solid var(--color-border-neutral);
+  background: #fff9f0;
+  border: 2px solid var(--nb-ink, #1a202c);
   box-shadow: none;
-  color: var(--color-foreground);
+  color: var(--nb-ink, #1a202c);
   border-radius: 12px;
 }
 
 .news-detail-dialog .el-textarea__inner:hover,
 .news-detail-dialog .el-textarea__inner:focus {
-  border-color: var(--color-primary);
+  border-color: #2563eb;
 }
 
 .news-detail-dialog .el-textarea__inner::placeholder {
-  color: var(--color-muted-foreground);
+  color: #94a3b8;
 }
 
 .news-detail-dialog .el-input__count {
   background: transparent;
-  color: var(--color-muted-foreground);
+  color: #94a3b8;
 }
 
 .news-detail-dialog .el-loading-mask {
-  background: color-mix(in srgb, var(--color-background) 70%, white);
+  background: rgba(255, 249, 240, 0.7);
 }
 </style>

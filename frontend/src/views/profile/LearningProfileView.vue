@@ -145,15 +145,17 @@ onMounted(fetchProfile)
   display: flex;
   flex-direction: column;
   gap: 20px;
+  color: var(--nb-ink, #1a202c);
 }
 
 .portrait-hero {
   display: flex;
   gap: 16px;
   padding: 18px 20px;
-  border-radius: 14px;
-  background: linear-gradient(135deg, rgba(24, 144, 255, 0.18), rgba(56, 189, 248, 0.08));
-  border: 1px solid rgba(56, 189, 248, 0.28);
+  border-radius: var(--radius-lg, 18px);
+  background: linear-gradient(135deg, #dbeafe 0%, #eff6ff 55%, #ffffff 100%);
+  border: 2px solid var(--nb-ink, #1a202c);
+  box-shadow: var(--nb-shadow-sm, 3px 3px 0 0 #1a202c);
 }
 
 .portrait-hero__icon {
@@ -162,20 +164,22 @@ onMounted(fetchProfile)
   border-radius: 14px;
   display: grid;
   place-items: center;
-  background: rgba(24, 144, 255, 0.2);
+  background: #bfdbfe;
+  border: 2px solid var(--nb-ink, #1a202c);
+  color: #1e3a8a;
   flex-shrink: 0;
 }
 
 .portrait-job {
   font-size: 20px;
-  font-weight: 700;
-  color: #e8f4ff;
+  font-weight: 800;
+  color: var(--nb-ink, #1a202c);
   line-height: 1.3;
 }
 
 .portrait-summary {
   margin: 8px 0 0;
-  color: rgba(226, 239, 255, 0.88);
+  color: var(--color-text-secondary, #475569);
   line-height: 1.7;
   font-size: 14px;
 }
@@ -192,14 +196,16 @@ onMounted(fetchProfile)
   padding: 4px 10px;
   border-radius: 999px;
   font-size: 12px;
-  color: #9fd4ff;
-  background: rgba(24, 144, 255, 0.18);
-  border: 1px solid rgba(56, 189, 248, 0.28);
+  font-weight: 700;
+  color: #1e3a8a;
+  background: #ffffff;
+  border: 2px solid var(--nb-ink, #1a202c);
 }
 
 .portrait-time {
   font-size: 12px;
-  color: rgba(186, 214, 240, 0.72);
+  font-weight: 600;
+  color: var(--color-text-muted, #64748b);
 }
 
 .portrait-grid {
@@ -210,9 +216,10 @@ onMounted(fetchProfile)
 
 .portrait-block {
   padding: 16px 18px;
-  border-radius: 12px;
-  background: rgba(10, 28, 52, 0.35);
-  border: 1px solid rgba(125, 186, 255, 0.16);
+  border-radius: var(--radius-md, 14px);
+  background: #fff9f0;
+  border: 2px solid var(--nb-ink, #1a202c);
+  box-shadow: var(--nb-shadow-sm, 3px 3px 0 0 #1a202c);
 }
 
 .portrait-block--wide {
@@ -222,8 +229,8 @@ onMounted(fetchProfile)
 .portrait-block h2 {
   margin: 0 0 12px;
   font-size: 15px;
-  font-weight: 650;
-  color: #d7ebff;
+  font-weight: 800;
+  color: var(--nb-ink, #1a202c);
 }
 
 .tag-list {
@@ -236,17 +243,23 @@ onMounted(fetchProfile)
   padding: 5px 11px;
   border-radius: 999px;
   font-size: 13px;
-  color: #b8dcff;
-  background: rgba(24, 144, 255, 0.16);
-  border: 1px solid rgba(56, 189, 248, 0.24);
+  font-weight: 700;
+  color: #1e3a8a;
+  background: #dbeafe;
+  border: 2px solid var(--nb-ink, #1a202c);
 }
 
 .item-list {
   margin: 0;
   padding-left: 18px;
-  color: rgba(220, 236, 255, 0.9);
+  color: var(--color-text-secondary, #475569);
   line-height: 1.75;
   font-size: 14px;
+}
+
+.item-list li::marker {
+  color: var(--nb-ink, #1a202c);
+  font-weight: 700;
 }
 
 .item-list.numbered {
