@@ -30,7 +30,7 @@ public class LearningProfileService {
             要求：
             1. 不要编造上下文中不存在的课程、成绩或经历。
             2. 用简洁中文。
-            3. 只输出一个 JSON 对象，不要 Markdown 代码块，字段如下：
+            3. 只输出一个合法 JSON 对象，禁止前后附加说明、禁止 Markdown 代码块（不要用 ```），字段如下：
             {
               "targetJob": "建议的心仪职位，字符串",
               "summary": "80-160字的学习画像摘要",
@@ -40,6 +40,7 @@ public class LearningProfileService {
               "gaps": ["待补齐短板，2-4条"],
               "suggestions": ["下一步行动建议，3条以内"]
             }
+            4. skills/strengths/gaps/suggestions 必须是字符串数组；文案不要使用 **加粗** 等标记。
             """;
 
     private final UserLearningProfileMapper profileMapper;
@@ -93,15 +94,19 @@ public class LearningProfileService {
         LearningSituationVO situation = loadSituation(userId);
         String context = buildContext(situation);
         String raw = llmService.chat(GENERATE_PROMPT, List.of(), context);
-        Map<String, Object> profile = parseLlmJson(raw);
+        Map<String, Object> profile = normalizeProfile(parseLlmJson(raw));
 
-        String summary = asString(profile.get("summary"));
+        String summary = cleanText(asString(profile.get("summary")));
         if (!StringUtils.hasText(summary)) {
-            summary = raw.length() > 300 ? raw.substring(0, 300) + "…" : raw;
+            throw new BusinessException(502, "画像生成失败：模型未返回有效结构化内容，请重试");
         }
-        String targetJob = asString(profile.get("targetJob"));
+        String targetJob = cleanText(asString(profile.get("targetJob")));
         if (!StringUtils.hasText(targetJob) && situation.getTargetTags() != null && !situation.getTargetTags().isEmpty()) {
             targetJob = "基于目标技能的相关岗位";
+        }
+        profile.put("summary", summary);
+        if (StringUtils.hasText(targetJob)) {
+            profile.put("targetJob", targetJob);
         }
 
         String json;
@@ -191,26 +196,112 @@ public class LearningProfileService {
     }
 
     private Map<String, Object> parseLlmJson(String raw) {
-        String text = raw == null ? "" : raw.trim();
-        if (text.startsWith("```")) {
-            int start = text.indexOf('{');
-            int end = text.lastIndexOf('}');
-            if (start >= 0 && end > start) {
-                text = text.substring(start, end + 1);
+        String candidate = extractJsonObject(raw);
+        if (StringUtils.hasText(candidate)) {
+            try {
+                return objectMapper.readValue(candidate, new TypeReference<LinkedHashMap<String, Object>>() {});
+            } catch (Exception e) {
+                log.warn("LLM profile JSON parse failed on extracted object: {}", e.getMessage());
             }
         }
+        // 兼容：模型先输出说明文字再跟 JSON
         try {
-            return objectMapper.readValue(text, new TypeReference<LinkedHashMap<String, Object>>() {});
+            return objectMapper.readValue(raw == null ? "" : raw.trim(),
+                    new TypeReference<LinkedHashMap<String, Object>>() {});
         } catch (Exception e) {
-            log.warn("LLM profile JSON parse failed, fallback. raw={}", raw);
-            Map<String, Object> fallback = new LinkedHashMap<>();
-            fallback.put("summary", raw);
-            fallback.put("skills", List.of());
-            fallback.put("strengths", List.of());
-            fallback.put("gaps", List.of());
-            fallback.put("suggestions", List.of());
-            return fallback;
+            log.warn("LLM profile JSON parse failed, no structured fallback. raw={}", abbreviate(raw, 400));
+            throw new BusinessException(502, "画像生成失败：返回格式无效，请点击重新生成");
         }
+    }
+
+    /** 从模型回复中截取最外层 JSON 对象，忽略前后说明/Markdown 围栏 */
+    private static String extractJsonObject(String raw) {
+        if (!StringUtils.hasText(raw)) {
+            return null;
+        }
+        String text = raw.trim();
+        if (text.startsWith("```")) {
+            int fenceEnd = text.indexOf('\n');
+            if (fenceEnd > 0) {
+                text = text.substring(fenceEnd + 1);
+            }
+            int closeFence = text.lastIndexOf("```");
+            if (closeFence >= 0) {
+                text = text.substring(0, closeFence).trim();
+            }
+        }
+        int start = text.indexOf('{');
+        int end = text.lastIndexOf('}');
+        if (start < 0 || end <= start) {
+            return null;
+        }
+        return text.substring(start, end + 1);
+    }
+
+    private Map<String, Object> normalizeProfile(Map<String, Object> source) {
+        Map<String, Object> profile = new LinkedHashMap<>();
+        if (source != null) {
+            profile.putAll(source);
+        }
+        profile.put("targetJob", cleanText(asString(profile.get("targetJob"))));
+        profile.put("summary", cleanText(asString(profile.get("summary"))));
+        profile.put("stage", cleanText(asString(profile.get("stage"))));
+        profile.put("skills", normalizeStringList(profile.get("skills")));
+        profile.put("strengths", normalizeStringList(profile.get("strengths")));
+        profile.put("gaps", normalizeStringList(profile.get("gaps")));
+        profile.put("suggestions", normalizeStringList(profile.get("suggestions")));
+        return profile;
+    }
+
+    private List<String> normalizeStringList(Object value) {
+        List<String> out = new ArrayList<>();
+        if (value == null) {
+            return out;
+        }
+        if (value instanceof List<?> list) {
+            for (Object item : list) {
+                String text = cleanText(asString(item));
+                if (StringUtils.hasText(text)) {
+                    out.add(text);
+                }
+            }
+            return out;
+        }
+        String text = cleanText(asString(value));
+        if (!StringUtils.hasText(text)) {
+            return out;
+        }
+        for (String part : text.split("[\n;；、|/]+")) {
+            String item = cleanText(part.replaceFirst("^[-*•\\d.、)\\s]+", ""));
+            if (StringUtils.hasText(item)) {
+                out.add(item);
+            }
+        }
+        return out;
+    }
+
+    private static String cleanText(String text) {
+        if (!StringUtils.hasText(text)) {
+            return text;
+        }
+        String cleaned = text
+                .replace("**", "")
+                .replace("__", "")
+                .replaceAll("`+", "")
+                .trim();
+        // 若误把整段 JSON 写进摘要，拒绝作为 summary
+        if (cleaned.startsWith("{") && cleaned.contains("\"skills\"")) {
+            return null;
+        }
+        return cleaned;
+    }
+
+    private static String abbreviate(String text, int max) {
+        if (text == null) {
+            return "";
+        }
+        String t = text.replace('\n', ' ');
+        return t.length() <= max ? t : t.substring(0, max) + "…";
     }
 
     private Map<String, Object> parseProfileJson(String json) {
@@ -218,9 +309,9 @@ public class LearningProfileService {
             return Map.of();
         }
         try {
-            return objectMapper.readValue(json, new TypeReference<LinkedHashMap<String, Object>>() {});
+            return normalizeProfile(objectMapper.readValue(json, new TypeReference<LinkedHashMap<String, Object>>() {}));
         } catch (Exception e) {
-            return Map.of("raw", json);
+            return Map.of();
         }
     }
 

@@ -783,6 +783,27 @@ onMounted(async () => {
   padding-top: 6px;
 }
 
+.package-actions :deep(.el-button) {
+  flex: 1 1 auto;
+  min-height: 36px;
+  border-radius: 10px !important;
+  font-weight: 800 !important;
+}
+
+.package-actions :deep(.el-button--default) {
+  background: #fff !important;
+  color: var(--nb-ink, #1a202c) !important;
+  border: 2px solid var(--nb-ink, #1a202c) !important;
+  box-shadow: 2px 2px 0 0 var(--nb-ink, #1a202c);
+}
+
+.package-actions :deep(.el-button--default.is-disabled) {
+  background: #f5efe6 !important;
+  color: #64748b !important;
+  opacity: 1;
+  box-shadow: none;
+}
+
 .more-wrap {
   display: flex;
   justify-content: center;
@@ -791,15 +812,18 @@ onMounted(async () => {
 
 .more-btn {
   min-width: 180px;
+  min-height: 44px;
   border-radius: 999px !important;
-  background: var(--color-card) !important;
-  border: 1px solid var(--color-primary) !important;
-  color: var(--color-primary-dark) !important;
-  font-weight: 600 !important;
+  background: var(--nb-green, #22c55e) !important;
+  border: 2.5px solid var(--nb-ink, #1a202c) !important;
+  color: #fff !important;
+  font-weight: 800 !important;
+  box-shadow: var(--nb-shadow-sm, 3px 3px 0 0 #1a202c) !important;
 }
 
 .more-btn:hover {
-  background: var(--color-primary-light) !important;
+  background: var(--nb-green-deep, #16a34a) !important;
+  color: #fff !important;
 }
 
 .quote-section {
@@ -820,19 +844,27 @@ onMounted(async () => {
   border: 2.5px solid var(--nb-ink, var(--color-border-neutral));
   box-shadow: var(--nb-shadow-sm, var(--shadow-sm));
   color: var(--color-foreground);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 100%;
+  box-sizing: border-box;
 }
 
 .quote-card p {
-  margin: 0 0 16px;
+  margin: 0;
   line-height: 1.75;
   font-size: 0.9rem;
   color: var(--color-text-secondary);
+  flex: 1 1 auto;
 }
 
 .quote-card footer {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  margin-top: auto;
+  padding-top: 16px;
 }
 
 .quote-card strong {

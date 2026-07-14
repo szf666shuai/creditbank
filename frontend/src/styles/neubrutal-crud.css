@@ -331,3 +331,85 @@
   background: var(--nb-green, #22c55e) !important;
   color: #fff !important;
 }
+
+/* —— 全局 Element Plus 主按钮：覆盖学习资源/课程播放等公开页旧蓝按钮 —— */
+.el-button {
+  --el-button-font-weight: 800;
+  font-family: var(--font-heading);
+}
+
+.el-button--primary {
+  --el-button-bg-color: var(--nb-green, #22c55e) !important;
+  --el-button-border-color: var(--nb-ink, #1a202c) !important;
+  --el-button-text-color: #fff !important;
+  --el-button-hover-bg-color: var(--nb-green-deep, #16a34a) !important;
+  --el-button-hover-border-color: var(--nb-ink, #1a202c) !important;
+  --el-button-hover-text-color: #fff !important;
+  --el-button-active-bg-color: var(--nb-green-deep, #16a34a) !important;
+  --el-button-disabled-bg-color: #86efac !important;
+  --el-button-disabled-border-color: var(--nb-ink, #1a202c) !important;
+  --el-button-disabled-text-color: #fff !important;
+  background-color: var(--nb-green, #22c55e) !important;
+  border: 2px solid var(--nb-ink, #1a202c) !important;
+  color: #fff !important;
+  border-radius: 999px !important;
+  box-shadow: 2px 2px 0 0 var(--nb-ink, #1a202c);
+}
+
+.el-button--primary:hover,
+.el-button--primary:focus {
+  background-color: var(--nb-green-deep, #16a34a) !important;
+  border-color: var(--nb-ink, #1a202c) !important;
+  color: #fff !important;
+}
+
+.el-button--primary.is-disabled,
+.el-button--primary.is-disabled:hover {
+  background-color: #bbf7d0 !important;
+  border-color: var(--nb-ink, #1a202c) !important;
+  color: var(--nb-ink, #1a202c) !important;
+  opacity: 0.85;
+  box-shadow: none;
+}
+
+.el-button--primary.is-plain {
+  --el-button-bg-color: #fff !important;
+  --el-button-text-color: var(--nb-ink, #1a202c) !important;
+  background: #fff !important;
+  color: var(--nb-ink, #1a202c) !important;
+  border: 2px solid var(--nb-ink, #1a202c) !important;
+}
+
+.el-button--default {
+  --el-button-bg-color: #fff !important;
+  --el-button-text-color: var(--nb-ink, #1a202c) !important;
+  --el-button-hover-bg-color: var(--nb-yellow, #fef08a) !important;
+  --el-button-hover-text-color: var(--nb-ink, #1a202c) !important;
+  background: #fff !important;
+  color: var(--nb-ink, #1a202c) !important;
+  border: 2px solid var(--nb-ink, #1a202c) !important;
+  border-radius: 999px !important;
+  box-shadow: 2px 2px 0 0 var(--nb-ink, #1a202c);
+}
+
+.el-button--success {
+  --el-button-bg-color: #bbf7d0 !important;
+  --el-button-text-color: var(--nb-ink, #1a202c) !important;
+  --el-button-hover-bg-color: #86efac !important;
+  background: #bbf7d0 !important;
+  color: var(--nb-ink, #1a202c) !important;
+  border: 2px solid var(--nb-ink, #1a202c) !important;
+  border-radius: 999px !important;
+  box-shadow: 2px 2px 0 0 var(--nb-ink, #1a202c);
+}
+
+.el-button--success.is-plain {
+  background: #fff !important;
+  color: var(--nb-green-deep, #16a34a) !important;
+  border: 2px solid var(--nb-green-deep, #16a34a) !important;
+  box-shadow: 2px 2px 0 0 var(--nb-ink, #1a202c);
+}
+
+.el-button--success.is-plain:hover {
+  background: #dcfce7 !important;
+}

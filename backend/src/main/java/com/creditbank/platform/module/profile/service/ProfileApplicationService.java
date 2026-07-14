@@ -12,20 +12,26 @@ import com.creditbank.platform.module.profile.dto.MyJobApplicationVO;
 import com.creditbank.platform.security.AuthSupport;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class ProfileApplicationService {
 
+    private static final int JOB_OPEN = 1;
+
     private final AuthSupport authSupport;
     private final SysOrganizationMapper orgMapper;
     private final JobApplicationMapper jobApplicationMapper;
     private final JobPostingMapper jobPostingMapper;
 
+    @Transactional
     public List<MyJobApplicationVO> listMyApplications(Integer status) {
         Long userId = authSupport.requireUserId();
 
@@ -44,9 +50,28 @@ public class ProfileApplicationService {
                 .stream()
                 .collect(Collectors.toMap(JobPosting::getId, job -> job));
 
-        List<Long> orgIds = jobMap.values().stream()
+        List<Long> staleIds = new ArrayList<>();
+        List<JobApplication> activeApps = new ArrayList<>();
+        for (JobApplication app : applications) {
+            if (isJobUnavailable(jobMap.get(app.getJobId()))) {
+                staleIds.add(app.getId());
+            } else {
+                activeApps.add(app);
+            }
+        }
+        if (!staleIds.isEmpty()) {
+            jobApplicationMapper.delete(new LambdaQueryWrapper<JobApplication>()
+                    .in(JobApplication::getId, staleIds));
+        }
+        if (activeApps.isEmpty()) {
+            return List.of();
+        }
+
+        List<Long> orgIds = activeApps.stream()
+                .map(app -> jobMap.get(app.getJobId()))
+                .filter(Objects::nonNull)
                 .map(JobPosting::getOrgId)
-                .filter(id -> id != null)
+                .filter(Objects::nonNull)
                 .distinct()
                 .toList();
         Map<Long, String> orgNameMap = orgIds.isEmpty()
@@ -55,26 +80,29 @@ public class ProfileApplicationService {
                         .stream()
                         .collect(Collectors.toMap(SysOrganization::getId, SysOrganization::getName));
 
-        return applications.stream()
+        return activeApps.stream()
                 .map(app -> {
                     JobPosting job = jobMap.get(app.getJobId());
-                    boolean jobUnavailable = job == null;
                     return MyJobApplicationVO.builder()
                             .id(app.getId())
                             .jobId(app.getJobId())
-                            .jobTitle(jobUnavailable ? ApplicationStatus.UNAVAILABLE_JOB_TITLE : job.getTitle())
-                            .orgId(job != null ? job.getOrgId() : null)
-                            .orgName(job != null ? orgNameMap.get(job.getOrgId()) : null)
-                            .jobLocation(job != null ? job.getLocation() : null)
-                            .salaryRange(job != null ? job.getSalaryRange() : null)
+                            .jobTitle(job.getTitle())
+                            .orgId(job.getOrgId())
+                            .orgName(orgNameMap.get(job.getOrgId()))
+                            .jobLocation(job.getLocation())
+                            .salaryRange(job.getSalaryRange())
                             .coverMessage(app.getCoverMessage())
                             .status(app.getStatus())
                             .statusName(ApplicationStatus.statusName(app.getStatus()))
-                            .jobUnavailable(jobUnavailable)
+                            .jobUnavailable(false)
                             .createTime(app.getCreateTime())
                             .updateTime(app.getUpdateTime())
                             .build();
                 })
                 .toList();
+    }
+
+    private boolean isJobUnavailable(JobPosting job) {
+        return job == null || job.getStatus() == null || job.getStatus() != JOB_OPEN;
     }
 }

@@ -32,8 +32,8 @@ const handleForm = reactive({
 })
 
 const handlePresets = [
-  { label: '确认违规，隐藏内容', status: 1 as const, hideTarget: true, remark: '经核实存在违规内容，已隐藏' },
-  { label: '确认违规，仅标记', status: 1 as const, hideTarget: false, remark: '经核实存在违规，已记录处理' },
+  { label: '确认违规，隐藏内容', status: 1 as const, hideTarget: true, remark: '经核实存在违规内容，已隐藏，并对作者扣减诚信分' },
+  { label: '确认违规，仅标记', status: 1 as const, hideTarget: false, remark: '经核实存在违规，已记录处理，并对作者扣减诚信分' },
   { label: '举报不成立', status: 2 as const, hideTarget: false, remark: '经核查，举报理由不成立' },
   { label: '内容正常，驳回', status: 2 as const, hideTarget: false, remark: '内容符合社区规范，驳回举报' },
 ]
@@ -67,7 +67,9 @@ async function submitHandle() {
         handleRemark: handleForm.handleRemark.trim(),
       }),
     )
-    ElMessage.success('举报已处理')
+    ElMessage.success(
+      handleForm.status === 1 ? '举报已处理，已对违规内容作者扣减诚信分' : '举报已驳回',
+    )
     dialogVisible.value = false
     await fetchData()
   } catch (e) {
@@ -104,7 +106,7 @@ onMounted(() => {
 <template>
   <PageShell
     title="举报处理"
-    description="审核论坛内容举报，选择处理方式并填写说明"
+    description="审核论坛内容举报：确认违规将扣减作者诚信分（-5），并可选择隐藏内容"
     :loading="loading"
     :error="loadError"
     @retry="fetchData"
@@ -189,7 +191,7 @@ onMounted(() => {
     <el-form label-width="100px" class="handle-form">
       <el-form-item label="处理结果" required>
         <el-radio-group v-model="handleForm.status">
-          <el-radio :value="1">确认违规（已处理）</el-radio>
+          <el-radio :value="1">确认违规（已处理，扣作者诚信分 5 分）</el-radio>
           <el-radio :value="2">驳回举报</el-radio>
         </el-radio-group>
       </el-form-item>

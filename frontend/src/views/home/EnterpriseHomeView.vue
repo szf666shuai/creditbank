@@ -31,10 +31,10 @@ const overviewCards = computed(() => {
   const data = dashboard.value
   if (!data) return []
   return [
-    { label: '在招职位', value: data.openJobCount, hint: '当前对外招聘中' },
-    { label: '进行中活动', value: data.ongoingActivityCount, hint: '学员可参与' },
-    { label: '待处理投递', value: data.pendingApplicationCount, hint: '等待企业回复' },
-    { label: '待回复面试', value: data.pendingInterviewCount, hint: '面试安排待确认' },
+    { label: '在招职位', value: data.openJobCount, hint: '当前对外招聘中', path: '/profile/enterprise/jobs' },
+    { label: '进行中活动', value: data.ongoingActivityCount, hint: '学员可参与', path: '/profile/enterprise/activities' },
+    { label: '待处理投递', value: data.pendingApplicationCount, hint: '等待企业回复', path: '/profile/enterprise/applications' },
+    { label: '待回复面试', value: data.pendingInterviewCount, hint: '面试安排待确认', path: '/profile/enterprise/interviews' },
   ]
 })
 
@@ -99,11 +99,18 @@ onMounted(loadDashboard)
           />
 
           <section class="overview-grid">
-            <article v-for="item in overviewCards" :key="item.label" class="overview-card">
+            <button
+              v-for="item in overviewCards"
+              :key="item.label"
+              type="button"
+              class="overview-card"
+              @click="go(item.path)"
+            >
               <span class="overview-label">{{ item.label }}</span>
               <strong>{{ item.value }}</strong>
               <p>{{ item.hint }}</p>
-            </article>
+              <span class="overview-go">进入 →</span>
+            </button>
           </section>
 
           <div class="feed-grid">
@@ -163,7 +170,9 @@ onMounted(loadDashboard)
           </div>
 
           <div class="footer-cta">
-            <el-button type="primary" size="large" @click="go('/profile/enterprise')">进入企业工作台</el-button>
+            <button type="button" class="cta-btn" @click="go('/profile/enterprise')">
+              进入企业工作台
+            </button>
           </div>
         </template>
       </div>
@@ -286,6 +295,18 @@ onMounted(loadDashboard)
   border: 2.5px solid var(--nb-ink, #1a202c);
   box-shadow: var(--nb-shadow-sm, 3px 3px 0 0 #1a202c);
   backdrop-filter: none;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.overview-card:hover {
+  background: #fff9f0;
+  border-color: var(--nb-green-deep, #16a34a);
+}
+
+.overview-card:active {
+  background: #dcfce7;
 }
 
 .overview-label {
@@ -300,13 +321,21 @@ onMounted(loadDashboard)
   font-size: 30px;
   font-family: var(--font-heading);
   font-weight: 900;
-  color: var(--nb-green-deep, #16a34a);
+  color: var(--nb-ink, #1a202c);
 }
 
 .overview-card p {
   margin: 8px 0 0;
   color: var(--role-text-muted);
   font-size: 12px;
+}
+
+.overview-go {
+  display: inline-block;
+  margin-top: 10px;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--nb-green-deep, #16a34a);
 }
 
 .feed-grid {
@@ -346,10 +375,10 @@ onMounted(loadDashboard)
 .text-link {
   border: none;
   background: transparent;
-  color: var(--role-primary-soft);
+  color: var(--nb-green-deep, #16a34a);
   cursor: pointer;
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 700;
 }
 
 .feed-list {
@@ -364,8 +393,8 @@ onMounted(loadDashboard)
   align-items: flex-start;
   padding: 12px 14px;
   border-radius: 12px;
-  background: var(--role-surface-card);
-  border: 1px solid rgba(32, 148, 243, 0.16);
+  background: #fff9f0;
+  border: 2px solid var(--nb-ink, #1a202c);
 }
 
 .feed-item strong {
@@ -387,10 +416,26 @@ onMounted(loadDashboard)
   margin-top: 24px;
 }
 
-.footer-cta :deep(.el-button--primary) {
-  background: linear-gradient(135deg, #1565c0, #2094f3);
-  border: none;
-  padding: 0 28px;
+.cta-btn {
+  min-width: 200px;
+  padding: 14px 28px;
+  border-radius: 12px;
+  border: 2.5px solid var(--nb-ink, #1a202c);
+  background: var(--nb-green, #22c55e);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: var(--nb-shadow, 4px 4px 0 0 #1a202c);
+  transition: background 0.15s ease;
+}
+
+.cta-btn:hover {
+  background: var(--nb-green-deep, #16a34a);
+}
+
+.cta-btn:active {
+  box-shadow: 2px 2px 0 0 var(--nb-ink, #1a202c);
 }
 
 @media (max-width: 900px) {

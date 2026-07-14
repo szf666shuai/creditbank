@@ -133,3 +133,10 @@ SELECT c.id,
 FROM course c
 WHERE c.deleted = 0 AND c.status = 1 AND c.video_url IS NOT NULL AND c.video_url <> ''
   AND NOT EXISTS (SELECT 1 FROM course_episode e WHERE e.course_id = c.id AND e.sort_order = 2);
+
+-- 修复历史写入时「 · 第N集」中文被连接乱码替换成 ? 的标题
+UPDATE course_episode e
+INNER JOIN course c ON c.id = e.course_id
+SET e.title = CONCAT(c.title, ' · 第', e.sort_order, '集')
+WHERE e.deleted = 0
+  AND e.title LIKE '%?%';

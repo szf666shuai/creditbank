@@ -204,7 +204,9 @@ onMounted(loadHomeData)
           </section>
 
           <div class="footer-cta">
-            <el-button type="primary" size="large" @click="go('/profile/admin')">进入管理后台</el-button>
+            <button type="button" class="cta-btn" @click="go('/profile/admin')">
+              进入管理后台
+            </button>
           </div>
         </template>
       </div>
@@ -355,7 +357,7 @@ onMounted(loadHomeData)
   gap: 12px;
   margin-bottom: 14px;
   padding-bottom: 10px;
-  border-bottom: 1px solid rgba(124, 58, 237, 0.18);
+  border-bottom: 2px solid color-mix(in srgb, var(--nb-ink, #1a202c) 14%, transparent);
 }
 
 .panel-head h2 {
@@ -376,30 +378,51 @@ onMounted(loadHomeData)
 }
 
 .todo-card {
-  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 16px 18px;
   border-radius: 14px;
   text-align: left;
   cursor: pointer;
-  background: #fff;
-  border: 1px solid rgba(124, 58, 237, 0.2);
-  transition: transform 0.2s, box-shadow 0.2s;
+  background: #fff9f0;
+  border: 2.5px solid var(--nb-ink, #1a202c);
+  box-shadow: var(--nb-shadow-sm, 3px 3px 0 0 #1a202c);
+  transition: background 0.15s ease, border-color 0.15s ease;
 }
 
 .todo-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(124, 58, 237, 0.2);
+  background: #ffffff;
+  border-color: var(--nb-green-deep, #16a34a);
+}
+
+.todo-card:active {
+  background: #dcfce7;
 }
 
 .todo-card span {
   display: block;
   color: var(--role-text-muted);
   font-size: 13px;
-  margin-bottom: 8px;
+  font-weight: 700;
+  margin-bottom: 0;
 }
 
 .todo-card strong {
-  font-size: 26px;
-  color: var(--role-primary-soft);
+  font-size: 28px;
+  font-weight: 900;
+  font-family: var(--font-heading);
+  color: var(--nb-ink, #1a202c);
+  line-height: 1.1;
+}
+
+.todo-card::after {
+  content: '进入 →';
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--nb-green-deep, #16a34a);
 }
 
 .feed-grid {
@@ -416,10 +439,10 @@ onMounted(loadHomeData)
 .text-link {
   border: none;
   background: transparent;
-  color: var(--role-primary-soft);
+  color: var(--nb-green-deep, #16a34a);
   cursor: pointer;
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 700;
 }
 
 .feed-list {
@@ -434,8 +457,8 @@ onMounted(loadHomeData)
   align-items: flex-start;
   padding: 12px 14px;
   border-radius: 12px;
-  background: #fff;
-  border: 1px solid rgba(124, 58, 237, 0.16);
+  background: #fff9f0;
+  border: 2px solid var(--nb-ink, #1a202c);
 }
 
 .feed-item strong {
@@ -460,8 +483,8 @@ onMounted(loadHomeData)
 .platform-item {
   padding: 14px 16px;
   border-radius: 12px;
-  background: #fff;
-  border: 1px solid rgba(124, 58, 237, 0.16);
+  background: #fff9f0;
+  border: 2px solid var(--nb-ink, #1a202c);
 }
 
 .platform-item span {
@@ -482,10 +505,26 @@ onMounted(loadHomeData)
   margin-top: 8px;
 }
 
-.footer-cta :deep(.el-button--primary) {
-  background: linear-gradient(135deg, #5b2c83, #7c3aed);
-  border: none;
-  padding: 0 28px;
+.cta-btn {
+  min-width: 200px;
+  padding: 14px 28px;
+  border-radius: 12px;
+  border: 2.5px solid var(--nb-ink, #1a202c);
+  background: var(--nb-green, #22c55e);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: var(--nb-shadow, 4px 4px 0 0 #1a202c);
+  transition: background 0.15s ease;
+}
+
+.cta-btn:hover {
+  background: var(--nb-green-deep, #16a34a);
+}
+
+.cta-btn:active {
+  box-shadow: 2px 2px 0 0 var(--nb-ink, #1a202c);
 }
 
 @media (max-width: 900px) {

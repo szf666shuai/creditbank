@@ -438,7 +438,8 @@ public class LearningService {
         cert.setTitle(title);
         cert.setQrContent(verifyUrl);
         cert.setQrImageUrl(null);
-        cert.setFileUrl("/certificates/" + certNo + ".pdf");
+        // 前端用 certificateId 打开证书预览；不再存假 PDF 路径以免空白页
+        cert.setFileUrl(null);
         cert.setBlockchainHash(hash);
         cert.setVerifyStatus(1);
         cert.setIssuedAt(LocalDateTime.now());
@@ -479,7 +480,7 @@ public class LearningService {
         achievement.setOrgId(course.getOrgId());
         achievement.setCertificateId(cert.getId());
         achievement.setCreditValue(nz(course.getCreditReward()));
-        achievement.setFileUrl(cert.getFileUrl());
+        achievement.setFileUrl(null);
         achievement.setVerifyStatus(1);
         achievement.setBlockchainHash(cert.getBlockchainHash());
         achievementMapper.insert(achievement);

@@ -7,7 +7,7 @@ import { useHeaderScroll } from '@/composables/useHeaderScroll'
 import { useSearchSuggest } from '@/composables/useSearchSuggest'
 import { useMessageStore } from '@/stores/message'
 import { useAuthStore } from '@/stores/auth'
-import { searchCategories } from '@/config/search-categories'
+import { searchCategories, DEFAULT_SEARCH_CATEGORY } from '@/config/search-categories'
 import { BRAND_NAME, BRAND_NAME_EN } from '@/config/brand'
 import { getRoleTheme, resolveHeaderThemeVariant } from '@/config/role-theme'
 import BrandLogo from '@/components/brand/BrandLogo.vue'
@@ -167,6 +167,8 @@ watch(
     } else {
       stopUnreadPolling()
       messageStore.reset()
+      searchKeyword.value = ''
+      searchCategory.value = DEFAULT_SEARCH_CATEGORY
     }
   },
 )

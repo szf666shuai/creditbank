@@ -15,6 +15,7 @@ import com.creditbank.platform.mapper.SysUserMapper;
 import com.creditbank.platform.module.admin.dto.AdminForumReportVO;
 import com.creditbank.platform.module.admin.dto.HandleForumReportRequest;
 import com.creditbank.platform.security.AuthSupport;
+import com.creditbank.platform.service.IntegrityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,11 +30,15 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AdminReportService {
 
+    /** 举报成立时对被举报内容作者的诚信分扣减 */
+    public static final int REPORT_UPHELD_PENALTY = -5;
+
     private final AuthSupport authSupport;
     private final ForumReportMapper forumReportMapper;
     private final ForumPostMapper forumPostMapper;
     private final ForumReplyMapper forumReplyMapper;
     private final SysUserMapper sysUserMapper;
+    private final IntegrityService integrityService;
 
     public PageResult<AdminForumReportVO> pageReports(long page, long pageSize, Integer status) {
         authSupport.requireAdmin();
@@ -55,7 +60,7 @@ public class AdminReportService {
 
     @Transactional
     public AdminForumReportVO handleReport(Long reportId, HandleForumReportRequest request) {
-        authSupport.requireAdmin();
+        SysUser admin = authSupport.requireAdmin();
         ForumReport report = forumReportMapper.selectById(reportId);
         if (report == null) {
             throw new BusinessException(404, "举报记录不存在");
@@ -74,13 +79,55 @@ public class AdminReportService {
                 : null);
         forumReportMapper.updateById(report);
 
-        if (request.getStatus() == AdminSupport.REPORT_HANDLED
-                && Boolean.TRUE.equals(request.getHideTarget())) {
-            hideTarget(report.getTargetType(), report.getTargetId());
+        if (request.getStatus() == AdminSupport.REPORT_HANDLED) {
+            if (Boolean.TRUE.equals(request.getHideTarget())) {
+                hideTarget(report.getTargetType(), report.getTargetId());
+            }
+            deductIntegrityForUpheldReport(report, admin.getId());
         }
 
         Map<Long, String> userNameMap = loadUserNameMap(List.of(report));
         return toVO(report, userNameMap);
+    }
+
+    private void deductIntegrityForUpheldReport(ForumReport report, Long operatorId) {
+        Long authorId = resolveTargetAuthorId(report.getTargetType(), report.getTargetId());
+        if (authorId == null) {
+            return;
+        }
+        String targetName = AdminSupport.targetTypeName(report.getTargetType());
+        String reason = StringUtils.hasText(report.getHandleRemark())
+                ? "论坛举报成立（" + targetName + "）：" + report.getHandleRemark()
+                : "论坛举报成立（" + targetName + " #" + report.getTargetId() + "）";
+        try {
+            integrityService.applyEvent(
+                    authorId,
+                    REPORT_UPHELD_PENALTY,
+                    reason,
+                    "forum_report",
+                    report.getId(),
+                    operatorId);
+        } catch (BusinessException ex) {
+            // 已到 0 分边界时仍视为举报处理成功，不阻断主流程
+            if (ex.getMessage() == null || !ex.getMessage().contains("边界")) {
+                throw ex;
+            }
+        }
+    }
+
+    private Long resolveTargetAuthorId(Integer targetType, Long targetId) {
+        if (targetType == null || targetId == null) {
+            return null;
+        }
+        if (targetType == AdminSupport.TARGET_POST) {
+            ForumPost post = forumPostMapper.selectById(targetId);
+            return post != null ? post.getUserId() : null;
+        }
+        if (targetType == AdminSupport.TARGET_REPLY) {
+            ForumReply reply = forumReplyMapper.selectById(targetId);
+            return reply != null ? reply.getUserId() : null;
+        }
+        return null;
     }
 
     private void hideTarget(Integer targetType, Long targetId) {

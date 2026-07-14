@@ -1,13 +1,16 @@
 ﻿<script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { ElMessage } from 'element-plus'
 import PageShell from '@/components/common/PageShell.vue'
 import LearningChartsPanel from '@/components/profile/LearningChartsPanel.vue'
+import CertificatePreview from '@/components/learning/CertificatePreview.vue'
 import {
   listLearningArchivesApi,
   listLearningAchievementsApi,
   type LearningArchiveItem,
   type LearningAchievementItem,
 } from '@/api/profile-learning'
+import { fetchLearningCertificates, type LearningCertificate } from '@/api/learning'
 import { getErrorMessage, unwrapApi } from '@/utils/api'
 import { formatDate, formatTime } from '@/utils/format'
 
@@ -16,6 +19,11 @@ const loadError = ref<string | null>(null)
 const activeTab = ref<'archives' | 'achievements'>('archives')
 const archives = ref<LearningArchiveItem[]>([])
 const achievements = ref<LearningAchievementItem[]>([])
+const certificates = ref<LearningCertificate[]>([])
+
+const certDialogVisible = ref(false)
+const previewCertificate = ref<LearningCertificate | null>(null)
+const loadingCert = ref(false)
 
 function archiveStatusType(status: number) {
   return status === 1 ? 'success' : 'warning'
@@ -25,6 +33,47 @@ function verifyStatusType(status: number) {
   if (status === 1) return 'success'
   if (status === 2) return 'danger'
   return 'warning'
+}
+
+function hasAttachment(row: LearningAchievementItem) {
+  return !!row.certificateId || isExternalUrl(row.fileUrl)
+}
+
+function isExternalUrl(url?: string) {
+  return !!url && /^https?:\/\//i.test(url)
+}
+
+async function ensureCertificates() {
+  if (certificates.value.length) return certificates.value
+  const res = await fetchLearningCertificates(100)
+  certificates.value = unwrapApi(res)
+  return certificates.value
+}
+
+async function openAttachment(row: LearningAchievementItem) {
+  if (isExternalUrl(row.fileUrl)) {
+    window.open(row.fileUrl, '_blank', 'noopener,noreferrer')
+    return
+  }
+  if (!row.certificateId) {
+    ElMessage.warning('暂无可预览的附件')
+    return
+  }
+  loadingCert.value = true
+  try {
+    const list = await ensureCertificates()
+    const cert = list.find((item) => item.id === row.certificateId)
+    if (!cert) {
+      ElMessage.error('未找到对应合格证，请刷新后重试')
+      return
+    }
+    previewCertificate.value = cert
+    certDialogVisible.value = true
+  } catch (e) {
+    ElMessage.error(getErrorMessage(e, '加载证书失败'))
+  } finally {
+    loadingCert.value = false
+  }
 }
 
 async function fetchData() {
@@ -37,6 +86,7 @@ async function fetchData() {
     ])
     archives.value = archiveData
     achievements.value = achievementData
+    certificates.value = []
   } catch (e) {
     loadError.value = getErrorMessage(e, '加载失败')
   } finally {
@@ -109,11 +159,17 @@ onMounted(fetchData)
       <el-table-column label="存证哈希" min-width="160" show-overflow-tooltip>
         <template #default="{ row }">{{ row.blockchainHash || '-' }}</template>
       </el-table-column>
-      <el-table-column label="附件" width="80" align="center">
+      <el-table-column label="附件" width="90" align="center">
         <template #default="{ row }">
-          <a v-if="row.fileUrl" :href="row.fileUrl" target="_blank" rel="noopener" class="page-link" @click.stop>
+          <el-button
+            v-if="hasAttachment(row)"
+            link
+            type="primary"
+            :loading="loadingCert"
+            @click.stop="openAttachment(row)"
+          >
             查看
-          </a>
+          </el-button>
           <span v-else class="page-text-muted">-</span>
         </template>
       </el-table-column>
@@ -135,4 +191,15 @@ onMounted(fetchData)
       description="暂无学习成果"
     />
   </PageShell>
+
+  <el-dialog
+    v-model="certDialogVisible"
+    title="合格证预览"
+    width="860px"
+    destroy-on-close
+    append-to-body
+    class="cert-dialog"
+  >
+    <CertificatePreview v-if="previewCertificate" :certificate="previewCertificate" />
+  </el-dialog>
 </template>

@@ -5,6 +5,7 @@ import { generateLearningProfileApi } from '@/api/learning-profile'
 import { useAuthStore } from '@/stores/auth'
 
 import { BRAND_NAME } from '@/config/brand'
+import AgentMarkdown from '@/components/agent/AgentMarkdown.vue'
 
 const STORAGE_KEY = 'singularis_ai_pet_pos'
 const SIZE = 72
@@ -363,7 +364,10 @@ onUnmounted(() => {
             class="ai-msg"
             :class="[msg.role, { 'has-profile': !!msg.profile }]"
           >
-            <p class="ai-msg-text">{{ msg.text }}</p>
+            <div class="ai-msg-text">
+              <AgentMarkdown v-if="msg.role === 'assistant'" :content="msg.text" />
+              <template v-else>{{ msg.text }}</template>
+            </div>
             <div v-if="msg.profile" class="ai-profile-card">
               <div class="ai-profile-row">
                 <span class="ai-profile-label">心仪职位</span>
@@ -751,8 +755,11 @@ onUnmounted(() => {
 
 .ai-msg-text {
   margin: 0;
-  white-space: pre-wrap;
   word-break: break-word;
+}
+
+.ai-msg.user .ai-msg-text {
+  white-space: pre-wrap;
 }
 
 .ai-msg.assistant {

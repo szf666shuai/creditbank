@@ -39,6 +39,8 @@ const danmakuInput = ref('')
 const selectedDanmakuColor = ref<DanmakuColor>(DANMAKU_COLORS[0].value)
 const controlsVisible = ref(true)
 const isFullscreen = ref(false)
+/** 正在编辑弹幕时固定显示底部控件，避免输入框被自动隐藏 */
+const pinningControls = ref(false)
 let hideControlsTimer: number | null = null
 
 const speedOptions = [0.5, 0.75, 1, 1.25, 1.5, 2]
@@ -54,14 +56,45 @@ function formatClock(seconds: number) {
   return `${minutes}:${remaining.toString().padStart(2, '0')}`
 }
 
+function clearHideControlsTimer() {
+  if (hideControlsTimer) {
+    window.clearTimeout(hideControlsTimer)
+    hideControlsTimer = null
+  }
+}
+
 function showControls() {
   controlsVisible.value = true
-  if (hideControlsTimer) window.clearTimeout(hideControlsTimer)
-  if (playing.value) {
+  clearHideControlsTimer()
+  if (playing.value && !pinningControls.value) {
     hideControlsTimer = window.setTimeout(() => {
       controlsVisible.value = false
     }, 2800)
   }
+}
+
+/** 点击/聚焦弹幕输入区：暂停播放并固定控件条 */
+function beginDanmakuCompose() {
+  pinningControls.value = true
+  controlsVisible.value = true
+  clearHideControlsTimer()
+  videoRef.value?.pause()
+}
+
+function endDanmakuCompose(event: FocusEvent) {
+  const row = event.currentTarget as HTMLElement | null
+  const next = event.relatedTarget as Node | null
+  if (row && next && row.contains(next)) return
+  pinningControls.value = false
+  showControls()
+}
+
+function onPlayerMouseLeave() {
+  if (pinningControls.value) {
+    controlsVisible.value = true
+    return
+  }
+  controlsVisible.value = !playing.value
 }
 
 function togglePlay() {
@@ -186,7 +219,7 @@ onBeforeUnmount(() => {
     class="course-player"
     :class="{ 'is-fullscreen': isFullscreen }"
     @mousemove="showControls"
-    @mouseleave="controlsVisible = !playing"
+    @mouseleave="onPlayerMouseLeave"
   >
     <video
       ref="videoRef"
@@ -284,7 +317,12 @@ onBeforeUnmount(() => {
         </div>
       </div>
 
-      <div class="danmaku-row">
+      <div
+        class="danmaku-row"
+        @pointerdown="beginDanmakuCompose"
+        @focusin="beginDanmakuCompose"
+        @focusout="endDanmakuCompose"
+      >
         <div class="danmaku-colors" title="弹幕颜色">
           <button
             v-for="item in DANMAKU_COLORS"

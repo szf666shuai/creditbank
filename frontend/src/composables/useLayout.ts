@@ -58,6 +58,8 @@ export function useLayout() {
   }
 
   function logout() {
+    searchKeyword.value = ''
+    searchCategory.value = DEFAULT_SEARCH_CATEGORY
     authStore.logout()
     router.push('/login')
   }

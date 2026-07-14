@@ -104,9 +104,12 @@ export function getSiteNavForRole(role?: number): NavItem[] {
       return {
         ...item,
         label: '平台监管',
+        path: '/profile/admin',
         children: [
           { label: '管理概览', path: '/profile/admin' },
           { label: '机构加盟', path: '/profile/admin/organizations' },
+          { label: '用户管理', path: '/profile/admin/users' },
+          { label: '商品审核', path: '/profile/admin/products' },
         ],
       }
     })

@@ -4,6 +4,7 @@ import { agentChatApi } from '@/api/agent'
 import type { AgentChatTurn } from '@/api/agent'
 import type { SearchItem } from '@/api/search'
 import { searchCategoryLabel } from '@/config/search-categories'
+import AgentMarkdown from '@/components/agent/AgentMarkdown.vue'
 
 const props = defineProps<{
   keyword: string
@@ -185,7 +186,11 @@ watch(
 
     <template v-else-if="messages.length">
       <div class="search-agent-insight">
-        {{ messages[0]?.role === 'assistant' ? messages[0].text : '' }}
+        <AgentMarkdown
+          v-if="messages[0]?.role === 'assistant'"
+          :content="messages[0].text"
+        />
+        <template v-else>{{ messages[0]?.text }}</template>
       </div>
 
       <div v-if="expanded && messages.length > 1" class="search-agent-thread">
@@ -195,7 +200,8 @@ watch(
           class="thread-msg"
           :class="msg.role"
         >
-          {{ msg.text }}
+          <AgentMarkdown v-if="msg.role === 'assistant'" :content="msg.text" />
+          <template v-else>{{ msg.text }}</template>
         </div>
       </div>
 
@@ -331,8 +337,7 @@ watch(
   font-size: 13px;
   line-height: 1.7;
   color: var(--color-foreground);
-  white-space: pre-wrap;
-  max-height: 160px;
+  max-height: 220px;
   overflow-y: auto;
   margin-bottom: 12px;
   padding: 12px 14px;
@@ -342,7 +347,7 @@ watch(
 }
 
 .search-agent.expanded .search-agent-insight {
-  max-height: 220px;
+  max-height: 280px;
 }
 
 .search-agent-thread {
@@ -360,6 +365,9 @@ watch(
   border-radius: 10px;
   font-size: 13px;
   line-height: 1.6;
+}
+
+.thread-msg.user {
   white-space: pre-wrap;
 }
 

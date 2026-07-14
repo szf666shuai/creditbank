@@ -177,15 +177,17 @@
   border-radius: var(--radius-md);
   cursor: pointer;
   text-align: left;
-  transition: transform 0.12s ease, box-shadow 0.12s ease;
+  transition: background 0.15s ease, border-color 0.15s ease;
   color: var(--color-card-foreground);
   box-shadow: var(--nb-shadow-sm, var(--shadow-sm));
 }
 
 .page-stat-card:hover {
-  border-color: var(--nb-ink, var(--color-border));
-  box-shadow: 1px 1px 0 0 var(--nb-ink, #1a202c);
-  transform: translate(2px, 2px);
+  background: #fff9f0;
+  border-color: var(--nb-green-deep, #16a34a);
+  /* 不做位移，避免网格行间悬停抖动/频闪 */
+  transform: none;
+  box-shadow: var(--nb-shadow-sm, var(--shadow-sm));
 }
 
 .page-stat-icon {
@@ -232,34 +234,43 @@
 
 .page-quick-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
 }
 
 .page-quick-card {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 8px;
-  padding: 18px;
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+  grid-template-rows: auto auto;
+  column-gap: 12px;
+  row-gap: 2px;
+  align-items: center;
+  padding: 14px 16px;
+  min-height: 68px;
   background: #fff;
   border: 2.5px solid var(--nb-ink, var(--color-border-neutral));
   border-radius: var(--radius-md);
   cursor: pointer;
   text-align: left;
-  transition: transform 0.12s ease, box-shadow 0.12s ease;
+  transition: background 0.15s ease, border-color 0.15s ease;
   box-shadow: var(--nb-shadow-sm, var(--shadow-sm));
 }
 
 .page-quick-card:hover {
-  border-color: var(--nb-ink, var(--color-border));
-  box-shadow: 1px 1px 0 0 var(--nb-ink, #1a202c);
-  transform: translate(2px, 2px);
+  background: #fff9f0;
+  border-color: var(--nb-green-deep, #16a34a);
+  transform: none;
+  box-shadow: var(--nb-shadow-sm, var(--shadow-sm));
+}
+
+.page-quick-card:active {
+  background: #fef3c7;
 }
 
 .page-quick-icon {
-  width: 36px;
-  height: 36px;
+  grid-row: 1 / span 2;
+  width: 40px;
+  height: 40px;
   border-radius: 10px;
   border: 2px solid var(--nb-ink, #1a202c);
   box-shadow: 2px 2px 0 0 var(--nb-ink, #1a202c);
@@ -267,17 +278,37 @@
   align-items: center;
   justify-content: center;
   font-size: 18px;
+  flex-shrink: 0;
 }
 
 .page-quick-title {
+  grid-column: 2;
   font-size: 15px;
-  font-weight: 600;
-  color: var(--color-foreground);
+  font-weight: 800;
+  color: var(--nb-ink, #1a202c);
+  line-height: 1.3;
 }
 
 .page-quick-desc {
+  grid-column: 2;
   font-size: 12px;
   color: var(--color-muted-foreground);
+  line-height: 1.4;
+}
+
+.page-quick-card::after {
+  content: '→';
+  grid-column: 3;
+  grid-row: 1 / span 2;
+  color: var(--nb-ink, #1a202c);
+  font-size: 18px;
+  font-weight: 800;
+  opacity: 0.45;
+}
+
+.page-quick-card:hover::after {
+  opacity: 1;
+  color: var(--nb-green-deep, #16a34a);
 }
 
 /* 摘要卡片行 */

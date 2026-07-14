@@ -244,9 +244,10 @@ onMounted(() => {
 
 .profile-main :deep(.page-stat-card:hover),
 .profile-main :deep(.page-quick-card:hover) {
-  border-color: var(--nb-ink, var(--color-border));
-  transform: translate(2px, 2px);
-  box-shadow: 1px 1px 0 0 var(--nb-ink, #1a202c);
+  background: #fff9f0;
+  border-color: var(--nb-green-deep, #16a34a);
+  transform: none;
+  box-shadow: var(--nb-shadow-sm, var(--shadow-sm));
 }
 
 .profile-main :deep(.page-summary-card) {

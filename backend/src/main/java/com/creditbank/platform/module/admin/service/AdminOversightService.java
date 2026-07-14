@@ -24,8 +24,10 @@ import com.creditbank.platform.module.admin.dto.UpdateContentStatusRequest;
 import com.creditbank.platform.module.enterprise.service.ActivityLifecycleService;
 import com.creditbank.platform.module.enterprise.support.ActivityStatus;
 import com.creditbank.platform.module.enterprise.entity.Activity;
+import com.creditbank.platform.module.enterprise.entity.JobApplication;
 import com.creditbank.platform.module.enterprise.entity.JobPosting;
 import com.creditbank.platform.module.enterprise.mapper.ActivityMapper;
+import com.creditbank.platform.module.enterprise.mapper.JobApplicationMapper;
 import com.creditbank.platform.module.enterprise.mapper.JobPostingMapper;
 import com.creditbank.platform.security.AuthSupport;
 import lombok.RequiredArgsConstructor;
@@ -45,6 +47,7 @@ public class AdminOversightService {
 
     private final AuthSupport authSupport;
     private final JobPostingMapper jobPostingMapper;
+    private final JobApplicationMapper jobApplicationMapper;
     private final ActivityMapper activityMapper;
     private final IntegrityRecordMapper integrityRecordMapper;
     private final CreditTransactionMapper creditTransactionMapper;
@@ -123,6 +126,10 @@ public class AdminOversightService {
         }
         job.setStatus(request.getStatus());
         jobPostingMapper.updateById(job);
+        if (request.getStatus() == 0) {
+            jobApplicationMapper.delete(new LambdaQueryWrapper<JobApplication>()
+                    .eq(JobApplication::getJobId, jobId));
+        }
         return toJobVO(job, loadOrgName(job.getOrgId()));
     }
 

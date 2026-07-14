@@ -8,8 +8,10 @@ import com.creditbank.platform.mapper.SysTagMapper;
 import com.creditbank.platform.module.enterprise.dto.JobManageVO;
 import com.creditbank.platform.module.enterprise.dto.JobSaveRequest;
 import com.creditbank.platform.module.enterprise.dto.TagVO;
+import com.creditbank.platform.module.enterprise.entity.JobApplication;
 import com.creditbank.platform.module.enterprise.entity.JobPosting;
 import com.creditbank.platform.module.enterprise.entity.JobTag;
+import com.creditbank.platform.module.enterprise.mapper.JobApplicationMapper;
 import com.creditbank.platform.module.enterprise.mapper.JobPostingMapper;
 import com.creditbank.platform.module.enterprise.mapper.JobTagMapper;
 import com.creditbank.platform.security.AuthSupport;
@@ -35,6 +37,7 @@ public class EnterpriseJobService {
     private final SysTagMapper tagMapper;
     private final JobPostingMapper jobPostingMapper;
     private final JobTagMapper jobTagMapper;
+    private final JobApplicationMapper jobApplicationMapper;
 
     public List<TagVO> listSkillTags() {
         return tagMapper.selectList(new LambdaQueryWrapper<SysTag>()
@@ -103,6 +106,11 @@ public class EnterpriseJobService {
         JobPosting job = authSupport.requireOrgJob(jobId, user.getOrgId());
         job.setStatus(status);
         jobPostingMapper.updateById(job);
+        if (status == JOB_OFFLINE) {
+            // 职位下架后清理对应投递记录，避免学员端出现「职位已下架」
+            jobApplicationMapper.delete(new LambdaQueryWrapper<JobApplication>()
+                    .eq(JobApplication::getJobId, jobId));
+        }
         return toManageVO(job, loadTags(job.getId()));
     }
 

@@ -849,10 +849,27 @@ onMounted(() => {
 
 .complete-btn {
   width: 100%;
+  margin-top: 4px;
+  min-height: 44px;
+  border-radius: 12px !important;
+  font-weight: 800 !important;
 }
 
-.episode-card {
-  margin-bottom: 0;
+.checkin-box {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 12px;
+  background: #fff9f0;
+  border: 2px solid var(--nb-ink, #1a202c);
+  box-shadow: 2px 2px 0 0 var(--nb-ink, #1a202c);
+}
+
+.checkin-box .el-button {
+  width: 100%;
+  min-height: 40px;
+  border-radius: 10px !important;
+  font-weight: 800 !important;
 }
 
 .episode-item {
@@ -892,15 +909,6 @@ onMounted(() => {
 .episode-item strong {
   font-size: 14px;
   color: var(--color-foreground);
-}
-
-.checkin-box {
-  display: grid;
-  gap: 10px;
-  padding: 12px;
-  border-radius: 12px;
-  background: var(--color-background);
-  border: 1px solid var(--color-border-neutral);
 }
 
 .checkin-meta {

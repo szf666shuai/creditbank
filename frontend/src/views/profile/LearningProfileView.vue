@@ -26,14 +26,32 @@ const skills = computed(() => asStringList(data.value?.profile?.skills))
 const strengths = computed(() => asStringList(data.value?.profile?.strengths))
 const gaps = computed(() => asStringList(data.value?.profile?.gaps))
 const suggestions = computed(() => asStringList(data.value?.profile?.suggestions))
-const stage = computed(() => {
-  const value = data.value?.profile?.stage
-  return typeof value === 'string' ? value : ''
-})
+const stage = computed(() => cleanText(data.value?.profile?.stage))
+const displayJob = computed(() => cleanText(data.value?.targetJob) || '目标岗位待明确')
+const displaySummary = computed(() => cleanText(data.value?.summary) || '暂无摘要')
+
+function cleanText(value: unknown): string {
+  if (typeof value !== 'string') return ''
+  return value
+    .replace(/\*\*/g, '')
+    .replace(/__/g, '')
+    .replace(/`+/g, '')
+    .trim()
+}
 
 function asStringList(value: unknown): string[] {
-  if (!Array.isArray(value)) return []
-  return value.filter((item): item is string => typeof item === 'string' && item.trim().length > 0)
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => cleanText(item))
+      .filter((item) => item.length > 0)
+  }
+  if (typeof value === 'string' && value.trim()) {
+    return value
+      .split(/[\n;；、|/]+/)
+      .map((part) => cleanText(part.replace(/^[-*•\d.、)\s]+/, '')))
+      .filter((item) => item.length > 0)
+  }
+  return []
 }
 
 async function fetchProfile() {
@@ -92,8 +110,8 @@ onMounted(fetchProfile)
           <UiIcon name="user" :size="28" />
         </div>
         <div class="portrait-hero__main">
-          <div class="portrait-job">{{ data?.targetJob || '目标岗位待明确' }}</div>
-          <p class="portrait-summary">{{ data?.summary || '暂无摘要' }}</p>
+          <div class="portrait-job">{{ displayJob }}</div>
+          <p class="portrait-summary">{{ displaySummary }}</p>
           <div class="portrait-meta">
             <span v-if="stage" class="portrait-chip">学习阶段 · {{ stage }}</span>
             <span v-if="data?.updateTime" class="portrait-time">
