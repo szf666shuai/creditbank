@@ -1,4 +1,4 @@
-﻿export interface BannerSlide {
+export interface BannerSlide {
   id: string
   type: 'hero' | 'image'
   title?: string
@@ -36,7 +36,7 @@ export const homeBannerSlides: BannerSlide[] = [
     id: 'credit-mall',
     type: 'image',
     image: '/images/banner/slide-credit-mall.png',
-    alt: '秩点商城，学习秩点换好礼',
+    alt: '我的秩点，学习记录与学分转换',
     link: '/credit',
   },
   {

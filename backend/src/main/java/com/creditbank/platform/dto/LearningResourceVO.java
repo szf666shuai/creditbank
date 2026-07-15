@@ -13,21 +13,20 @@ public class LearningResourceVO {
     private String coverUrl;
     private String videoUrl;
     private Integer videoDurationSeconds;
-    private BigDecimal priceCredit;
-    private BigDecimal priceMoney;
     private BigDecimal durationHours;
     private BigDecimal creditReward;
+    private Long orgId;
     private String orgName;
     private String tags;
+    private BigDecimal creditValue;
+    private Integer difficulty;
+    private Integer durationMinutes;
     private Integer progress;
     private Integer watchedSeconds;
     private Integer maxWatchedPositionSeconds;
     private Integer lastPositionSeconds;
     private Integer learningStatus;
-    private Boolean purchased;
-    private Boolean paid;
     private Boolean learned;
-    private Long purchaseProductId;
     private Long certificateId;
     private String certNo;
 }

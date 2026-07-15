@@ -12,5 +12,4 @@ public class ProfileSummaryVO {
     private CreditAccountVO creditAccount;
     private List<LearningArchiveVO> archives;
     private List<LearningCertificateVO> certificates;
-    private List<MallOrderVO> orders;
 }

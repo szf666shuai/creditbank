@@ -1,4 +1,4 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import PageShell from '@/components/common/PageShell.vue'
@@ -166,14 +166,16 @@ onMounted(fetchActivities)
           <el-tag :type="statusTagType(row.status)" size="small">{{ row.statusName }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="操作" width="160">
+      <el-table-column label="操作" width="160" align="center">
         <template #default="{ row }">
-          <el-button v-if="row.status !== 0" link type="primary" @click="openEdit(row)">
-            编辑
-          </el-button>
-          <el-button v-if="row.status !== 0" link type="danger" @click="handleCancel(row)">
-            取消
-          </el-button>
+          <div class="page-table-actions">
+            <el-button v-if="row.status !== 0" link type="primary" @click="openEdit(row)">
+              编辑
+            </el-button>
+            <el-button v-if="row.status !== 0" link type="danger" @click="handleCancel(row)">
+              取消
+            </el-button>
+          </div>
         </template>
       </el-table-column>
     </el-table>

@@ -20,7 +20,7 @@ public class CourseCommentVO {
     private String content;
     private Integer likeCount;
     private Boolean liked;
-    private BigDecimal creditReward;
+    private Integer integrityReward;
     private LocalDateTime createTime;
     private List<CourseCommentVO> replies = new ArrayList<>();
 }

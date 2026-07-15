@@ -19,7 +19,6 @@ const discoveryPaths: Record<string, string> = {
 
 function itemLink(item: SearchItem) {
   if (item.type === 'course' && item.id > 0) return `/resources/${item.id}`
-  if (item.type === 'credit' && item.id > 0) return `/credit/products/${item.id}`
   return discoveryPaths[item.type] ?? '/'
 }
 
@@ -30,7 +29,6 @@ function showCoverImage(url?: string) {
 
 const courses = computed(() => (homeData.value?.courses ?? []).slice(0, 4))
 const activities = computed(() => (homeData.value?.hotActivities ?? []).slice(0, 3))
-const products = computed(() => (homeData.value?.hotProducts ?? []).slice(0, 4))
 
 async function loadHomeData() {
   loading.value = true
@@ -109,31 +107,6 @@ onMounted(loadHomeData)
               <h3>{{ item.title }}</h3>
               <p v-if="item.extra">{{ item.extra }}</p>
             </div>
-          </router-link>
-        </div>
-      </section>
-
-      <section class="discovery-block">
-        <HomeSectionHeader title="精选好物" icon="gift" more-to="/credit" />
-        <el-empty v-if="!products.length" description="暂无商品" :image-size="64" />
-        <div v-else class="card-grid card-grid--4">
-          <router-link
-            v-for="item in products"
-            :key="`product-${item.id}`"
-            :to="itemLink(item)"
-            class="media-card"
-          >
-            <div class="media-cover">
-              <img
-                v-if="showCoverImage(item.coverUrl)"
-                :src="item.coverUrl"
-                :alt="item.title"
-                loading="lazy"
-              />
-              <UiIcon v-else class="cover-fallback" name="gift" :size="32" />
-            </div>
-            <h3>{{ item.title }}</h3>
-            <p v-if="item.extra" class="meta highlight">{{ item.extra }}</p>
           </router-link>
         </div>
       </section>

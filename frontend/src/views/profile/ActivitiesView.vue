@@ -72,8 +72,8 @@ async function handleCheckIn(row: MyActivityRegistrationItem) {
   actingId.value = row.id
   try {
     const result = unwrapApi(await checkInActivityApi(row.activityId))
-    if (result.creditGranted === false && result.creditMessage) {
-      ElMessage.warning(result.message || '签到成功，但秩点未发放')
+    if (result.integrityGranted === false && result.integrityMessage) {
+      ElMessage.warning(result.message || '签到成功，但诚信分未发放')
     } else {
       ElMessage.success(result.message || '签到成功')
     }

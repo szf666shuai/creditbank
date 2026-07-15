@@ -3,10 +3,10 @@ package com.creditbank.platform.module.admin.controller;
 import com.creditbank.platform.common.PageResult;
 import com.creditbank.platform.common.Result;
 import com.creditbank.platform.module.admin.dto.AdminActivityVO;
+import com.creditbank.platform.module.admin.dto.AdminCourseVO;
 import com.creditbank.platform.module.admin.dto.AdminCreditTransactionVO;
 import com.creditbank.platform.module.admin.dto.AdminIntegrityRecordVO;
 import com.creditbank.platform.module.admin.dto.AdminJobVO;
-import com.creditbank.platform.module.admin.dto.AdminMallProductVO;
 import com.creditbank.platform.module.admin.dto.AdminProductApprovalRequest;
 import com.creditbank.platform.module.admin.dto.UpdateContentStatusRequest;
 import com.creditbank.platform.module.admin.service.AdminOversightService;
@@ -59,20 +59,20 @@ public class AdminOversightController {
         return Result.ok(adminOversightService.updateActivityStatus(id, request));
     }
 
-    @GetMapping("/products")
-    public Result<PageResult<AdminMallProductVO>> pageProducts(
+    @GetMapping("/courses")
+    public Result<PageResult<AdminCourseVO>> pageCourses(
             @RequestParam(defaultValue = "1") long page,
             @RequestParam(defaultValue = "10") long pageSize,
             @RequestParam(required = false) Integer approvalStatus,
             @RequestParam(required = false) String keyword) {
-        return Result.ok(adminOversightService.pageProducts(page, pageSize, approvalStatus, keyword));
+        return Result.ok(adminOversightService.pageCourses(page, pageSize, approvalStatus, keyword));
     }
 
-    @PatchMapping("/products/{id}/approval")
-    public Result<AdminMallProductVO> reviewProduct(
+    @PatchMapping("/courses/{id}/approval")
+    public Result<AdminCourseVO> reviewCourse(
             @PathVariable Long id,
             @Valid @RequestBody AdminProductApprovalRequest request) {
-        return Result.ok(adminOversightService.reviewProduct(id, request));
+        return Result.ok(adminOversightService.reviewCourse(id, request));
     }
 
     @GetMapping("/integrity-records")

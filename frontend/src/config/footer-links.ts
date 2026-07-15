@@ -1,4 +1,4 @@
-﻿import { ROLE_ADMIN, ROLE_ENTERPRISE, ROLE_STUDENT } from '@/types/auth'
+import { ROLE_ADMIN, ROLE_ENTERPRISE, ROLE_STUDENT } from '@/types/auth'
 
 export interface FooterLink {
   label: string
@@ -13,7 +13,7 @@ export function getFooterLinksForRole(options: {
   if (!options.isLoggedIn) {
     return [
       { label: '课程资源', path: '/resources' },
-      { label: '秩点商城', path: '/credit' },
+      { label: '我的秩点', path: '/credit' },
       { label: '企业机构', path: '/enterprise' },
       { label: '机构入驻', path: '/register' },
     ]
@@ -24,7 +24,7 @@ export function getFooterLinksForRole(options: {
   if (role === ROLE_ENTERPRISE) {
     return [
       { label: '企业工作台', path: '/profile/enterprise' },
-      { label: '商品管理', path: '/profile/enterprise/products' },
+      { label: '课程管理', path: '/profile/enterprise/courses' },
       { label: '招聘管理', path: '/profile/enterprise/jobs' },
       { label: '加盟企业', path: '/enterprise' },
     ]
@@ -34,9 +34,9 @@ export function getFooterLinksForRole(options: {
     return [
       { label: '管理概览', path: '/profile/admin' },
       { label: '课程资源', path: '/resources' },
-      { label: '秩点商城', path: '/credit' },
+      { label: '我的秩点', path: '/credit' },
       { label: '机构审核', path: '/profile/admin/organizations' },
-      { label: '商品审核', path: '/profile/admin/products' },
+      { label: '课程审核', path: '/profile/admin/courses' },
       { label: '用户管理', path: '/profile/admin/users' },
     ]
   }
@@ -44,7 +44,7 @@ export function getFooterLinksForRole(options: {
   return [
     { label: '课程资源', path: '/resources' },
     { label: '学习档案', path: '/archive' },
-    { label: '秩点商城', path: '/credit' },
+    { label: '我的秩点', path: '/credit' },
     { label: '个人中心', path: '/profile' },
   ]
 }

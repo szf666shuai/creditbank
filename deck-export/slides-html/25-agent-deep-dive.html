@@ -1,0 +1,46 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  width: 960pt; height: 540pt;
+  font-family: "PingFang SC", "Microsoft YaHei", system-ui, -apple-system, sans-serif;
+  background: #FFF9F0;
+  overflow: hidden;
+  position: relative;
+}</style></head><body>
+  <div style="position:absolute;top:38pt;left:60pt;"><h1 style="font-size:25pt;color:#1A202C;font-weight:900;">深讲① Agent 智能学伴（LLM 调用链路）</h1>
+  <div style="width:50pt;height:4pt;background:#22C55E;border-radius:2pt;margin-top:6pt;"></div></div>
+  <!-- 时序流程 -->
+  <div style="position:absolute;top:100pt;left:50pt;right:50pt;">
+    <div style="display:flex;align-items:center;gap:6pt;justify-content:center;flex-wrap:wrap;">
+      <div style="background:#22C55E;border:2pt solid #1A202C;border-radius:6pt;padding:10pt 14pt;box-shadow:2pt 2pt 0 #1A202C;text-align:center;">
+          <p style="font-size:11pt;color:#1A202C;font-weight:600;white-space:pre-line;">用户提问</p>
+        </div>
+        <p style="font-size:16pt;color:#1A202C;">→</p><div style="background:#BEE3F8;border:2pt solid #1A202C;border-radius:6pt;padding:10pt 14pt;box-shadow:2pt 2pt 0 #1A202C;text-align:center;">
+          <p style="font-size:11pt;color:#1A202C;font-weight:600;white-space:pre-line;">AgentService</p>
+        </div>
+        <p style="font-size:16pt;color:#1A202C;">→</p><div style="background:#DDD6FE;border:2pt solid #1A202C;border-radius:6pt;padding:10pt 14pt;box-shadow:2pt 2pt 0 #1A202C;text-align:center;">
+          <p style="font-size:11pt;color:#1A202C;font-weight:600;white-space:pre-line;">拼装学习画像
+上下文</p>
+        </div>
+        <p style="font-size:16pt;color:#1A202C;">→</p><div style="background:#FEF08A;border:2pt solid #1A202C;border-radius:6pt;padding:10pt 14pt;box-shadow:2pt 2pt 0 #1A202C;text-align:center;">
+          <p style="font-size:11pt;color:#1A202C;font-weight:600;white-space:pre-line;">DeepSeek
+/chat/completions</p>
+        </div>
+        <p style="font-size:16pt;color:#1A202C;">→</p><div style="background:#22C55E;border:2pt solid #1A202C;border-radius:6pt;padding:10pt 14pt;box-shadow:2pt 2pt 0 #1A202C;text-align:center;">
+          <p style="font-size:11pt;color:#1A202C;font-weight:600;white-space:pre-line;">个性化回答
+/ AI简历</p>
+        </div>
+    </div>
+  </div>
+  <div style="position:absolute;top:195pt;left:50pt;width:860pt;height:140pt;background:#FFF9F0;border:2pt solid #1A202C;border-radius:6pt;padding:12pt 16pt;box-shadow:4pt 4pt 0 #1A202C;border:2pt solid #CBD5E1;">
+    <h3 style="font-size:15pt;color:#1A202C;font-weight:700;margin-bottom:10pt;">上下文注入字段</h3>
+    <div style="display:flex;gap:12pt;flex-wrap:wrap;">
+      <div style="background:#FFFFFF;border:2pt solid #1A202C;border-radius:4pt;padding:5pt 12pt;"><p style="font-size:11pt;color:#1A202C;">信用余额</p></div><div style="background:#FFFFFF;border:2pt solid #1A202C;border-radius:4pt;padding:5pt 12pt;"><p style="font-size:11pt;color:#1A202C;">诚信分</p></div><div style="background:#FFFFFF;border:2pt solid #1A202C;border-radius:4pt;padding:5pt 12pt;"><p style="font-size:11pt;color:#1A202C;">课程进度</p></div><div style="background:#FFFFFF;border:2pt solid #1A202C;border-radius:4pt;padding:5pt 12pt;"><p style="font-size:11pt;color:#1A202C;">目标技能</p></div><div style="background:#FFFFFF;border:2pt solid #1A202C;border-radius:4pt;padding:5pt 12pt;"><p style="font-size:11pt;color:#1A202C;">心仪职位</p></div><div style="background:#FFFFFF;border:2pt solid #1A202C;border-radius:4pt;padding:5pt 12pt;"><p style="font-size:11pt;color:#1A202C;">学习偏好</p></div>
+    </div>
+    <p style="font-size:12pt;color:#1A202C;line-height:1.5;margin-top:12pt;"><b>关键技术：</b>RestClient 调用 DeepSeek API · 同一条链路复用于 AI 简历生成 · 上下文窗口管理</p>
+  </div>
+  <div style="position:absolute;top:350pt;left:50pt;width:860pt;height:95pt;background:#22C55E;border:2pt solid #1A202C;border-radius:6pt;padding:12pt 16pt;box-shadow:4pt 4pt 0 #1A202C;">
+    <h3 style="font-size:14pt;color:#1A202C;font-weight:700;">为什么不是简单套壳？</h3>
+    <p style="font-size:12pt;color:#1A202C;line-height:1.55;">每个用户的回答都基于其真实的学习档案 —— 同样问"推荐什么课"，新手和进阶者得到的答案完全不同。"档案即上下文"是核心差异化。</p>
+  </div>
+</body></html>

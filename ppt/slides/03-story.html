@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>品牌故事</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
+    
+    :root {
+      --nb-ink: #1a202c;
+      --nb-cream: #fff9f0;
+      --nb-green: #22c55e;
+      --nb-green-deep: #16a34a;
+      --nb-blue: #bee3f8;
+      --nb-pink: #fecdd3;
+      --nb-yellow: #fef08a;
+      --nb-red: #fca5a5;
+      --nb-shadow: 4px 4px 0 0 var(--nb-ink);
+      --font-heading: 'Nunito', 'PingFang SC', sans-serif;
+    }
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    html, body {
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      background: var(--nb-cream);
+      font-family: var(--font-heading);
+    }
+    
+    .slide {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      padding: 60px 120px;
+      position: relative;
+    }
+    
+    .page-header {
+      margin-bottom: 40px;
+    }
+    
+    .page-header .page-number {
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--nb-green);
+      letter-spacing: 0.1em;
+      margin-bottom: 8px;
+    }
+    
+    .page-header h2 {
+      font-size: 3rem;
+      font-weight: 900;
+      color: var(--nb-ink);
+    }
+    
+    .story-content {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+    }
+    
+    .story-left {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    
+    .story-card {
+      background: #fff;
+      border: 3px solid var(--nb-ink);
+      border-radius: 20px;
+      box-shadow: var(--nb-shadow);
+      padding: 28px;
+    }
+    
+    .story-card--problem {
+      background: var(--nb-red);
+    }
+    
+    .story-card--solution {
+      background: var(--nb-green);
+      color: #fff;
+    }
+    
+    .story-card--solution .story-card__title,
+    .story-card--solution .story-card__desc {
+      color: #fff;
+    }
+    
+    .story-card--solution .story-card__number {
+      background: rgba(255,255,255,0.3);
+      color: #fff;
+    }
+    
+    .story-card__header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    
+    .story-card__number {
+      width: 48px;
+      height: 48px;
+      background: var(--nb-yellow);
+      border: 3px solid var(--nb-ink);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      font-weight: 900;
+      color: var(--nb-ink);
+    }
+    
+    .story-card__title {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--nb-ink);
+    }
+    
+    .story-card__desc {
+      font-size: 1rem;
+      line-height: 1.7;
+      color: #475569;
+    }
+    
+    .story-card__desc strong {
+      color: var(--nb-ink);
+    }
+    
+    .story-right {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    
+    .quote-card {
+      background: var(--nb-blue);
+      border: 3px solid var(--nb-ink);
+      border-radius: 20px;
+      box-shadow: var(--nb-shadow);
+      padding: 36px;
+      text-align: center;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    
+    .quote-card__icon {
+      font-size: 3rem;
+      margin-bottom: 20px;
+    }
+    
+    .quote-card__text {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--nb-ink);
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+    
+    .quote-card__text span {
+      color: var(--nb-green-deep);
+    }
+    
+    .quote-card__source {
+      font-size: 1rem;
+      color: #64748b;
+      font-weight: 600;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+    
+    .stat-card {
+      background: #fff;
+      border: 3px solid var(--nb-ink);
+      border-radius: 16px;
+      box-shadow: var(--nb-shadow);
+      padding: 24px;
+      text-align: center;
+    }
+    
+    .stat-card__number {
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: var(--nb-green);
+      margin-bottom: 8px;
+    }
+    
+    .stat-card__label {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #64748b;
+    }
+    
+    .footer-highlight {
+      margin-top: 40px;
+      text-align: center;
+    }
+    
+    .footer-highlight p {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--nb-ink);
+    }
+    
+    .footer-highlight p span {
+      color: var(--nb-green);
+    }
+  </style>
+</head>
+<body>
+  <div class="slide">
+    <div class="page-header">
+      <div class="page-number">03 / 12</div>
+      <h2>品牌故事</h2>
+    </div>
+    
+    <div class="story-content">
+      <div class="story-left">
+        <div class="story-card story-card--problem">
+          <div class="story-card__header">
+            <div class="story-card__number">01</div>
+            <div class="story-card__title">大学教育的脱节</div>
+          </div>
+          <div class="story-card__desc">
+            大学教授传授的知识与社会真正需要的技能之间存在<span>巨大鸿沟</span>。学生毕业后发现，课本知识无法直接应用于工作场景，需要花费大量时间重新学习。
+          </div>
+        </div>
+        
+        <div class="story-card">
+          <div class="story-card__header">
+            <div class="story-card__number">02</div>
+            <div class="story-card__title">学习的孤独感</div>
+          </div>
+          <div class="story-card__desc">
+            在线学习缺乏<span>氛围和互动</span>。一个人在家学习容易懈怠，但去图书馆或学习小组又有地域和时间的限制。学习需要仪式感和同伴激励。
+          </div>
+        </div>
+        
+        <div class="story-card">
+          <div class="story-card__header">
+            <div class="story-card__number">03</div>
+            <div class="story-card__title">企业招聘的痛点</div>
+          </div>
+          <div class="story-card__desc">
+            企业难以评估候选人的<span>真实能力</span>。简历上的学历和项目经验无法完全反映一个人的技能水平和学习能力。企业需要更精准的人才匹配。
+          </div>
+        </div>
+      </div>
+      
+      <div class="story-right">
+        <div class="quote-card">
+          <div class="quote-card__icon">💡</div>
+          <div class="quote-card__text">
+            "明明在家就可以学习，为什么有些人还要去图书馆？<br>
+            <span>因为氛围是无可替代的</span>"
+          </div>
+          <div class="quote-card__source">—— 学分银行平台设计理念</div>
+        </div>
+        
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-card__number">70%</div>
+            <div class="stat-card__label">大学生认为课程与实际脱节</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card__number">85%</div>
+            <div class="stat-card__label">学习者需要同伴激励</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card__number">60%</div>
+            <div class="stat-card__label">企业难以评估真实能力</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card__number">90%</div>
+            <div class="stat-card__label">成人希望持续学习</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="footer-highlight">
+      <p>我们的愿景：<span>构建终身学习生态系统</span></p>
+    </div>
+  </div>
+</body>
+</html>

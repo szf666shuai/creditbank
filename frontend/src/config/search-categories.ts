@@ -8,7 +8,7 @@ export const searchCategories: SearchCategory[] = [
   { value: 'all', label: '全部' },
   { value: 'resource', label: '学习资源' },
   { value: 'course', label: '课程' },
-  { value: 'credit', label: '积分商品' },
+  { value: 'credit', label: '秩点档案' },
   { value: 'news', label: '资讯' },
   { value: 'activity', label: '活动' },
   { value: 'job', label: '招聘' },
@@ -20,7 +20,7 @@ export const searchCategories: SearchCategory[] = [
 export const gridSearchTypes: SearchCategory[] = [
   { value: 'resource', label: '学习资源' },
   { value: 'course', label: '课程' },
-  { value: 'credit', label: '积分商品' },
+  { value: 'credit', label: '秩点档案' },
 ]
 
 /** @deprecated 使用 gridSearchTypes */

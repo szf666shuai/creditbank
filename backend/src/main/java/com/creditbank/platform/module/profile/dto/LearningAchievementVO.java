@@ -19,6 +19,7 @@ public class LearningAchievementVO {
     private Long certificateId;
     private BigDecimal creditValue;
     private String fileUrl;
+    private String tags;
     private Integer verifyStatus;
     private String verifyStatusName;
     private String blockchainHash;

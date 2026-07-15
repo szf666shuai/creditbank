@@ -1,4 +1,4 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import PageShell from '@/components/common/PageShell.vue'
@@ -26,22 +26,13 @@ const studentStatCards = computed(() => {
   if (!data) return []
   return [
     {
-      key: 'credit',
-      label: '秩点余额',
-      value: data.creditBalance,
+      key: 'totalEarned',
+      label: '累计获得秩点',
+      value: data.totalEarned ?? 0,
       suffix: '分',
       icon: 'credit',
       color: '#22c55e',
-      path: '/profile/credit',
-    },
-    {
-      key: 'integrity',
-      label: '诚信分',
-      value: data.integrityScore ?? '-',
-      suffix: data.integrityScore != null ? '分' : '',
-      icon: 'integrity',
-      color: '#d97706',
-      path: '/profile/integrity',
+      path: '/credit',
     },
     {
       key: 'messages',
@@ -90,21 +81,20 @@ const enterpriseStatCards = computed(() => {
 
 const studentQuickEntries = [
   { label: '我的简历', desc: '编辑个人简历', icon: 'resume', path: '/profile/resume', color: '#22c55e' },
-  { label: '学习档案', desc: '学习记录与统计', icon: 'folder', path: '/profile/learning', color: '#059669' },
-  { label: '学习画像', desc: 'AI 生成能力画像', icon: 'user', path: '/profile/learning-profile', color: '#0f766e' },
-  { label: '秩点流水', desc: '查看秩点变动', icon: 'credit', path: '/profile/credit', color: '#d97706' },
-  { label: '诚信评定', desc: '诚信分详情', icon: 'integrity', path: '/profile/integrity', color: '#ea580c' },
+  { label: '学习档案', desc: '学习记录与学分', icon: 'folder', path: '/profile/learning', color: '#059669' },
+  { label: '学分转换', desc: '申请学分转换', icon: 'exchange', path: '/profile/credit-transfer', color: '#0f766e' },
+  { label: '我的秩点', desc: '秩点与学习档案', icon: 'credit', path: '/credit', color: '#d97706' },
+  { label: '资源商城', desc: '浏览机构课程', icon: 'course', path: '/resources', color: '#ea580c' },
   { label: '投递记录', desc: '求职投递历史', icon: 'applications', path: '/profile/applications', color: '#0284c7' },
-  { label: '我的活动', desc: '活动报名与邀请', icon: 'activity', path: '/profile/activities', color: '#22c55e' },
   { label: '消息中心', desc: '查看私信通知', icon: 'message', path: '/profile/messages', color: '#0284c7' },
 ]
 
 const enterpriseQuickEntries = [
   { label: '企业工作台', desc: '运营数据概览', icon: 'enterprise', path: '/profile/enterprise', color: '#22c55e' },
-  { label: '招聘管理', desc: '发布与管理职位', icon: 'job', path: '/profile/enterprise/jobs', color: '#059669' },
-  { label: '活动管理', desc: '发布与管理活动', icon: 'activity', path: '/profile/enterprise/activities', color: '#0f766e' },
-  { label: '投递管理', desc: '处理简历投递', icon: 'applications', path: '/profile/enterprise/applications', color: '#d97706' },
-  { label: '机构信息', desc: '维护企业简介', icon: 'school', path: '/profile/enterprise/org', color: '#0284c7' },
+  { label: '课程管理', desc: '发布与管理课程', icon: 'course', path: '/profile/enterprise/courses', color: '#059669' },
+  { label: '招聘管理', desc: '发布与管理职位', icon: 'job', path: '/profile/enterprise/jobs', color: '#0f766e' },
+  { label: '活动管理', desc: '发布与管理活动', icon: 'activity', path: '/profile/enterprise/activities', color: '#d97706' },
+  { label: '转换规则', desc: '设置学分转换规则', icon: 'exchange', path: '/profile/enterprise/transfer-rules', color: '#0284c7' },
   { label: '消息中心', desc: '查看私信通知', icon: 'message', path: '/profile/messages', color: '#0284c7' },
 ]
 
@@ -190,9 +180,6 @@ onMounted(() => {
         <el-descriptions-item label="邮箱">{{ user.email || '-' }}</el-descriptions-item>
         <el-descriptions-item v-if="isStudent && dashboard" label="累计获得秩点">
           {{ dashboard.totalEarned }} 分
-        </el-descriptions-item>
-        <el-descriptions-item v-if="isStudent && dashboard?.integrityScore != null" label="诚信分">
-          {{ dashboard.integrityScore }} 分
         </el-descriptions-item>
         <el-descriptions-item v-if="user.orgName" label="所属企业">
           {{ user.orgName }}

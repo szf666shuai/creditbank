@@ -14,7 +14,6 @@ public class CreditTransactionVO {
     private Integer type;
     private String typeName;
     private BigDecimal amount;
-    private BigDecimal balanceAfter;
     private String bizType;
     private String source;
     private String refType;

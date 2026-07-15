@@ -1,4 +1,4 @@
-﻿/** 个人中心左侧菜单项 */
+/** 个人中心左侧菜单项 */
 export interface ProfileMenuItem {
   key: string
   label: string
@@ -15,9 +15,9 @@ export interface ProfileMenuItem {
 export const studentProfileMenu: ProfileMenuItem[] = [
   { key: 'dashboard', label: '个人概览', path: '/profile', icon: 'home', roles: [0] },
   { key: 'resume', label: '我的简历', path: '/profile/resume', icon: 'resume', roles: [0] },
-  { key: 'learning', label: '学习档案', path: '/profile/learning', icon: 'folder', roles: [0] },
+  { key: 'learning', label: '学习档案', path: '/profile/learning', icon: 'learning', roles: [0] },
+  { key: 'credit-transfer', label: '学分转换', path: '/profile/credit-transfer', icon: 'exchange', roles: [0] },
   { key: 'learning-profile', label: '学习画像', path: '/profile/learning-profile', icon: 'user', roles: [0] },
-  { key: 'credit', label: '秩点流水', path: '/profile/credit', icon: 'credit', roles: [0] },
   { key: 'integrity', label: '诚信评定', path: '/profile/integrity', icon: 'integrity', roles: [0] },
   { key: 'posts', label: '我的发言', path: '/profile/posts', icon: 'edit', roles: [0] },
   { key: 'applications', label: '投递记录', path: '/profile/applications', icon: 'applications', roles: [0] },
@@ -37,7 +37,9 @@ export const enterpriseProfileMenu: ProfileMenuItem[] = [
   { key: 'interviews', label: '面试管理', path: '/profile/enterprise/interviews', icon: 'interview', roles: [1] },
   { key: 'activity-invitations', label: '定向邀请', path: '/profile/enterprise/activity-invitations', icon: 'invite', roles: [1] },
   { key: 'materials', label: '企业资料', path: '/profile/enterprise/materials', icon: 'material', roles: [1] },
-  { key: 'products', label: '商城管理', path: '/profile/enterprise/products', icon: 'goods', roles: [1] },
+  { key: 'courses', label: '课程管理', path: '/profile/enterprise/courses', icon: 'course', roles: [1] },
+  { key: 'transfer-rules', label: '转换规则', path: '/profile/enterprise/transfer-rules', icon: 'exchange', roles: [1] },
+  { key: 'transfer-applications', label: '转换申请', path: '/profile/enterprise/transfer-applications', icon: 'file-application', roles: [1] },
   { key: 'messages', label: '消息中心', path: '/profile/messages', icon: 'message', roles: [1], dividerBefore: true },
 ]
 
@@ -52,9 +54,7 @@ export const adminProfileMenu: ProfileMenuItem[] = [
   { key: 'credit', label: '秩点监察', path: '/profile/admin/credit', icon: 'credit', roles: [2] },
   { key: 'jobs', label: '招聘监管', path: '/profile/admin/jobs', icon: 'job', roles: [2] },
   { key: 'activities', label: '活动监管', path: '/profile/admin/activities', icon: 'activity', roles: [2] },
-  { key: 'products', label: '商品审核', path: '/profile/admin/products', icon: 'goods', roles: [2] },
-  { key: 'mall-browse', label: '秩点商城', path: '/credit', icon: 'cart', roles: [2], dividerBefore: true },
-  { key: 'resources-browse', label: '学习资源', path: '/resources', icon: 'folder', roles: [2] },
+  { key: 'courses', label: '课程审核', path: '/profile/admin/courses', icon: 'course', roles: [2] },
   { key: 'messages', label: '消息中心', path: '/profile/messages', icon: 'message', roles: [2], dividerBefore: true },
 ]
 

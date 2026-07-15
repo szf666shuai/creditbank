@@ -14,7 +14,7 @@ public interface UserLearningProfileMapper extends BaseMapper<UserLearningProfil
 
     @Select("""
             SELECT u.id AS userId, u.username, u.real_name AS realName, u.role,
-                   ca.balance AS creditBalance, ca.total_earned AS creditEarned, ca.total_spent AS creditSpent,
+                   ca.total_earned AS creditEarned,
                    COALESCE(ins.score, 100) AS integrityScore
             FROM sys_user u
             LEFT JOIN credit_account ca ON ca.user_id = u.id

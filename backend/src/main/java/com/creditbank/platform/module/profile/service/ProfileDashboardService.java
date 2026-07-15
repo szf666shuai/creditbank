@@ -37,7 +37,6 @@ public class ProfileDashboardService {
 
         return ProfileDashboardVO.builder()
                 .userInfo(userInfo)
-                .creditBalance(account != null ? account.getBalance() : BigDecimal.ZERO)
                 .totalEarned(account != null ? account.getTotalEarned() : BigDecimal.ZERO)
                 .integrityScore(integrity != null ? integrity.getScore() : null)
                 .unreadMessageCount(unreadCount)

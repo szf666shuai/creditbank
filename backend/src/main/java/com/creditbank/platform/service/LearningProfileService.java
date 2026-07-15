@@ -57,9 +57,7 @@ public class LearningProfileService {
                 .username(asString(basics.get("username")))
                 .realName(asString(basics.get("realName")))
                 .role(asInt(basics.get("role")))
-                .creditBalance(asDecimal(basics.get("creditBalance")))
                 .creditEarned(asDecimal(basics.get("creditEarned")))
-                .creditSpent(asDecimal(basics.get("creditSpent")))
                 .integrityScore(asInt(basics.get("integrityScore")))
                 .courses(nullToEmpty(profileMapper.selectCourseProgress(userId)))
                 .archives(nullToEmpty(profileMapper.selectArchives(userId, 8)))
@@ -152,8 +150,7 @@ public class LearningProfileService {
             LearningSituationVO s = profile.getSituation();
             if (s != null) {
                 sb.append("- 用户：").append(s.getRealName()).append("（").append(s.getUsername()).append("）\n");
-                sb.append("- 秩点余额：").append(s.getCreditBalance())
-                        .append("，累计获得：").append(s.getCreditEarned()).append('\n');
+                sb.append("- 累计获得学分：").append(s.getCreditEarned()).append('\n');
                 sb.append("- 诚信分：").append(s.getIntegrityScore()).append('\n');
                 if (s.getCourses() != null && !s.getCourses().isEmpty()) {
                     sb.append("- 课程进度：\n");

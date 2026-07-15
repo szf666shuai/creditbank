@@ -1,5 +1,9 @@
 import request from '@/utils/request'
-import type { CreditChangeResult } from '@/api/mall'
+
+export interface CreditChangeResult {
+  amount: number
+  balanceAfter?: number
+}
 
 export interface LearningResource {
   id: number
@@ -8,21 +12,20 @@ export interface LearningResource {
   coverUrl?: string
   videoUrl?: string
   videoDurationSeconds?: number
-  priceCredit?: number
-  priceMoney?: number
   durationHours?: number
   creditReward?: number
+  orgId?: number
   orgName?: string
   tags?: string
+  creditValue?: number
+  difficulty?: number
+  durationMinutes?: number
   progress?: number
   watchedSeconds?: number
   maxWatchedPositionSeconds?: number
   lastPositionSeconds?: number
   learningStatus?: number
-  purchased?: boolean
-  paid?: boolean
   learned?: boolean
-  purchaseProductId?: number
   certificateId?: number
   certNo?: string
 }
@@ -87,7 +90,7 @@ export interface CourseComment {
   content: string
   likeCount: number
   liked?: boolean
-  creditReward?: number
+  integrityReward?: number
   createTime: string
   replies?: CourseComment[]
 }
@@ -130,6 +133,13 @@ export function fetchLearningResources(params?: { keyword?: string; tag?: string
   return request.get<LearningResource[]>(`/learning/resources${suffix}`)
 }
 
+export function fetchOrgCourses(orgId: number, keyword?: string) {
+  const query = new URLSearchParams()
+  if (keyword) query.set('keyword', keyword)
+  const suffix = query.toString() ? `?${query.toString()}` : ''
+  return request.get<LearningResource[]>(`/learning/resources/org/${orgId}${suffix}`)
+}
+
 export function fetchLearningTags() {
   return request.get<string[]>('/learning/tags')
 }
@@ -160,7 +170,7 @@ export interface LearningCheckin {
   courseId: number
   checkedInToday: boolean
   streakDays: number
-  creditReward?: number
+  integrityReward?: number
   message?: string
 }
 
@@ -185,15 +195,6 @@ export function fetchLearningCheckinStatus(courseId: number) {
 
 export function postLearningCheckin(courseId: number) {
   return request.post<LearningCheckin>(`/learning/resources/${courseId}/checkin`)
-}
-
-export function purchaseCourse(courseId: number) {
-  return request.post<{
-    courseId: number
-    paidCredit: number
-    balanceAfter?: number
-    purchased: boolean
-  }>(`/learning/resources/${courseId}/purchase`)
 }
 
 export function reportLearningProgress(

@@ -1,0 +1,31 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  width: 960pt; height: 540pt;
+  font-family: "PingFang SC", "Microsoft YaHei", system-ui, -apple-system, sans-serif;
+  background: #FFF9F0;
+  overflow: hidden;
+  position: relative;
+}</style></head><body>
+  <div style="position:absolute;top:38pt;left:60pt;"><h1 style="font-size:25pt;color:#1A202C;font-weight:900;">架构总览 + 技术选型</h1>
+  <div style="width:50pt;height:4pt;background:#22C55E;border-radius:2pt;margin-top:6pt;"></div>
+  <p style="font-size:12pt;color:#EF4444;margin-top:4pt;font-weight:600;">分层单体（非微服务），可平滑演进</p></div>
+  <div style="position:absolute;top:100pt;left:50pt;width:600pt;height:320pt;">
+    <!-- 分层架构示意 -->
+    <div style="position:absolute;top:0pt;left:0pt;width:580pt;height:52pt;background:#22C55E;border:2pt solid #1A202C;border-radius:6pt;padding:12pt 16pt;box-shadow:4pt 4pt 0 #1A202C;"><p style="font-size:14pt;color:#1A202C;font-weight:700;text-align:center;">前端 SPA（Vue3 + TS + Vite）— 三端合一</p></div>
+    <div style="position:absolute;top:62pt;left:0pt;width:580pt;height:52pt;background:#BEE3F8;border:2pt solid #1A202C;border-radius:6pt;padding:12pt 16pt;box-shadow:4pt 4pt 0 #1A202C;"><p style="font-size:14pt;color:#1A202C;font-weight:700;text-align:center;">统一网关拦截器（JWT 鉴权 + 角色归属校验）</p></div>
+    <div style="position:absolute;top:124pt;left:0pt;width:580pt;height:100pt;background:#DDD6FE;border:2pt solid #1A202C;border-radius:6pt;padding:12pt 16pt;box-shadow:4pt 4pt 0 #1A202C;">
+      <p style="font-size:13pt;color:#1A202C;font-weight:700;text-align:center;margin-bottom:6pt;">业务层（Spring Boot 3.4 分包）</p>
+      <p style="font-size:10pt;color:#1A202C;text-align:center;line-height:1.5;">学习 / 档案 / 积分 / 诚信 / 论坛 / 机构 / Agent / 面试 / …</p>
+    </div>
+    <div style="position:absolute;top:234pt;left:0pt;width:580pt;height:46pt;background:#FEF08A;border:2pt solid #1A202C;border-radius:6pt;padding:12pt 16pt;box-shadow:4pt 4pt 0 #1A202C;"><p style="font-size:14pt;color:#1A202C;font-weight:700;text-align:center;">数据层 MySQL 8 + Redis 缓存</p></div>
+    <!-- 外部服务 -->
+    <div style="position:absolute;top:72pt;left:-10pt;"><div style="background:#FECACA;border:2pt solid #1A202C;border-radius:6pt;padding:6pt 12pt;box-shadow:2pt 2pt 0 #1A202C;"><p style="font-size:11pt;color:#1A202C;font-weight:600;">DeepSeek LLM</p></div></div>
+    <div style="position:absolute;top:72pt;right:-10pt;"><div style="background:#BEE3F8;border:2pt solid #1A202C;border-radius:6pt;padding:6pt 12pt;box-shadow:2pt 2pt 0 #1A202C;"><p style="font-size:11pt;color:#1A202C;font-weight:600;">腾讯云 TRTC</p></div></div>
+  </div>
+  <!-- 技术栈标签墙 -->
+  <div style="position:absolute;top:100pt;right:40pt;width:250pt;">
+    <h3 style="font-size:14pt;color:#1A202C;font-weight:700;margin-bottom:10pt;">技术栈</h3>
+    <div style="display:inline-block;background:#FFF9F0;border:2pt solid #1A202C;border-radius:4pt;padding:4pt 10pt;margin:3pt;box-shadow:1pt 1pt 0 #1A202C;"><p style="font-size:10pt;color:#1A202C;font-weight:600;">Java 21</p></div><div style="display:inline-block;background:#FFF9F0;border:2pt solid #1A202C;border-radius:4pt;padding:4pt 10pt;margin:3pt;box-shadow:1pt 1pt 0 #1A202C;"><p style="font-size:10pt;color:#1A202C;font-weight:600;">Spring Boot 3.4</p></div><div style="display:inline-block;background:#FFF9F0;border:2pt solid #1A202C;border-radius:4pt;padding:4pt 10pt;margin:3pt;box-shadow:1pt 1pt 0 #1A202C;"><p style="font-size:10pt;color:#1A202C;font-weight:600;">MyBatis-Plus</p></div><div style="display:inline-block;background:#FFF9F0;border:2pt solid #1A202C;border-radius:4pt;padding:4pt 10pt;margin:3pt;box-shadow:1pt 1pt 0 #1A202C;"><p style="font-size:10pt;color:#1A202C;font-weight:600;">Vue3 + TS + Vite</p></div><div style="display:inline-block;background:#FFF9F0;border:2pt solid #1A202C;border-radius:4pt;padding:4pt 10pt;margin:3pt;box-shadow:1pt 1pt 0 #1A202C;"><p style="font-size:10pt;color:#1A202C;font-weight:600;">Element Plus</p></div><div style="display:inline-block;background:#FFF9F0;border:2pt solid #1A202C;border-radius:4pt;padding:4pt 10pt;margin:3pt;box-shadow:1pt 1pt 0 #1A202C;"><p style="font-size:10pt;color:#1A202C;font-weight:600;">MySQL 8</p></div><div style="display:inline-block;background:#FFF9F0;border:2pt solid #1A202C;border-radius:4pt;padding:4pt 10pt;margin:3pt;box-shadow:1pt 1pt 0 #1A202C;"><p style="font-size:10pt;color:#1A202C;font-weight:600;">Redis</p></div><div style="display:inline-block;background:#FFF9F0;border:2pt solid #1A202C;border-radius:4pt;padding:4pt 10pt;margin:3pt;box-shadow:1pt 1pt 0 #1A202C;"><p style="font-size:10pt;color:#1A202C;font-weight:600;">Docker Compose</p></div><div style="display:inline-block;background:#FFF9F0;border:2pt solid #1A202C;border-radius:4pt;padding:4pt 10pt;margin:3pt;box-shadow:1pt 1pt 0 #1A202C;"><p style="font-size:10pt;color:#1A202C;font-weight:600;">DeepSeek API</p></div><div style="display:inline-block;background:#FFF9F0;border:2pt solid #1A202C;border-radius:4pt;padding:4pt 10pt;margin:3pt;box-shadow:1pt 1pt 0 #1A202C;"><p style="font-size:10pt;color:#1A202C;font-weight:600;">TRTC SDK</p></div>
+  </div>
+</body></html>

@@ -1,0 +1,48 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  width: 960pt; height: 540pt;
+  font-family: "PingFang SC", "Microsoft YaHei", system-ui, -apple-system, sans-serif;
+  background: #FFF9F0;
+  overflow: hidden;
+  position: relative;
+}</style></head><body>
+  <div style="position:absolute;top:38pt;left:60pt;"><h1 style="font-size:25pt;color:#1A202C;font-weight:900;">深讲② TRTC 线上视频面试</h1>
+  <div style="width:50pt;height:4pt;background:#22C55E;border-radius:2pt;margin-top:6pt;"></div>
+  <p style="font-size:12pt;color:#4A5568;margin-top:6pt;">真实音视频集成 —— 自建签名服务，不裸奔密钥</p></div>
+  <!-- 流程 -->
+  <div style="position:absolute;top:100pt;left:50pt;right:50pt;">
+    <div style="display:flex;align-items:center;gap:6pt;justify-content:center;">
+      <div style="background:#22C55E;border:2pt solid #1A202C;border-radius:6pt;padding:10pt 14pt;box-shadow:2pt 2pt 0 #1A202C;text-align:center;">
+          <p style="font-size:10pt;color:#1A202C;font-weight:600;white-space:pre-line;">机构约面</p>
+        </div>
+        <p style="font-size:16pt;color:#1A202C;">→</p><div style="background:#BEE3F8;border:2pt solid #1A202C;border-radius:6pt;padding:10pt 14pt;box-shadow:2pt 2pt 0 #1A202C;text-align:center;">
+          <p style="font-size:10pt;color:#1A202C;font-weight:600;white-space:pre-line;">InterviewRtcService</p>
+        </div>
+        <p style="font-size:16pt;color:#1A202C;">→</p><div style="background:#DDD6FE;border:2pt solid #1A202C;border-radius:6pt;padding:10pt 14pt;box-shadow:2pt 2pt 0 #1A202C;text-align:center;">
+          <p style="font-size:10pt;color:#1A202C;font-weight:600;white-space:pre-line;">TlsSigApiV2
+签发 UserSig
+(HmacSHA256)</p>
+        </div>
+        <p style="font-size:16pt;color:#1A202C;">→</p><div style="background:#FEF08A;border:2pt solid #1A202C;border-radius:6pt;padding:10pt 14pt;box-shadow:2pt 2pt 0 #1A202C;text-align:center;">
+          <p style="font-size:10pt;color:#1A202C;font-weight:600;white-space:pre-line;">trtc-sdk-v5
+enterRoom</p>
+        </div>
+        <p style="font-size:16pt;color:#1A202C;">→</p><div style="background:#22C55E;border:2pt solid #1A202C;border-radius:6pt;padding:10pt 14pt;box-shadow:2pt 2pt 0 #1A202C;text-align:center;">
+          <p style="font-size:10pt;color:#1A202C;font-weight:600;white-space:pre-line;">双向音视频
+真实通话</p>
+        </div>
+    </div>
+  </div>
+  <div style="position:absolute;top:195pt;left:50pt;width:860pt;height:135pt;background:#FFF9F0;border:2pt solid #1A202C;border-radius:6pt;padding:12pt 16pt;box-shadow:4pt 4pt 0 #1A202C;border:2pt solid #CBD5E1;">
+    <h3 style="font-size:15pt;color:#1A202C;font-weight:700;margin-bottom:10pt;">安全设计要点</h3>
+    <div style="display:flex;gap:14pt;flex-wrap:wrap;">
+      <div style="background:#FFFFFF;border:2pt solid #1A202C;border-radius:4pt;padding:5pt 12pt;"><p style="font-size:11pt;color:#1A202C;">🔒 UserSig 含房间号 + 时间窗口</p></div><div style="background:#FFFFFF;border:2pt solid #1A202C;border-radius:4pt;padding:5pt 12pt;"><p style="font-size:11pt;color:#1A202C;">🔒 参与者身份校验</p></div><div style="background:#FFFFFF;border:2pt solid #1A202C;border-radius:4pt;padding:5pt 12pt;"><p style="font-size:11pt;color:#1A202C;">🔒 密钥不出后端服务</p></div><div style="background:#FFFFFF;border:2pt solid #1A202C;border-radius:4pt;padding:5pt 12pt;"><p style="font-size:11pt;color:#1A202C;">🔒 HmacSHA256 签名防伪造</p></div>
+    </div>
+  </div>
+  <div style="position:absolute;bottom:38pt;left:60pt;width:340pt;height:75pt;border:2pt dashed ${C.gray400};border-radius:8pt;display:flex;align-items:center;justify-content:center;background:#FAFAF5;"><p style="font-size:12pt;color:#4A5568;">面试房间界面截图占位</p></div>
+  <div style="position:absolute;top:348pt;left:440pt;width:480pt;height:82pt;background:#BEE3F8;border:2pt solid #1A202C;border-radius:6pt;padding:12pt 16pt;box-shadow:4pt 4pt 0 #1A202C;">
+    <h3 style="font-size:13pt;color:#1A202C;font-weight:700;margin-bottom:6pt;">现场可演示！</h3>
+    <p style="font-size:11pt;color:#1A202C;line-height:1.5;">答辩时可实时演示浏览器内音视频通话 —— 不是 mock，是真跑通 TRTC。</p>
+  </div>
+</body></html>

@@ -15,9 +15,7 @@ public class CreditAccount {
     @TableId(type = IdType.AUTO)
     private Long id;
     private Long userId;
-    private BigDecimal balance;
     private BigDecimal totalEarned;
-    private BigDecimal totalSpent;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
 }

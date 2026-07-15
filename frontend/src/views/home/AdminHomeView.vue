@@ -6,10 +6,10 @@ import { roleLabel } from '@/types/auth'
 import {
   getAdminDashboardStatsApi,
   listAdminOrganizationsApi,
-  listAdminProductsApi,
+  listAdminCoursesApi,
   listAdminReportsApi,
   type AdminDashboardStats,
-  type AdminMallProduct,
+  type AdminCourse,
   type AdminOrganization,
   type AdminForumReport,
 } from '@/api/admin'
@@ -23,7 +23,7 @@ const loading = ref(true)
 const loadError = ref('')
 const stats = ref<AdminDashboardStats | null>(null)
 const pendingOrgs = ref<AdminOrganization[]>([])
-const pendingProducts = ref<AdminMallProduct[]>([])
+const pendingCourses = ref<AdminCourse[]>([])
 const pendingReports = ref<AdminForumReport[]>([])
 
 const user = computed(() => authStore.userInfo)
@@ -44,7 +44,7 @@ const todoCards = computed(() => {
   if (!s) return []
   return [
     { label: '待审核机构', value: s.pendingOrganizations, path: '/profile/admin/organizations?joinStatus=0' },
-    { label: '待审核商品', value: pendingProducts.value.length, path: '/profile/admin/products' },
+    { label: '待审核课程', value: pendingCourses.value.length, path: '/profile/admin/courses' },
     { label: '待处理举报', value: s.pendingReports, path: '/profile/admin/reports?status=0' },
     { label: '未读消息', value: s.unreadMessages, path: '/profile/messages' },
   ]
@@ -71,15 +71,15 @@ async function loadHomeData() {
   loading.value = true
   loadError.value = ''
   try {
-    const [statsRes, orgRes, productRes, reportRes] = await Promise.all([
+    const [statsRes, orgRes, courseRes, reportRes] = await Promise.all([
       getAdminDashboardStatsApi(),
       listAdminOrganizationsApi({ page: 1, pageSize: 5, joinStatus: 0 }),
-      listAdminProductsApi({ page: 1, pageSize: 5, approvalStatus: 0 }),
+      listAdminCoursesApi({ page: 1, pageSize: 5, approvalStatus: 0 }),
       listAdminReportsApi({ page: 1, pageSize: 5, status: 0 }),
     ])
     stats.value = unwrapApi(statsRes)
     pendingOrgs.value = unwrapApi(orgRes).records
-    pendingProducts.value = unwrapApi(productRes).records
+    pendingCourses.value = unwrapApi(courseRes).records
     pendingReports.value = unwrapApi(reportRes).records
   } catch (e) {
     loadError.value = getErrorMessage(e, '平台数据加载失败')
@@ -158,19 +158,19 @@ onMounted(loadHomeData)
 
             <section class="feed-panel">
               <div class="panel-head">
-                <h2>待审核商品</h2>
-                <button type="button" class="text-link" @click="go('/profile/admin/products')">查看全部</button>
+                <h2>待审核课程</h2>
+                <button type="button" class="text-link" @click="go('/profile/admin/courses')">查看全部</button>
               </div>
-              <div v-if="pendingProducts.length" class="feed-list">
-                <article v-for="product in pendingProducts" :key="product.id" class="feed-item">
+              <div v-if="pendingCourses.length" class="feed-list">
+                <article v-for="course in pendingCourses" :key="course.id" class="feed-item">
                   <div>
-                    <strong>{{ product.name }}</strong>
-                    <p>{{ product.orgName || '未知企业' }} · {{ product.productTypeName }}</p>
+                    <strong>{{ course.title }}</strong>
+                    <p>{{ course.orgName || '未知机构' }} · {{ course.difficultyName }}</p>
                   </div>
-                  <el-tag size="small" type="warning">{{ product.approvalStatusName }}</el-tag>
+                  <el-tag size="small" type="warning">{{ course.approvalStatusName }}</el-tag>
                 </article>
               </div>
-              <el-empty v-else :image-size="64" description="暂无待审核商品" />
+              <el-empty v-else :image-size="64" description="暂无待审核课程" />
             </section>
 
             <section class="feed-panel full-width">

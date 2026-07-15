@@ -12,6 +12,6 @@ public class LearningCheckinVO {
     private Long courseId;
     private Boolean checkedInToday;
     private Integer streakDays;
-    private BigDecimal creditReward;
+    private Integer integrityReward;
     private String message;
 }

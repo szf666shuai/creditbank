@@ -23,6 +23,7 @@ import {
   ShoppingCart,
   Stamp,
   Star,
+  Switch,
   Ticket,
   Tickets,
   TrendCharts,
@@ -89,6 +90,8 @@ export const uiIcons = {
   view: View,
   plus: Plus,
   flag: Flag,
+  exchange: Switch,
+  'file-application': Document,
 } as const satisfies Record<string, Component>
 
 export type UiIconName = keyof typeof uiIcons

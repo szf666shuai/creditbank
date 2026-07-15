@@ -16,14 +16,10 @@ public interface CreditAccountExtMapper {
 
     @Update("""
             UPDATE credit_account
-            SET balance = #{balance},
-                total_earned = #{totalEarned},
-                total_spent = #{totalSpent},
+            SET total_earned = #{totalEarned},
                 update_time = NOW()
             WHERE user_id = #{userId}
             """)
     int updateBalance(@Param("userId") Long userId,
-                      @Param("balance") BigDecimal balance,
-                      @Param("totalEarned") BigDecimal totalEarned,
-                      @Param("totalSpent") BigDecimal totalSpent);
+                      @Param("totalEarned") BigDecimal totalEarned);
 }

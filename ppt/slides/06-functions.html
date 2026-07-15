@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>核心功能</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
+    
+    :root {
+      --nb-ink: #1a202c;
+      --nb-cream: #fff9f0;
+      --nb-green: #22c55e;
+      --nb-green-deep: #16a34a;
+      --nb-blue: #bee3f8;
+      --nb-pink: #fecdd3;
+      --nb-yellow: #fef08a;
+      --nb-purple: #ddd6fe;
+      --nb-shadow: 4px 4px 0 0 var(--nb-ink);
+      --font-heading: 'Nunito', 'PingFang SC', sans-serif;
+    }
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    html, body {
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      background: var(--nb-cream);
+      font-family: var(--font-heading);
+    }
+    
+    .slide {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      padding: 60px 120px;
+      position: relative;
+    }
+    
+    .page-header {
+      margin-bottom: 40px;
+    }
+    
+    .page-header .page-number {
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--nb-green);
+      letter-spacing: 0.1em;
+      margin-bottom: 8px;
+    }
+    
+    .page-header h2 {
+      font-size: 3rem;
+      font-weight: 900;
+      color: var(--nb-ink);
+    }
+    
+    .functions-content {
+      flex: 1;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+    }
+    
+    .function-card {
+      background: #fff;
+      border: 3px solid var(--nb-ink);
+      border-radius: 20px;
+      box-shadow: var(--nb-shadow);
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    
+    .function-card:hover {
+      transform: translate(2px, 2px);
+      box-shadow: 2px 2px 0 0 var(--nb-ink);
+    }
+    
+    .function-card--highlight {
+      grid-row: span 2;
+      background: var(--nb-green);
+      color: #fff;
+    }
+    
+    .function-card--highlight .function-card__title,
+    .function-card--highlight .function-card__desc {
+      color: #fff;
+    }
+    
+    .function-card--highlight .function-card__features li {
+      color: rgba(255,255,255,0.9);
+    }
+    
+    .function-card--highlight .function-card__badge {
+      background: rgba(255,255,255,0.3);
+      color: #fff;
+    }
+    
+    .function-card__icon {
+      width: 72px;
+      height: 72px;
+      background: var(--nb-blue);
+      border: 3px solid var(--nb-ink);
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+      box-shadow: 3px 3px 0 0 var(--nb-ink);
+    }
+    
+    .function-card--highlight .function-card__icon {
+      background: rgba(255,255,255,0.3);
+      border-color: rgba(255,255,255,0.5);
+    }
+    
+    .function-card__badge {
+      align-self: flex-start;
+      background: var(--nb-yellow);
+      border: 2px solid var(--nb-ink);
+      border-radius: 999px;
+      padding: 4px 12px;
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: var(--nb-ink);
+      margin-bottom: 12px;
+    }
+    
+    .function-card__title {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--nb-ink);
+      margin-bottom: 12px;
+    }
+    
+    .function-card__desc {
+      font-size: 0.9rem;
+      line-height: 1.6;
+      color: #64748b;
+      margin-bottom: 16px;
+      flex: 1;
+    }
+    
+    .function-card__features {
+      list-style: none;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .function-card__features li {
+      font-size: 0.85rem;
+      color: #475569;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .function-card__features li::before {
+      content: '✓';
+      color: var(--nb-green);
+      font-weight: 800;
+    }
+    
+    .function-card:nth-child(2) .function-card__icon { background: var(--nb-pink); }
+    .function-card:nth-child(3) .function-card__icon { background: var(--nb-purple); }
+    .function-card:nth-child(4) .function-card__icon { background: var(--nb-yellow); }
+    .function-card:nth-child(5) .function-card__icon { background: var(--nb-blue); }
+    .function-card:nth-child(6) .function-card__icon { background: var(--nb-pink); }
+    
+    .footer-note {
+      margin-top: 32px;
+      text-align: center;
+    }
+    
+    .footer-note p {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--nb-ink);
+    }
+    
+    .footer-note p span {
+      color: var(--nb-green);
+    }
+  </style>
+</head>
+<body>
+  <div class="slide">
+    <div class="page-header">
+      <div class="page-number">06 / 12</div>
+      <h2>核心功能</h2>
+    </div>
+    
+    <div class="functions-content">
+      <div class="function-card function-card--highlight">
+        <div class="function-card__badge">AI驱动</div>
+        <div class="function-card__icon">🤖</div>
+        <div class="function-card__title">智能学习助手</div>
+        <div class="function-card__desc">
+          基于大语言模型的智能学习伙伴，提供个性化学习指导、课程推荐、问题解答等服务
+        </div>
+        <ul class="function-card__features">
+          <li>智能课程推荐</li>
+          <li>实时答疑解惑</li>
+          <li>学习路径规划</li>
+          <li>AI简历生成</li>
+          <li>个性化提醒</li>
+        </ul>
+      </div>
+      
+      <div class="function-card">
+        <div class="function-card__icon">📚</div>
+        <div class="function-card__title">学习管理</div>
+        <div class="function-card__desc">
+          完整的学习管理系统，包括课程学习、进度跟踪、打卡签到、证书颁发等功能
+        </div>
+        <ul class="function-card__features">
+          <li>课程播放器</li>
+          <li>学习进度跟踪</li>
+          <li>每日打卡</li>
+          <li>学习档案</li>
+          <li>数字证书</li>
+        </ul>
+      </div>
+      
+      <div class="function-card">
+        <div class="function-card__icon">🏢</div>
+        <div class="function-card__title">企业对接</div>
+        <div class="function-card__desc">
+          企业入驻、职位发布、在线面试、活动组织，连接学员与企业的桥梁
+        </div>
+        <ul class="function-card__features">
+          <li>企业入驻</li>
+          <li>职位发布</li>
+          <li>在线面试</li>
+          <li>活动管理</li>
+          <li>人才匹配</li>
+        </ul>
+      </div>
+      
+      <div class="function-card">
+        <div class="function-card__icon">💰</div>
+        <div class="function-card__title">学分银行</div>
+        <div class="function-card__desc">
+          学习成果量化为学分，可积累、可兑换、可提现，激励持续学习
+        </div>
+        <ul class="function-card__features">
+          <li>学分积累</li>
+          <li>学分兑换</li>
+          <li>积分商城</li>
+          <li>信用体系</li>
+          <li>积分流水</li>
+        </ul>
+      </div>
+      
+      <div class="function-card">
+        <div class="function-card__icon">💬</div>
+        <div class="function-card__title">社区论坛</div>
+        <div class="function-card__desc">
+          学员交流社区，讨论学习心得、分享就业信息、获取政策资讯
+        </div>
+        <ul class="function-card__features">
+          <li>帖子发布</li>
+          <li>评论互动</li>
+          <li>热门排行</li>
+          <li>版块分类</li>
+          <li>举报机制</li>
+        </ul>
+      </div>
+      
+      <div class="function-card">
+        <div class="function-card__icon">🎯</div>
+        <div class="function-card__title">诚信体系</div>
+        <div class="function-card__desc">
+          学习诚信记录与评分，确保学习成果的真实性和可信度
+        </div>
+        <ul class="function-card__features">
+          <li>诚信评分</li>
+          <li>学习记录</li>
+          <li>证书验证</li>
+          <li>违规处理</li>
+          <li>信用修复</li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="footer-note">
+      <p><span>6大核心模块</span>，构建完整的终身学习生态</p>
+    </div>
+  </div>
+</body>
+</html>

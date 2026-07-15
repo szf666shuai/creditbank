@@ -7,9 +7,9 @@ export interface ActivityCheckinResult {
   statusName: string
   checkInTime?: string
   message?: string
-  creditGranted?: boolean
-  creditReward?: number
-  creditMessage?: string
+  integrityGranted?: boolean
+  integrityReward?: number
+  integrityMessage?: string
 }
 
 export function checkInActivityApi(activityId: number) {

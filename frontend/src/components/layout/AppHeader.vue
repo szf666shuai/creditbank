@@ -247,9 +247,9 @@ onUnmounted(() => {
             <el-icon :size="18"><HomeFilled /></el-icon>
           </router-link>
 
-          <!-- 带下拉的菜单：有 path 时可点击进入总览 -->
+          <!-- 有子菜单时显示下拉，否则直接链接 -->
           <el-dropdown
-            v-else
+            v-else-if="item.children && item.children.length > 0"
             trigger="hover"
             placement="bottom-start"
             popper-class="app-header-dropdown"
@@ -267,21 +267,27 @@ onUnmounted(() => {
             </button>
             <template #dropdown>
               <el-dropdown-menu>
-                <template v-if="item.children.length">
-                  <el-dropdown-item
-                    v-for="child in item.children"
-                    :key="child.path"
-                    @click="navigate(child.path)"
-                  >
-                    {{ child.label }}
-                  </el-dropdown-item>
-                </template>
-                <el-dropdown-item v-else disabled>
-                  待组员补充页面
+                <el-dropdown-item
+                  v-for="child in item.children"
+                  :key="child.path"
+                  @click="navigate(child.path)"
+                >
+                  {{ child.label }}
                 </el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
+
+          <!-- 无子菜单：直接作为链接 -->
+          <button
+            v-else
+            type="button"
+            class="nav-item"
+            :class="{ active: isNavActive(item) }"
+            @click.stop="item.path && navigate(item.path)"
+          >
+            {{ item.label }}
+          </button>
         </template>
       </nav>
 

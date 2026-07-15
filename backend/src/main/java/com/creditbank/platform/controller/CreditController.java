@@ -6,7 +6,6 @@ import com.creditbank.platform.dto.CreditAccountVO;
 import com.creditbank.platform.dto.CreditChangeResult;
 import com.creditbank.platform.dto.CreditEarnRequest;
 import com.creditbank.platform.dto.CreditRuleVO;
-import com.creditbank.platform.dto.CreditSpendRequest;
 import com.creditbank.platform.dto.CreditTransactionVO;
 import com.creditbank.platform.service.CreditService;
 import jakarta.validation.Valid;
@@ -47,11 +46,5 @@ public class CreditController {
     @PostMapping("/earn")
     public Result<CreditChangeResult> earn(@Valid @RequestBody CreditEarnRequest request) {
         return Result.ok(creditService.earnByRule(UserContext.getUserId(), request));
-    }
-
-    /** 消耗学分（商城/报名等） */
-    @PostMapping("/spend")
-    public Result<CreditChangeResult> spend(@Valid @RequestBody CreditSpendRequest request) {
-        return Result.ok(creditService.spend(UserContext.getUserId(), request));
     }
 }

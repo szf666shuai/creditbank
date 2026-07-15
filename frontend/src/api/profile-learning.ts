@@ -27,6 +27,7 @@ export interface LearningAchievementItem {
   certificateId?: number
   creditValue?: number
   fileUrl?: string
+  tags?: string
   verifyStatus: number
   verifyStatusName: string
   blockchainHash?: string

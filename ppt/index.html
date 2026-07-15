@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>学分银行平台 - 答辩PPT</title>
+  <style>
+    :root {
+      --nb-ink: #1a202c;
+      --nb-cream: #fff9f0;
+      --nb-green: #22c55e;
+      --nb-green-deep: #16a34a;
+      --nb-blue: #bee3f8;
+      --nb-shadow: 4px 4px 0 0 var(--nb-ink);
+      --font-heading: 'Nunito', 'PingFang SC', 'Hiragino Sans GB', sans-serif;
+      --font-body: 'Source Sans 3', 'PingFang SC', sans-serif;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: var(--font-body);
+      background: var(--nb-cream);
+      color: var(--nb-ink);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    .deck-header {
+      padding: 24px 32px;
+      border-bottom: 3px solid var(--nb-ink);
+      box-shadow: var(--nb-shadow);
+      background: #fff;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .deck-header h1 {
+      font-family: var(--font-heading);
+      font-size: 1.5rem;
+      font-weight: 800;
+    }
+    .deck-header p {
+      font-size: 0.875rem;
+      color: #64748b;
+      margin-top: 4px;
+    }
+    .deck-gallery {
+      padding: 32px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    .slide-card {
+      background: #fff;
+      border: 3px solid var(--nb-ink);
+      border-radius: 18px;
+      box-shadow: var(--nb-shadow);
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .slide-card:hover {
+      transform: translate(3px, 3px);
+      box-shadow: 1px 1px 0 0 var(--nb-ink);
+    }
+    .slide-card:active {
+      transform: translate(6px, 6px);
+      box-shadow: none;
+    }
+    .slide-card__thumb {
+      aspect-ratio: 16 / 9;
+      background: linear-gradient(135deg, var(--nb-cream), var(--nb-blue));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .slide-card__number {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background: var(--nb-green);
+      color: #fff;
+      font-family: var(--font-heading);
+      font-weight: 800;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      border: 2px solid var(--nb-ink);
+    }
+    .slide-card__preview {
+      font-family: var(--font-heading);
+      font-size: 4rem;
+      font-weight: 900;
+      color: rgba(34, 197, 94, 0.15);
+      text-align: center;
+    }
+    .slide-card__info {
+      padding: 16px;
+    }
+    .slide-card__title {
+      font-family: var(--font-heading);
+      font-size: 1.125rem;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+    .slide-card__desc {
+      font-size: 0.875rem;
+      color: #64748b;
+      line-height: 1.5;
+    }
+    .deck-footer {
+      padding: 24px;
+      text-align: center;
+      color: #64748b;
+      font-size: 0.875rem;
+      border-top: 2px solid var(--nb-ink);
+      margin-top: 40px;
+    }
+    @media (max-width: 768px) {
+      .deck-header { padding: 16px; }
+      .deck-gallery { padding: 16px; grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="deck-header">
+    <h1>📚 学分银行平台答辩PPT</h1>
+    <p>终身学习 · 成就未来 | 点击卡片预览每页内容</p>
+  </header>
+  
+  <main class="deck-gallery">
+    <div class="slide-card" onclick="window.open('slides/01-cover.html', '_blank')">
+      <div class="slide-card__thumb">
+        <div class="slide-card__number">01</div>
+        <div class="slide-card__preview">封面</div>
+      </div>
+      <div class="slide-card__info">
+        <div class="slide-card__title">项目封面</div>
+        <div class="slide-card__desc">学分银行平台 · 终身学习管理系统</div>
+      </div>
+    </div>
+    
+    <div class="slide-card" onclick="window.open('slides/02-agenda.html', '_blank')">
+      <div class="slide-card__thumb">
+        <div class="slide-card__number">02</div>
+        <div class="slide-card__preview">目录</div>
+      </div>
+      <div class="slide-card__info">
+        <div class="slide-card__title">答辩大纲</div>
+        <div class="slide-card__desc">故事线 · 产品 · 技术 · 团队</div>
+      </div>
+    </div>
+    
+    <div class="slide-card" onclick="window.open('slides/03-story.html', '_blank')">
+      <div class="slide-card__thumb">
+        <div class="slide-card__number">03</div>
+        <div class="slide-card__preview">故事</div>
+      </div>
+      <div class="slide-card__info">
+        <div class="slide-card__title">品牌故事</div>
+        <div class="slide-card__desc">为什么做这个项目？教育的痛点</div>
+      </div>
+    </div>
+    
+    <div class="slide-card" onclick="window.open('slides/04-positioning.html', '_blank')">
+      <div class="slide-card__thumb">
+        <div class="slide-card__number">04</div>
+        <div class="slide-card__preview">定位</div>
+      </div>
+      <div class="slide-card__info">
+        <div class="slide-card__title">产品定位</div>
+        <div class="slide-card__desc">健身房 · 图书馆般的学习氛围</div>
+      </div>
+    </div>
+    
+    <div class="slide-card" onclick="window.open('slides/05-color.html', '_blank')">
+      <div class="slide-card__thumb">
+        <div class="slide-card__number">05</div>
+        <div class="slide-card__preview">色彩</div>
+      </div>
+      <div class="slide-card__info">
+        <div class="slide-card__title">色彩心理学</div>
+        <div class="slide-card__desc">绿色+奶油色的设计思考</div>
+      </div>
+    </div>
+    
+    <div class="slide-card" onclick="window.open('slides/06-functions.html', '_blank')">
+      <div class="slide-card__thumb">
+        <div class="slide-card__number">06</div>
+        <div class="slide-card__preview">功能</div>
+      </div>
+      <div class="slide-card__info">
+        <div class="slide-card__title">核心功能</div>
+        <div class="slide-card__desc">学习 · 企业 · 社交 · 商城</div>
+      </div>
+    </div>
+    
+    <div class="slide-card" onclick="window.open('slides/07-agent.html', '_blank')">
+      <div class="slide-card__thumb">
+        <div class="slide-card__number">07</div>
+        <div class="slide-card__preview">AI</div>
+      </div>
+      <div class="slide-card__info">
+        <div class="slide-card__title">AI智能助手</div>
+        <div class="slide-card__desc">个性化学习伙伴</div>
+      </div>
+    </div>
+    
+    <div class="slide-card" onclick="window.open('slides/08-tech.html', '_blank')">
+      <div class="slide-card__thumb">
+        <div class="slide-card__number">08</div>
+        <div class="slide-card__preview">技术</div>
+      </div>
+      <div class="slide-card__info">
+        <div class="slide-card__title">技术架构</div>
+        <div class="slide-card__desc">前后端分离 · 微服务架构</div>
+      </div>
+    </div>
+    
+    <div class="slide-card" onclick="window.open('slides/09-innovation.html', '_blank')">
+      <div class="slide-card__thumb">
+        <div class="slide-card__number">09</div>
+        <div class="slide-card__preview">创新</div>
+      </div>
+      <div class="slide-card__info">
+        <div class="slide-card__title">技术创新</div>
+        <div class="slide-card__desc">AI驱动 · 学分银行 · 直播面试</div>
+      </div>
+    </div>
+    
+    <div class="slide-card" onclick="window.open('slides/10-process.html', '_blank')">
+      <div class="slide-card__thumb">
+        <div class="slide-card__number">10</div>
+        <div class="slide-card__preview">流程</div>
+      </div>
+      <div class="slide-card__info">
+        <div class="slide-card__title">流程演示</div>
+        <div class="slide-card__desc">面试 · 活动 · 学习三大流程</div>
+      </div>
+    </div>
+    
+    <div class="slide-card" onclick="window.open('slides/11-team.html', '_blank')">
+      <div class="slide-card__thumb">
+        <div class="slide-card__number">11</div>
+        <div class="slide-card__preview">团队</div>
+      </div>
+      <div class="slide-card__info">
+        <div class="slide-card__title">团队介绍</div>
+        <div class="slide-card__desc">四位成员 · 分工协作</div>
+      </div>
+    </div>
+    
+    <div class="slide-card" onclick="window.open('slides/12-summary.html', '_blank')">
+      <div class="slide-card__thumb">
+        <div class="slide-card__number">12</div>
+        <div class="slide-card__preview">总结</div>
+      </div>
+      <div class="slide-card__info">
+        <div class="slide-card__title">项目小结</div>
+        <div class="slide-card__desc">回顾与展望</div>
+      </div>
+    </div>
+  </main>
+  
+  <footer class="deck-footer">
+    <p>学分银行平台 · 终身学习学分银行平台学习管理系统</p>
+  </footer>
+</body>
+</html>

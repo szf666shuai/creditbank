@@ -27,6 +27,11 @@ public class LearningArchive {
     private LocalDate endDate;
     private BigDecimal creditEarned;
     private Integer status;
+    private Long transferredToOrgId;
+    private Long transferredToCourseId;
+    private Long transferredToCertificateId;
+    private Long transferApplicationId;
+    private Integer transferStatus;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
 

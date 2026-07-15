@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI智能助手</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
+    
+    :root {
+      --nb-ink: #1a202c;
+      --nb-cream: #fff9f0;
+      --nb-green: #22c55e;
+      --nb-green-deep: #16a34a;
+      --nb-blue: #bee3f8;
+      --nb-pink: #fecdd3;
+      --nb-yellow: #fef08a;
+      --nb-purple: #ddd6fe;
+      --nb-shadow: 4px 4px 0 0 var(--nb-ink);
+      --font-heading: 'Nunito', 'PingFang SC', sans-serif;
+    }
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    html, body {
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      background: var(--nb-cream);
+      font-family: var(--font-heading);
+    }
+    
+    .slide {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      padding: 60px 120px;
+      position: relative;
+    }
+    
+    .page-header {
+      margin-bottom: 40px;
+    }
+    
+    .page-header .page-number {
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--nb-green);
+      letter-spacing: 0.1em;
+      margin-bottom: 8px;
+    }
+    
+    .page-header h2 {
+      font-size: 3rem;
+      font-weight: 900;
+      color: var(--nb-ink);
+    }
+    
+    .agent-content {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1.5fr;
+      gap: 40px;
+    }
+    
+    .agent-left {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    
+    .agent-intro {
+      background: var(--nb-green);
+      border: 3px solid var(--nb-ink);
+      border-radius: 24px;
+      box-shadow: var(--nb-shadow);
+      padding: 40px;
+      color: #fff;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    
+    .agent-intro__icon {
+      font-size: 5rem;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    
+    .agent-intro__title {
+      font-size: 2.5rem;
+      font-weight: 900;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    
+    .agent-intro__subtitle {
+      font-size: 1.2rem;
+      text-align: center;
+      opacity: 0.9;
+    }
+    
+    .agent-features {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+    
+    .feature-badge {
+      background: #fff;
+      border: 2.5px solid var(--nb-ink);
+      border-radius: 14px;
+      box-shadow: 3px 3px 0 0 var(--nb-ink);
+      padding: 16px;
+      text-align: center;
+    }
+    
+    .feature-badge__icon {
+      font-size: 1.5rem;
+      margin-bottom: 8px;
+    }
+    
+    .feature-badge__name {
+      font-size: 0.875rem;
+      font-weight: 700;
+      color: var(--nb-ink);
+    }
+    
+    .agent-right {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    
+    .chat-demo {
+      background: #fff;
+      border: 3px solid var(--nb-ink);
+      border-radius: 24px;
+      box-shadow: var(--nb-shadow);
+      padding: 32px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .chat-demo__header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid var(--nb-ink);
+    }
+    
+    .chat-demo__avatar {
+      width: 44px;
+      height: 44px;
+      background: var(--nb-green);
+      border: 2px solid var(--nb-ink);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+    
+    .chat-demo__title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--nb-ink);
+    }
+    
+    .chat-messages {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      overflow-y: auto;
+    }
+    
+    .chat-message {
+      max-width: 80%;
+      padding: 16px 20px;
+      border-radius: 16px;
+      border: 2px solid var(--nb-ink);
+    }
+    
+    .chat-message--user {
+      align-self: flex-end;
+      background: var(--nb-blue);
+      border-bottom-right-radius: 4px;
+    }
+    
+    .chat-message--ai {
+      align-self: flex-start;
+      background: var(--nb-green);
+      color: #fff;
+      border-bottom-left-radius: 4px;
+    }
+    
+    .chat-message__text {
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+    
+    .chat-input {
+      margin-top: 16px;
+      display: flex;
+      gap: 12px;
+    }
+    
+    .chat-input__field {
+      flex: 1;
+      background: var(--nb-cream);
+      border: 2px solid var(--nb-ink);
+      border-radius: 12px;
+      padding: 14px 20px;
+      font-size: 1rem;
+      font-family: var(--font-heading);
+      outline: none;
+    }
+    
+    .chat-input__button {
+      background: var(--nb-green);
+      border: 2px solid var(--nb-ink);
+      border-radius: 12px;
+      padding: 0 24px;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff;
+      cursor: pointer;
+      box-shadow: 3px 3px 0 0 var(--nb-ink);
+      transition: transform 0.1s ease, box-shadow 0.1s ease;
+    }
+    
+    .chat-input__button:hover {
+      transform: translate(2px, 2px);
+      box-shadow: 1px 1px 0 0 var(--nb-ink);
+    }
+    
+    .agent-capabilities {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    
+    .capability-card {
+      background: #fff;
+      border: 2.5px solid var(--nb-ink);
+      border-radius: 14px;
+      box-shadow: 3px 3px 0 0 var(--nb-ink);
+      padding: 20px;
+      text-align: center;
+    }
+    
+    .capability-card:nth-child(1) { background: var(--nb-yellow); }
+    .capability-card:nth-child(2) { background: var(--nb-pink); }
+    .capability-card:nth-child(3) { background: var(--nb-purple); }
+    
+    .capability-card__icon {
+      font-size: 1.8rem;
+      margin-bottom: 10px;
+    }
+    
+    .capability-card__name {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--nb-ink);
+    }
+    
+    .footer-note {
+      margin-top: 32px;
+      text-align: center;
+    }
+    
+    .footer-note p {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--nb-ink);
+    }
+    
+    .footer-note p span {
+      color: var(--nb-green);
+    }
+  </style>
+</head>
+<body>
+  <div class="slide">
+    <div class="page-header">
+      <div class="page-number">07 / 12</div>
+      <h2>AI智能助手</h2>
+    </div>
+    
+    <div class="agent-content">
+      <div class="agent-left">
+        <div class="agent-intro">
+          <div class="agent-intro__icon">🤖</div>
+          <div class="agent-intro__title">学习伙伴</div>
+          <div class="agent-intro__subtitle">24小时陪伴式学习助手</div>
+        </div>
+        
+        <div class="agent-features">
+          <div class="feature-badge">
+            <div class="feature-badge__icon">📖</div>
+            <div class="feature-badge__name">课程推荐</div>
+          </div>
+          <div class="feature-badge">
+            <div class="feature-badge__icon">❓</div>
+            <div class="feature-badge__name">智能答疑</div>
+          </div>
+          <div class="feature-badge">
+            <div class="feature-badge__icon">📝</div>
+            <div class="feature-badge__name">简历生成</div>
+          </div>
+          <div class="feature-badge">
+            <div class="feature-badge__icon">🎯</div>
+            <div class="feature-badge__name">学习规划</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="agent-right">
+        <div class="chat-demo">
+          <div class="chat-demo__header">
+            <div class="chat-demo__avatar">🤖</div>
+            <div class="chat-demo__title">学分银行助手</div>
+          </div>
+          
+          <div class="chat-messages">
+            <div class="chat-message chat-message--ai">
+              <div class="chat-message__text">你好！我是你的学习助手，请问有什么可以帮你的？</div>
+            </div>
+            <div class="chat-message chat-message--user">
+              <div class="chat-message__text">我想学习Python，有什么推荐的课程吗？</div>
+            </div>
+            <div class="chat-message chat-message--ai">
+              <div class="chat-message__text">根据你的学习目标和当前水平，我推荐以下课程：<br><br>📚 Python基础入门（适合零基础）<br>📚 Python数据分析实战（适合进阶）<br>📚 Python机器学习（适合高级）<br><br>需要我帮你生成学习计划吗？</div>
+            </div>
+          </div>
+          
+          <div class="chat-input">
+            <input type="text" class="chat-input__field" placeholder="输入你的问题..." />
+            <button class="chat-input__button">发送</button>
+          </div>
+        </div>
+        
+        <div class="agent-capabilities">
+          <div class="capability-card">
+            <div class="capability-card__icon">💡</div>
+            <div class="capability-card__name">个性化推荐</div>
+          </div>
+          <div class="capability-card">
+            <div class="capability-card__icon">⚡</div>
+            <div class="capability-card__name">实时响应</div>
+          </div>
+          <div class="capability-card">
+            <div class="capability-card__icon">🔒</div>
+            <div class="capability-card__name">隐私保护</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="footer-note">
+      <p>AI驱动的<span>个性化学习体验</span></p>
+    </div>
+  </div>
+</body>
+</html>

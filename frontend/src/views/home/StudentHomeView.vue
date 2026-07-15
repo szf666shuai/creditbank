@@ -36,7 +36,7 @@ const valueProps = [
   {
     icon: 'gift',
     title: '秩点激励成长',
-    desc: '学习积累秩点，在商城兑换奖励，让坚持可见。',
+    desc: '学习积累秩点，成长轨迹留存档案，让坚持可见。',
     tint: 'yellow',
   },
   {
@@ -49,7 +49,7 @@ const valueProps = [
 
 const highlightStats = [
   { label: '学习资源', hint: '课程随时开讲' },
-  { label: '秩点激励', hint: '学有所得可兑' },
+  { label: '秩点激励', hint: '学有所得可查' },
   { label: '机构加盟', hint: '成果可核验' },
 ] as const
 
@@ -69,10 +69,11 @@ onMounted(async () => {
     <section class="home-hero" aria-label="首页主视觉">
       <div class="home-hero__inner">
         <div class="home-hero__copy">
-          <span class="nb-badge">
-            <i class="nb-badge__dot" aria-hidden="true" />
-            终身学习 · 秩点银行
-          </span>
+          <div class="system-badge">
+            <span class="system-badge__label">终身学习</span>
+            <span class="system-badge__divider">·</span>
+            <span class="system-badge__highlight">学分银行平台</span>
+          </div>
 
           <p class="home-hero__brand">{{ BRAND_NAME }}</p>
           <p class="home-hero__brand-en">{{ BRAND_NAME_EN }} · {{ BRAND_PLATFORM }}</p>
@@ -210,7 +211,7 @@ onMounted(async () => {
               class="nb-btn nb-btn--secondary"
               @click="go(authStore.isLoggedIn ? '/credit' : '/register')"
             >
-              {{ authStore.isLoggedIn ? '去秩点商城' : '了解注册' }}
+              {{ authStore.isLoggedIn ? '我的秩点' : '了解注册' }}
             </button>
           </div>
           <ul class="cta-band__perks">
@@ -272,27 +273,36 @@ onMounted(async () => {
   align-items: center;
 }
 
-.nb-badge {
+.system-badge {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  margin-bottom: 18px;
-  padding: 6px 12px 6px 10px;
-  border: 2px solid var(--nb-ink);
-  border-radius: 999px;
-  background: #dcfce7;
-  color: var(--nb-green-deep);
-  font-size: 12px;
-  font-weight: 800;
-  box-shadow: var(--nb-shadow-sm);
+  margin-bottom: 20px;
+  padding: 14px 28px;
+  border: 3px solid var(--nb-ink);
+  border-radius: 16px;
+  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+  box-shadow: var(--nb-shadow);
 }
 
-.nb-badge__dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--nb-green);
-  border: 1.5px solid var(--nb-ink);
+.system-badge__label {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--nb-green-deep);
+}
+
+.system-badge__divider {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--nb-ink);
+  opacity: 0.5;
+}
+
+.system-badge__highlight {
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: var(--nb-green-deep);
 }
 
 .home-hero__brand {

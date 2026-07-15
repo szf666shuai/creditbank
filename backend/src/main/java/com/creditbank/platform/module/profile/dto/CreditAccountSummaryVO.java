@@ -9,7 +9,5 @@ import java.math.BigDecimal;
 @Builder
 public class CreditAccountSummaryVO {
 
-    private BigDecimal balance;
     private BigDecimal totalEarned;
-    private BigDecimal totalSpent;
 }

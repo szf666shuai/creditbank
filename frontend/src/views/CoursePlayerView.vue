@@ -1,8 +1,8 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { ArrowLeft, Check, Collection, Calendar, Lock } from '@element-plus/icons-vue'
+import { ArrowLeft, Check, Collection, Calendar } from '@element-plus/icons-vue'
 import {
   completeLearning,
   fetchCourseDanmaku,
@@ -11,7 +11,6 @@ import {
   fetchLearningResource,
   postCourseDanmaku,
   postLearningCheckin,
-  purchaseCourse,
   reportLearningProgress,
   startLearning,
   type CourseDanmaku,
@@ -45,7 +44,6 @@ const episodes = ref<CourseEpisode[]>([])
 const currentEpisodeId = ref<number | null>(null)
 const checkinStatus = ref<LearningCheckin | null>(null)
 const checkinLoading = ref(false)
-const purchaseLoading = ref(false)
 
 const pendingWatchedSeconds = ref(0)
 const lastPlaybackTime = ref<number | null>(null)
@@ -57,12 +55,6 @@ let lastSeekWarningAt = 0
 let progressReportPromise: Promise<void> | null = null
 
 const courseId = computed(() => Number(route.params.courseId))
-
-const needsPurchase = computed(
-  () => !!course.value?.paid && !course.value?.purchased,
-)
-
-const coursePrice = computed(() => Number(course.value?.priceCredit || 0))
 
 const hasEpisodes = computed(() => episodes.value.length > 0)
 
@@ -142,7 +134,7 @@ function applyEpisodeProgress(episode?: CourseEpisode | null) {
 }
 
 async function loadCheckinStatus() {
-  if (!authStore.isLoggedIn || needsPurchase.value) return
+  if (!authStore.isLoggedIn) return
   const checkinRes = await fetchLearningCheckinStatus(courseId.value)
   if (checkinRes.code === 200 && checkinRes.data) {
     checkinStatus.value = checkinRes.data
@@ -150,11 +142,6 @@ async function loadCheckinStatus() {
 }
 
 async function loadEpisodes() {
-  if (needsPurchase.value) {
-    episodes.value = []
-    currentEpisodeId.value = null
-    return
-  }
   const res = await fetchCourseEpisodes(courseId.value)
   if (res.code !== 200 || !res.data?.length) {
     episodes.value = []
@@ -175,27 +162,6 @@ async function switchEpisode(episodeId: number) {
   applyEpisodeProgress(currentEpisode.value)
 }
 
-async function handlePurchase() {
-  if (!requireLogin()) return
-  purchaseLoading.value = true
-  try {
-    const res = await purchaseCourse(courseId.value)
-    if (res.code !== 200 || !res.data?.purchased) {
-      throw new Error(res.message || '购买失败')
-    }
-    ElMessage.success(
-      res.data.balanceAfter === undefined
-        ? '购买成功，可以开始学习了'
-        : `购买成功，剩余 ${Number(res.data.balanceAfter).toFixed(2)} 秩点`,
-    )
-    await loadCourse()
-  } catch (e) {
-    ElMessage.error(e instanceof Error ? e.message : '购买失败')
-  } finally {
-    purchaseLoading.value = false
-  }
-}
-
 async function handleCheckin() {
   if (!requireLogin()) return
   checkinLoading.value = true
@@ -203,8 +169,8 @@ async function handleCheckin() {
     const res = await postLearningCheckin(courseId.value)
     if (res.code !== 200 || !res.data) throw new Error(res.message || '打卡失败')
     checkinStatus.value = res.data
-    const reward = Number(res.data.creditReward || 0)
-    ElMessage.success(reward > 0 ? `打卡成功，获得 ${reward} 秩点` : res.data.message || '打卡成功')
+    const reward = Number(res.data.integrityReward || 0)
+    ElMessage.success(reward > 0 ? `打卡成功，获得 ${reward} 诚信分` : res.data.message || '打卡成功')
   } catch (e) {
     ElMessage.error(e instanceof Error ? e.message : '打卡失败')
   } finally {
@@ -241,7 +207,7 @@ async function loadCourse() {
     if (danmakuRes.code === 200 && danmakuRes.data) {
       danmakuItems.value = danmakuRes.data
     }
-    if (authStore.isLoggedIn && !needsPurchase.value) {
+    if (authStore.isLoggedIn) {
       const startRes = await startLearning(courseId.value)
       if (startRes.code === 200 && startRes.data) {
         applyLearningRecord(startRes.data)
@@ -462,26 +428,8 @@ onMounted(() => {
 
         <div class="player-layout">
           <main class="player-main">
-            <div v-if="needsPurchase" class="purchase-paywall">
-              <div class="paywall-inner">
-                <el-icon class="paywall-icon"><Lock /></el-icon>
-                <h2>付费课程需购买后观看</h2>
-                <p>《{{ course.title }}》为付费课程，支付 {{ formatCredit(coursePrice) }} 秩点即可解锁全部视频与学习内容。</p>
-                <div class="paywall-actions">
-                  <el-button
-                    type="primary"
-                    size="large"
-                    :loading="purchaseLoading"
-                    @click="handlePurchase"
-                  >
-                    {{ authStore.isLoggedIn ? `支付 ${formatCredit(coursePrice)} 秩点解锁` : '登录后购买' }}
-                  </el-button>
-                  <el-button size="large" plain @click="router.push('/mall')">去秩点商城充值</el-button>
-                </div>
-              </div>
-            </div>
             <CourseVideoPlayer
-              v-else-if="currentVideoUrl"
+              v-if="currentVideoUrl"
               ref="videoPlayerRef"
               :key="currentEpisodeId || 'single'"
               :video-url="currentVideoUrl"
@@ -532,10 +480,10 @@ onMounted(() => {
                     </div>
                   </div>
                 </el-tab-pane>
-                <el-tab-pane v-if="!needsPurchase" label="评论" name="comments">
+                <el-tab-pane label="评论" name="comments">
                   <CourseCommentPanel :course-id="course.id" />
                 </el-tab-pane>
-                <el-tab-pane v-if="!needsPurchase" label="课件" name="courseware">
+                <el-tab-pane label="课件" name="courseware">
                   <CoursewarePanel :course-id="course.id" />
                 </el-tab-pane>
               </el-tabs>
@@ -562,28 +510,8 @@ onMounted(() => {
             <div class="sidebar-card">
               <div class="sidebar-title">
                 <el-icon><Collection /></el-icon>
-                {{ needsPurchase ? '课程解锁' : '学习进度' }}
+                学习进度
               </div>
-              <template v-if="needsPurchase">
-                <el-alert
-                  type="warning"
-                  :closable="false"
-                  show-icon
-                  :title="`需支付 ${formatCredit(coursePrice)} 秩点解锁本课程`"
-                />
-                <p class="sidebar-tip">
-                  购买后可观看全部视频、记录学习进度、打卡领奖并申请合格证。
-                </p>
-                <el-button
-                  type="primary"
-                  class="complete-btn"
-                  :loading="purchaseLoading"
-                  @click="handlePurchase"
-                >
-                  {{ authStore.isLoggedIn ? '立即购买解锁' : '登录后购买' }}
-                </el-button>
-              </template>
-              <template v-else>
               <el-progress
                 :percentage="course.progress || 0"
                 :status="Number(course.progress || 0) >= 80 ? 'success' : undefined"
@@ -641,7 +569,6 @@ onMounted(() => {
               >
                 {{ course.certNo ? '已颁发合格证' : '完成课程并颁发合格证' }}
               </el-button>
-              </template>
             </div>
           </aside>
         </div>

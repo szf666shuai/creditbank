@@ -1,202 +1,73 @@
-﻿<script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { Check, Collection, Search, VideoPlay } from '@element-plus/icons-vue'
-import {
-  completeLearning,
-  fetchLearningResources,
-  fetchLearningTags,
-  type LearningResource,
-} from '@/api/learning'
-import { useAuthStore } from '@/stores/auth'
+<script setup lang="ts">
+import { onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { Search, OfficeBuilding } from '@element-plus/icons-vue'
+import { listJoinedOrgsApi, type OrgListItem } from '@/api/enterprise'
 import { BRAND_NAME } from '@/config/brand'
 import UiIcon from '@/components/ui/UiIcon.vue'
 
 const router = useRouter()
-const route = useRoute()
-const authStore = useAuthStore()
 
 const loading = ref(false)
-const completingId = ref<number | null>(null)
-const resources = ref<LearningResource[]>([])
-const tags = ref<string[]>([])
+const orgs = ref<OrgListItem[]>([])
 const keyword = ref('')
-const activeTag = ref('')
-const activeResourceGroup = ref('all')
-const showAllCourses = ref(false)
+const activeType = ref<number | null>(null)
 
-const advantages = [
-  {
-    icon: 'collection',
-    title: '学习资源立体化',
-    desc: '视频、课件、弹幕互动与学习档案一体呈现，覆盖学、练、证全链路。',
-  },
-  {
-    icon: 'edit',
-    title: '进度可追踪可认证',
-    desc: '按有效观看进度推进学习，达标后可完成课程并领取合格证与秩点奖励。',
-  },
-  {
-    icon: 'link',
-    title: '学习流程一体化',
-    desc: '从资源发现、课程学习到档案沉淀无缝衔接，支撑终身学习与成果互认。',
-  },
+const typeOptions = [
+  { label: '全部', value: null },
+  { label: '企业', value: 1 },
+  { label: '高校', value: 2 },
+  { label: '培训机构', value: 3 },
 ]
 
-const quotes = [
-  {
-    text: `${BRAND_NAME}把优质课程沉淀为可追踪的学习资源，学员既能系统学习，也能把成果写入档案，真正打通「学—证—用」。`,
-    author: '教学实践反馈',
-    org: '联盟院校教师',
-  },
-  {
-    text: '资源页把筛选、进度和领证入口收拢到一起，减少跳转成本，对混合式学习场景很友好。',
-    author: '课程运营观察',
-    org: '平台学员社群',
-  },
-  {
-    text: '付费解锁与免费资源同屏展示，配合秩点激励，更容易形成持续学习习惯。',
-    author: '学习路径设计',
-    org: '职业教育顾问',
-  },
-]
-
-const completedCount = computed(() =>
-  resources.value.filter((item) => item.learningStatus === 1 || item.certNo).length,
-)
-
-const filteredResources = computed(() =>
-  resources.value.filter((item) => {
-    if (activeResourceGroup.value === 'purchased') return !!item.purchased
-    if (activeResourceGroup.value === 'learned') return !!item.learned
-    if (activeResourceGroup.value === 'free') return !item.paid
-    if (activeResourceGroup.value === 'paid') return !!item.paid
-    return true
-  }),
-)
-
-const visibleResources = computed(() =>
-  showAllCourses.value ? filteredResources.value : filteredResources.value.slice(0, 8),
-)
-
-const resourceGroups = computed(() => [
-  { value: 'all', label: '全部课程', count: resources.value.length },
-  { value: 'purchased', label: '已购买', count: resources.value.filter((item) => item.purchased).length },
-  { value: 'learned', label: '已学习', count: resources.value.filter((item) => item.learned).length },
-  { value: 'free', label: '免费课程', count: resources.value.filter((item) => !item.paid).length },
-  { value: 'paid', label: '付费课程', count: resources.value.filter((item) => item.paid).length },
-])
-
-function tagList(item: LearningResource) {
-  return item.tags ? item.tags.split(',').filter(Boolean).slice(0, 3) : []
+function typeLabel(type?: number) {
+  switch (type) {
+    case 1: return '企业'
+    case 2: return '高校'
+    case 3: return '培训机构'
+    default: return '机构'
+  }
 }
 
-function formatCredit(value?: number) {
-  return Number(value || 0).toFixed(2)
-}
-
-function canComplete(item: LearningResource) {
-  return !item.certNo && Number(item.progress || 0) >= 80
-}
-
-function showCoverImage(url?: string) {
-  if (!url) return false
-  return !/\.(pdf|zip|doc|docx|ppt|pptx|xlsx)(\?.*)?$/i.test(url)
-}
-
-async function loadResources() {
+async function loadOrgs() {
   loading.value = true
   try {
-    const res = await fetchLearningResources({
-      keyword: keyword.value.trim(),
-      tag: activeTag.value,
+    const res = await listJoinedOrgsApi({
+      page: 1,
+      pageSize: 50,
+      name: keyword.value.trim(),
+      type: activeType.value ?? undefined,
     })
-    if (res.code !== 200 || !res.data) throw new Error(res.message || '加载学习资源失败')
-    resources.value = res.data
-    showAllCourses.value = false
-  } catch (e) {
-    ElMessage.error(e instanceof Error ? e.message : '加载学习资源失败')
+    if (res.code === 200 && res.data?.records) {
+      orgs.value = res.data.records
+    }
+  } catch {
+    // ignore
   } finally {
     loading.value = false
   }
 }
 
-async function loadTags() {
-  const res = await fetchLearningTags()
-  if (res.code === 200 && res.data) {
-    tags.value = res.data
-  }
+function gotoOrgCourses(orgId: number) {
+  router.push(`/resources/org/${orgId}`)
 }
 
-function openCourse(item: LearningResource) {
-  if (!authStore.isLoggedIn) {
-    router.push({ path: '/login', query: { redirect: `/resources/${item.id}` } })
-    return
-  }
-  if (!authStore.isStudent && !authStore.isAdmin) {
-    ElMessage.warning('学习页仅学员或管理员可进入')
-    return
-  }
-  router.push({ name: 'course-player', params: { courseId: item.id } })
+function selectType(val: number | null) {
+  activeType.value = val
+  loadOrgs()
 }
 
-async function handleComplete(item: LearningResource) {
-  if (!canComplete(item)) {
-    ElMessage.warning('需先在学习页有效观看至 80% 进度，才能完成课程并领取合格证')
-    openCourse(item)
-    return
-  }
-  try {
-    await ElMessageBox.confirm(
-      `《${item.title}》已达到合格观看时长，确认完成课程并生成合格证？`,
-      '完成学习',
-      { type: 'success', confirmButtonText: '确认完成', cancelButtonText: '取消' },
-    )
-  } catch {
-    return
-  }
-  completingId.value = item.id
-  try {
-    const res = await completeLearning(item.id)
-    if (res.code !== 200 || !res.data) throw new Error(res.message || '完成学习失败')
-    ElMessage.success(res.data.creditChange ? '已完成学习并发放奖励秩点' : '已完成学习并生成证书')
-    await loadResources()
-  } catch (e) {
-    ElMessage.error(e instanceof Error ? e.message : '完成学习失败')
-  } finally {
-    completingId.value = null
-  }
-}
-
-function selectTag(tag: string) {
-  activeTag.value = activeTag.value === tag ? '' : tag
-  loadResources()
-}
-
-function selectGroup(value: string) {
-  activeResourceGroup.value = value
-  showAllCourses.value = false
-}
-
-onMounted(async () => {
-  await Promise.all([loadTags(), loadResources()])
-  const courseId = Number(route.query.courseId)
-  if (courseId) {
-    router.replace({ name: 'course-player', params: { courseId } })
-  }
-})
+onMounted(loadOrgs)
 </script>
 
 <template>
   <div class="resources-portal" v-loading="loading">
-    <!-- 页头：与首页 CTA 连续的浅色教育站气质 -->
     <section class="page-hero">
       <div class="page-hero__inner">
-        <p class="eyebrow">学习资源</p>
-        <h1>探索优质课程</h1>
+        <p class="eyebrow">资源商城</p>
+        <h1>探索机构课程</h1>
         <p class="page-hero__desc">
-          由联盟机构与平台沉淀的在线课程，支持视频学习、进度追踪与成果认证。
+          汇聚联盟高校、企业与培训机构的优质课程资源，选择心仪机构开始学习之旅。
         </p>
       </div>
     </section>
@@ -204,17 +75,17 @@ onMounted(async () => {
     <section class="intro-band">
       <div class="intro-inner">
         <div class="intro-card">
-          <h2>什么是学习资源？</h2>
+          <h2>为什么选择资源商城？</h2>
           <p>
-            学习资源是由联盟机构与平台沉淀的优质在线课程，支持视频学习、课件查阅与互动讨论，
-            可直接用于个人深度学习与成果认证。
+            精选联盟机构优质课程，每门课程均经过平台审核，
+            学习成果可计入学习档案并兑换秩点奖励。
           </p>
         </div>
         <div class="intro-card">
-          <h2>学习资源有何意义？</h2>
+          <h2>机构资源有哪些？</h2>
           <p>
-            让优质课程触达每一位学习者，促进教育资源共享与学习成果互认，
-            推动终身学习公平与秩点激励闭环。
+            涵盖企业内训、高校公开课、职业技能培训等多种类型，
+            满足学历提升、职业发展与兴趣学习多元化需求。
           </p>
         </div>
       </div>
@@ -222,178 +93,114 @@ onMounted(async () => {
 
     <section class="portal-section">
       <header class="section-head">
-        <p class="eyebrow">平台优势</p>
-        <h2>学习资源的优势</h2>
-      </header>
-      <div class="advantage-grid">
-        <article v-for="item in advantages" :key="item.title" class="advantage-card">
-          <span class="advantage-icon"><UiIcon :name="item.icon" :size="28" /></span>
-          <h3>{{ item.title }}</h3>
-          <p>{{ item.desc }}</p>
-        </article>
-      </div>
-    </section>
-
-    <!-- 课程目录：Popular Courses 气质 + 真实数据 -->
-    <section class="portal-section catalog-section">
-      <header class="section-head section-head--row">
-        <div>
-          <p class="eyebrow">课程目录</p>
-          <h2>精选课程</h2>
-          <p class="section-sub">按标签与学习状态筛选，进入课程页继续学习</p>
-        </div>
-        <div class="catalog-stats">
-          <div>
-            <strong>{{ resources.length }}</strong>
-            <span>可学资源</span>
-          </div>
-          <div>
-            <strong>{{ completedCount }}</strong>
-            <span>已完成</span>
-          </div>
-        </div>
+        <p class="eyebrow">机构列表</p>
+        <h2>入驻机构</h2>
+        <p class="section-sub">选择机构查看其提供的课程资源</p>
       </header>
 
       <div class="catalog-toolbar">
         <div class="glass-search">
           <el-input
             v-model="keyword"
-            placeholder="搜索课程、技能或机构"
+            placeholder="搜索机构名称..."
             clearable
-            @keyup.enter="loadResources"
-            @clear="loadResources"
+            @keyup.enter="loadOrgs"
+            @clear="loadOrgs"
           >
             <template #prefix>
               <el-icon><Search /></el-icon>
             </template>
           </el-input>
-          <el-button class="glass-search__btn" type="primary" @click="loadResources">搜索</el-button>
+          <el-button class="glass-search__btn" type="primary" @click="loadOrgs">搜索</el-button>
         </div>
       </div>
 
       <div class="chip-row">
         <button
-          v-for="group in resourceGroups"
-          :key="group.value"
+          v-for="opt in typeOptions"
+          :key="opt.label"
           type="button"
           class="chip"
-          :class="{ active: activeResourceGroup === group.value }"
-          @click="selectGroup(group.value)"
+          :class="{ active: activeType === opt.value }"
+          @click="selectType(opt.value)"
         >
-          {{ group.label }}
-          <em>{{ group.count }}</em>
-        </button>
-      </div>
-
-      <div v-if="tags.length" class="chip-row chip-row--tags">
-        <button
-          type="button"
-          class="chip ghost"
-          :class="{ active: !activeTag }"
-          @click="selectTag('')"
-        >
-          全部标签
-        </button>
-        <button
-          v-for="tag in tags"
-          :key="tag"
-          type="button"
-          class="chip ghost"
-          :class="{ active: activeTag === tag }"
-          @click="selectTag(tag)"
-        >
-          {{ tag }}
+          {{ opt.label }}
         </button>
       </div>
 
       <el-empty
-        v-if="!loading && !filteredResources.length"
-        description="暂无符合条件的学习资源"
+        v-if="!loading && orgs.length === 0"
+        description="暂无符合条件的机构"
         :image-size="80"
       />
 
-      <div v-else class="package-grid">
+      <div v-else class="org-grid">
         <article
-          v-for="item in visibleResources"
-          :key="item.id"
-          class="package-card"
-          @click="openCourse(item)"
+          v-for="org in orgs"
+          :key="org.id"
+          class="org-card"
+          @click="gotoOrgCourses(org.id)"
         >
-          <div class="package-cover">
+          <div class="org-cover">
             <img
-              v-if="showCoverImage(item.coverUrl)"
-              :src="item.coverUrl"
-              :alt="item.title"
+              v-if="org.logo"
+              :src="org.logo"
+              :alt="org.name"
               loading="lazy"
             />
-            <div v-else class="cover-fallback"><UiIcon name="course" :size="36" /></div>
-            <span v-if="item.paid && !item.purchased" class="package-badge paid">付费</span>
-            <span v-else-if="item.certNo" class="package-badge done">已完成</span>
-            <span v-else-if="item.progress" class="package-badge progress">{{ item.progress }}%</span>
+            <div v-else class="cover-fallback">
+              <el-icon :size="36"><OfficeBuilding /></el-icon>
+            </div>
+            <span class="org-type-badge">{{ typeLabel(org.type) }}</span>
           </div>
-          <div class="package-body">
-            <h3>{{ item.title }}</h3>
-            <p class="package-org">{{ item.orgName || '平台课程' }}</p>
-            <div v-if="tagList(item).length" class="package-tags">
-              <span v-for="tag in tagList(item)" :key="tag">{{ tag }}</span>
+          <div class="org-body">
+            <h3>{{ org.name }}</h3>
+            <p class="org-desc">{{ org.intro || '暂无介绍' }}</p>
+            <div class="org-meta">
+              <span v-if="org.email" class="meta-item">
+                <el-icon><UiIcon name="mail" :size="14" /></el-icon>
+                <span>有合作</span>
+              </span>
+              <span class="meta-item">
+                <el-icon><UiIcon name="star" :size="14" /></el-icon>
+                <span>精选机构</span>
+              </span>
             </div>
-            <div class="package-meta">
-              <span>奖励 {{ formatCredit(item.creditReward) }} 秩点</span>
-              <span v-if="item.paid">{{ formatCredit(item.priceCredit) }} 秩点解锁</span>
-              <span v-else>免费学习</span>
-            </div>
-            <div class="package-actions" @click.stop>
-              <el-button type="primary" size="small" :icon="VideoPlay" @click="openCourse(item)">
-                <template v-if="item.paid && !item.purchased">购买解锁</template>
-                <template v-else-if="item.progress">继续学习</template>
-                <template v-else>进入学习</template>
-              </el-button>
-              <el-button
-                v-if="item.certNo"
-                size="small"
-                type="success"
-                :icon="Check"
-                disabled
-              >
-                已领证
-              </el-button>
-              <el-button
-                v-else
-                size="small"
-                :icon="Collection"
-                :loading="completingId === item.id"
-                :disabled="!canComplete(item)"
-                @click="handleComplete(item)"
-              >
-                {{ canComplete(item) ? '完成领证' : '满 80% 可领证' }}
+            <div class="org-actions">
+              <el-button type="primary" @click.stop="gotoOrgCourses(org.id)">
+                查看课程
               </el-button>
             </div>
           </div>
         </article>
       </div>
-
-      <div v-if="filteredResources.length > 8" class="more-wrap">
-        <el-button
-          class="more-btn"
-          size="large"
-          @click="showAllCourses = !showAllCourses"
-        >
-          {{ showAllCourses ? '收起列表' : '查看更多课程' }}
-        </el-button>
-      </div>
     </section>
 
     <section class="portal-section quote-section">
       <header class="section-head">
-        <p class="eyebrow">学习者声音</p>
-        <h2>学习者与共建者反馈</h2>
+        <p class="eyebrow">机构声音</p>
+        <h2>共建机构反馈</h2>
       </header>
       <div class="quote-grid">
-        <blockquote v-for="(item, index) in quotes" :key="index" class="quote-card">
-          <p>{{ item.text }}</p>
+        <blockquote class="quote-card">
+          <p>{{ BRAND_NAME }}的资源商城帮助我们的课程触达更多学员，学习数据与秩点体系让教学效果可量化。</p>
           <footer>
-            <strong>{{ item.author }}</strong>
-            <span>{{ item.org }}</span>
+            <strong>合作院校代表</strong>
+            <span>高校联盟成员</span>
+          </footer>
+        </blockquote>
+        <blockquote class="quote-card">
+          <p>企业内训课程上架后，学员参与度明显提升，证书与秩点激励形成了良好的学习闭环。</p>
+          <footer>
+            <strong>企业培训负责人</strong>
+            <span>合作企业 HRD</span>
+          </footer>
+        </blockquote>
+        <blockquote class="quote-card">
+          <p>平台的课程审核与档案体系，让培训机构的专业课程获得了更广泛的信任与认可。</p>
+          <footer>
+            <strong>培训机构创始人</strong>
+            <span>职业教育伙伴</span>
           </footer>
         </blockquote>
       </div>
@@ -411,7 +218,7 @@ onMounted(async () => {
 .page-hero {
   padding: 48px 16px 28px;
   background:
-    radial-gradient(circle at 88% 18%, rgba(34, 197, 94, 0.12), transparent 28%),
+    radial-gradient(circle at 88% 18%, rgba(59, 130, 246, 0.15), transparent 28%),
     radial-gradient(circle at 12% 80%, rgba(190, 227, 248, 0.45), transparent 32%),
     var(--nb-cream, var(--color-background));
   border-bottom: 2.5px solid var(--nb-ink, var(--color-border-neutral));
@@ -484,14 +291,6 @@ onMounted(async () => {
   margin-bottom: 24px;
 }
 
-.section-head--row {
-  display: flex;
-  justify-content: space-between;
-  align-items: end;
-  gap: 16px;
-  text-align: left;
-}
-
 .eyebrow {
   margin: 0 0 8px;
   font-size: 0.75rem;
@@ -506,7 +305,6 @@ onMounted(async () => {
   font-family: var(--font-heading);
   font-size: clamp(1.5rem, 2.5vw, 1.875rem);
   color: var(--color-foreground);
-  text-shadow: none;
 }
 
 .section-sub {
@@ -514,75 +312,6 @@ onMounted(async () => {
   font-size: 0.9rem;
   color: var(--color-muted-foreground);
   line-height: 1.5;
-}
-
-.catalog-stats {
-  display: flex;
-  gap: 12px;
-}
-
-.catalog-stats div {
-  min-width: 88px;
-  padding: 10px 14px;
-  border-radius: var(--radius-md);
-  background: var(--color-primary-light);
-  border: 1px solid var(--color-border);
-  text-align: center;
-}
-
-.catalog-stats strong {
-  display: block;
-  font-size: 1.35rem;
-  color: var(--color-primary-dark);
-}
-
-.catalog-stats span {
-  font-size: 12px;
-  color: var(--color-muted-foreground);
-}
-
-.advantage-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
-}
-
-.advantage-card {
-  padding: 24px 22px;
-  border-radius: var(--radius-lg);
-  background: var(--color-card);
-  border: 1px solid var(--color-border-neutral);
-  box-shadow: var(--shadow-sm);
-  color: var(--color-foreground);
-}
-
-.advantage-icon {
-  display: inline-grid;
-  place-items: center;
-  width: 48px;
-  height: 48px;
-  margin-bottom: 14px;
-  border-radius: 12px;
-  color: var(--color-primary-dark);
-  background: var(--color-primary-light);
-}
-
-.advantage-card h3 {
-  margin: 0 0 10px;
-  font-family: var(--font-heading);
-  font-size: 1.1rem;
-  color: var(--color-foreground);
-}
-
-.advantage-card p {
-  margin: 0;
-  line-height: 1.7;
-  font-size: 0.9rem;
-  color: var(--color-muted-foreground);
-}
-
-.catalog-section {
-  padding-top: 40px;
 }
 
 .catalog-toolbar {
@@ -597,10 +326,6 @@ onMounted(async () => {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-bottom: 12px;
-}
-
-.chip-row--tags {
   margin-bottom: 22px;
 }
 
@@ -620,16 +345,6 @@ onMounted(async () => {
   transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
 }
 
-.chip em {
-  font-style: normal;
-  opacity: 0.7;
-  font-size: 12px;
-}
-
-.chip.ghost {
-  background: transparent;
-}
-
 .chip:hover {
   border-color: var(--nb-ink, var(--color-border));
   background: var(--nb-yellow, var(--color-primary-light));
@@ -639,18 +354,18 @@ onMounted(async () => {
 .chip.active {
   border-color: var(--nb-ink, var(--color-primary));
   color: var(--nb-ink, var(--color-primary-dark));
-  background: #bbf7d0;
+  background: #bfdbfe;
   font-weight: 800;
   box-shadow: 2px 2px 0 0 var(--nb-ink, #1a202c);
 }
 
-.package-grid {
+.org-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 18px;
 }
 
-.package-card {
+.org-card {
   display: flex;
   flex-direction: column;
   border-radius: var(--radius-lg);
@@ -662,81 +377,68 @@ onMounted(async () => {
   transition: transform 0.12s ease, box-shadow 0.12s ease;
 }
 
-.package-card:hover {
+.org-card:hover {
   transform: translate(3px, 3px);
   border-color: var(--nb-ink, var(--color-border));
   box-shadow: 2px 2px 0 0 var(--nb-ink, #1a202c);
 }
 
-.package-cover {
+.org-cover {
   position: relative;
-  aspect-ratio: 16 / 10;
-  background: var(--color-muted);
+  aspect-ratio: 16 / 9;
+  background: linear-gradient(135deg, #bfdbfe 0%, #93c5fd 100%);
 }
 
-.package-cover img,
-.cover-fallback {
+.org-cover img {
   width: 100%;
   height: 100%;
-}
-
-.package-cover img {
-  display: block;
   object-fit: cover;
 }
 
 .cover-fallback {
-  display: grid;
-  place-items: center;
-  color: var(--color-on-primary);
-  background: linear-gradient(135deg, var(--color-primary-dark), var(--color-primary));
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--nb-ink, #1e40af);
 }
 
-.package-badge {
+.org-type-badge {
   position: absolute;
   top: 10px;
-  right: 10px;
-  padding: 2px 8px;
+  left: 10px;
+  padding: 4px 10px;
   border-radius: 999px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
-  color: var(--color-primary-dark);
   background: rgba(255, 255, 255, 0.95);
-  border: 1px solid var(--color-border);
+  border: 2px solid var(--nb-ink, #1a202c);
+  color: var(--nb-ink, #1a202c);
 }
 
-.package-badge.paid {
-  background: #fff7ed;
-  color: #9a3412;
-  border-color: rgba(217, 119, 6, 0.35);
-}
-
-.package-badge.done {
-  background: #ecfdf5;
-  color: #065f46;
-  border-color: rgba(16, 185, 129, 0.35);
-}
-
-.package-badge.progress {
-  background: var(--color-primary-light);
-  color: var(--color-primary-dark);
-}
-
-.package-body {
-  padding: 14px 14px 16px;
+.org-body {
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   flex: 1;
   color: var(--color-foreground);
 }
 
-.package-body h3 {
+.org-body h3 {
   margin: 0;
   font-family: var(--font-heading);
-  font-size: 1rem;
+  font-size: 1.05rem;
   line-height: 1.4;
   color: var(--color-foreground);
+}
+
+.org-desc {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--color-muted-foreground);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -744,30 +446,7 @@ onMounted(async () => {
   min-height: 2.8em;
 }
 
-.package-org {
-  margin: 0;
-  font-size: 12px;
-  color: var(--color-primary);
-  font-weight: 600;
-}
-
-.package-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  min-height: 22px;
-}
-
-.package-tags span {
-  padding: 1px 8px;
-  border-radius: 999px;
-  font-size: 11px;
-  background: var(--color-primary-light);
-  border: 1px solid var(--color-border);
-  color: var(--color-primary-dark);
-}
-
-.package-meta {
+.org-meta {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
@@ -775,55 +454,21 @@ onMounted(async () => {
   color: var(--color-muted-foreground);
 }
 
-.package-actions {
+.meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.org-actions {
   margin-top: auto;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding-top: 6px;
+  padding-top: 4px;
 }
 
-.package-actions :deep(.el-button) {
-  flex: 1 1 auto;
-  min-height: 36px;
+.org-actions :deep(.el-button) {
+  width: 100%;
+  font-weight: 800 !important;
   border-radius: 10px !important;
-  font-weight: 800 !important;
-}
-
-.package-actions :deep(.el-button--default) {
-  background: #fff !important;
-  color: var(--nb-ink, #1a202c) !important;
-  border: 2px solid var(--nb-ink, #1a202c) !important;
-  box-shadow: 2px 2px 0 0 var(--nb-ink, #1a202c);
-}
-
-.package-actions :deep(.el-button--default.is-disabled) {
-  background: #f5efe6 !important;
-  color: #64748b !important;
-  opacity: 1;
-  box-shadow: none;
-}
-
-.more-wrap {
-  display: flex;
-  justify-content: center;
-  margin-top: 28px;
-}
-
-.more-btn {
-  min-width: 180px;
-  min-height: 44px;
-  border-radius: 999px !important;
-  background: var(--nb-green, #22c55e) !important;
-  border: 2.5px solid var(--nb-ink, #1a202c) !important;
-  color: #fff !important;
-  font-weight: 800 !important;
-  box-shadow: var(--nb-shadow-sm, 3px 3px 0 0 #1a202c) !important;
-}
-
-.more-btn:hover {
-  background: var(--nb-green-deep, #16a34a) !important;
-  color: #fff !important;
 }
 
 .quote-section {
@@ -847,8 +492,6 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   height: 100%;
-  min-height: 100%;
-  box-sizing: border-box;
 }
 
 .quote-card p {
@@ -878,30 +521,20 @@ onMounted(async () => {
 }
 
 @media (max-width: 1100px) {
-  .package-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+  .org-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 900px) {
   .intro-inner,
-  .advantage-grid,
   .quote-grid {
     grid-template-columns: 1fr;
-  }
-
-  .package-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .section-head--row {
-    flex-direction: column;
-    align-items: flex-start;
   }
 }
 
 @media (max-width: 560px) {
-  .package-grid {
+  .org-grid {
     grid-template-columns: 1fr;
   }
 

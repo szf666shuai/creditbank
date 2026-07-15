@@ -3,7 +3,7 @@ package com.creditbank.platform.service;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.creditbank.platform.common.BusinessException;
 import com.creditbank.platform.constant.UserRole;
-import com.creditbank.platform.dto.CreditEarnRequest;
+import com.creditbank.platform.dto.IntegrityScoreVO;
 import com.creditbank.platform.dto.LoginRequest;
 import com.creditbank.platform.dto.LoginResponse;
 import com.creditbank.platform.dto.RegisterRequest;
@@ -34,7 +34,7 @@ public class AuthService {
     private final SysOrganizationMapper orgMapper;
     private final CreditAccountMapper creditAccountMapper;
     private final IntegrityScoreMapper integrityScoreMapper;
-    private final CreditService creditService;
+    private final IntegrityService integrityService;
     private final JwtUtil jwtUtil;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
@@ -110,14 +110,10 @@ public class AuthService {
         if (request.getRoleType() == UserRole.STUDENT) {
             initStudentAccount(user.getId());
             try {
-                CreditEarnRequest bonus = new CreditEarnRequest();
-                bonus.setRuleCode("REGISTER_BONUS");
-                bonus.setRefType("user");
-                bonus.setRefId(user.getId());
-                bonus.setSource("新用户注册奖励");
-                creditService.earnByRule(user.getId(), bonus);
+                integrityService.applyEvent(user.getId(), 5, "新用户注册奖励",
+                        "user", user.getId(), null);
             } catch (BusinessException ignored) {
-                // 规则未配置时跳过，不影响注册
+                // 诚信分规则未配置时跳过，不影响注册
             }
         }
 
@@ -137,9 +133,7 @@ public class AuthService {
     private void initStudentAccount(Long userId) {
         CreditAccount account = new CreditAccount();
         account.setUserId(userId);
-        account.setBalance(BigDecimal.ZERO);
         account.setTotalEarned(BigDecimal.ZERO);
-        account.setTotalSpent(BigDecimal.ZERO);
         creditAccountMapper.insert(account);
 
         IntegrityScore score = new IntegrityScore();

@@ -1,7 +1,7 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Medal, Tickets, TrendCharts, Wallet } from '@element-plus/icons-vue'
+import { Medal, TrendCharts, Wallet } from '@element-plus/icons-vue'
 import { fetchProfileSummary, type ProfileSummary } from '@/api/profile'
 import { useAuthStore } from '@/stores/auth'
 import { roleLabel } from '@/types/auth'
@@ -41,7 +41,7 @@ onMounted(loadSummary)
         <div>
           <p class="eyebrow">Profile</p>
           <h1>个人中心</h1>
-          <p class="subtitle">学习完成记录、证书和商城订单会同步沉淀到个人档案。</p>
+          <p class="subtitle">学习完成记录、证书和秩点会同步沉淀到个人档案。</p>
         </div>
         <div class="identity-card">
           <el-descriptions :column="2" border>
@@ -65,7 +65,7 @@ onMounted(loadSummary)
           <article class="metric-card">
             <el-icon><Wallet /></el-icon>
             <span>当前秩点</span>
-            <strong>{{ formatAmount(summary.creditAccount.balance) }}</strong>
+            <strong>{{ formatAmount(summary.creditAccount.totalEarned) }}</strong>
           </article>
           <article class="metric-card">
             <el-icon><TrendCharts /></el-icon>
@@ -76,11 +76,6 @@ onMounted(loadSummary)
             <el-icon><Medal /></el-icon>
             <span>学习证书</span>
             <strong>{{ summary.certificates.length }}</strong>
-          </article>
-          <article class="metric-card">
-            <el-icon><Tickets /></el-icon>
-            <span>商城订单</span>
-            <strong>{{ summary.orders.length }}</strong>
           </article>
         </section>
 
@@ -120,27 +115,7 @@ onMounted(loadSummary)
             </div>
           </article>
 
-          <article class="panel wide">
-            <div class="panel-head">
-              <h2>商城订单</h2>
-              <el-button link type="primary" @click="$router.push('/credit')">进入商城</el-button>
-            </div>
-            <el-empty v-if="!summary.orders.length" description="暂无订单记录" />
-            <div v-else class="order-grid">
-              <div v-for="order in summary.orders" :key="order.id" class="order-line">
-                <div>
-                  <strong>{{ order.orderNo }}</strong>
-                  <span>{{ order.items.map((item) => `${item.productName} x ${item.quantity}`).join('、') }}</span>
-                </div>
-                <div class="order-price">
-                  <strong>{{ formatAmount(order.totalCredit) }} 秩点</strong>
-                  <el-tag size="small" :type="order.payStatus === 1 ? 'success' : 'warning'">
-                    {{ order.payStatusName }}
-                  </el-tag>
-                </div>
-              </div>
-            </div>
-          </article>
+          
         </section>
       </template>
 
@@ -150,7 +125,7 @@ onMounted(loadSummary)
         </el-button>
         <el-button @click="$router.push('/archive')">学习档案</el-button>
         <el-button @click="$router.push('/resources')">学习资源</el-button>
-        <el-button @click="$router.push('/credit')">秩点商城</el-button>
+        <el-button @click="$router.push('/credit')">我的秩点</el-button>
       </div>
     </div>
   </div>

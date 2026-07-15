@@ -75,10 +75,10 @@ async function submitComment() {
     }
     draft.value = ''
     replyTarget.value = null
-    const reward = Number(created.creditReward || 0)
+    const reward = Number(created.integrityReward || 0)
     ElMessage.success(
       reward > 0
-        ? `${isReply ? '回复已发布' : '评论已发布'}，获得 ${reward.toFixed(2)} 秩点`
+        ? `${isReply ? '回复已发布' : '评论已发布'}，获得 ${reward} 诚信分`
         : isReply
           ? '回复已发布'
           : '评论已发布',

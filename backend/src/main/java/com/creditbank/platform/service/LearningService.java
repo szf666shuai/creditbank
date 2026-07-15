@@ -3,10 +3,8 @@ package com.creditbank.platform.service;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.creditbank.platform.common.BusinessException;
 import com.creditbank.platform.dto.CertificateVerifyResult;
-import com.creditbank.platform.dto.CoursePurchaseResult;
 import com.creditbank.platform.dto.CreditChangeResult;
 import com.creditbank.platform.dto.CreditEarnRequest;
-import com.creditbank.platform.dto.CreditSpendRequest;
 import com.creditbank.platform.dto.LearningArchiveVO;
 import com.creditbank.platform.dto.LearningCertificateVO;
 import com.creditbank.platform.dto.LearningCompletionResult;
@@ -16,15 +14,12 @@ import com.creditbank.platform.entity.Course;
 import com.creditbank.platform.entity.LearningAchievement;
 import com.creditbank.platform.entity.LearningArchive;
 import com.creditbank.platform.entity.LearningCertificate;
-import com.creditbank.platform.entity.MallProduct;
 import com.creditbank.platform.entity.SysTag;
 import com.creditbank.platform.entity.UserCourse;
 import com.creditbank.platform.mapper.CourseMapper;
 import com.creditbank.platform.mapper.LearningAchievementMapper;
 import com.creditbank.platform.mapper.LearningArchiveMapper;
 import com.creditbank.platform.mapper.LearningCertificateMapper;
-import com.creditbank.platform.mapper.MallOrderItemMapper;
-import com.creditbank.platform.mapper.MallProductMapper;
 import com.creditbank.platform.mapper.SysTagMapper;
 import com.creditbank.platform.mapper.UserCourseMapper;
 import com.creditbank.platform.module.profile.service.ProfileLearningStatsService;
@@ -41,13 +36,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HexFormat;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -63,8 +53,6 @@ public class LearningService {
     private final LearningArchiveMapper archiveMapper;
     private final LearningAchievementMapper achievementMapper;
     private final CreditService creditService;
-    private final MallProductMapper mallProductMapper;
-    private final MallOrderItemMapper mallOrderItemMapper;
     private final ProfileLearningStatsService profileLearningStatsService;
     private final LearningEngagementService learningEngagementService;
     private final AuthSupport authSupport;
@@ -74,29 +62,7 @@ public class LearningService {
         if (resources.isEmpty()) {
             return resources;
         }
-        Map<Long, MallProduct> paidProductByCourse = mallProductMapper.selectList(
-                        new LambdaQueryWrapper<MallProduct>()
-                                .eq(MallProduct::getProductType, 3)
-                                .eq(MallProduct::getStatus, 1)
-                                .eq(MallProduct::getDeleted, 0)
-                                .isNotNull(MallProduct::getRefCourseId)
-                )
-                .stream()
-                .collect(Collectors.toMap(MallProduct::getRefCourseId, Function.identity(), (first, ignored) -> first));
-        Set<Long> purchasedCourseIds = userId == null
-                ? Set.of()
-                : new HashSet<>(mallOrderItemMapper.findPurchasedCourseIds(userId));
         for (LearningResourceVO resource : resources) {
-            MallProduct paidProduct = paidProductByCourse.get(resource.getId());
-            resource.setPaid(paidProduct != null
-                    || nz(resource.getPriceCredit()).compareTo(BigDecimal.ZERO) > 0
-                    || nz(resource.getPriceMoney()).compareTo(BigDecimal.ZERO) > 0);
-            resource.setPurchaseProductId(paidProduct == null ? null : paidProduct.getId());
-            BigDecimal effectivePrice = resolveCoursePrice(resource, paidProduct);
-            if (Boolean.TRUE.equals(resource.getPaid()) && effectivePrice.compareTo(BigDecimal.ZERO) > 0) {
-                resource.setPriceCredit(effectivePrice);
-            }
-            resource.setPurchased(purchasedCourseIds.contains(resource.getId()));
             resource.setLearned(false);
             if (userId == null) {
                 continue;
@@ -115,11 +81,45 @@ public class LearningService {
                 resource.setLearned((userCourse.getWatchedSeconds() != null && userCourse.getWatchedSeconds() > 0)
                         || (userCourse.getProgress() != null && userCourse.getProgress() > 0)
                         || (userCourse.getStatus() != null && userCourse.getStatus() == 1));
-                if (!resource.getPurchased()) {
-                    BigDecimal price = resolveCoursePrice(resource, paidProductByCourse.get(resource.getId()));
-                    resource.setPurchased(nz(userCourse.getPaidCredit()).compareTo(price) >= 0
-                            && price.compareTo(BigDecimal.ZERO) > 0);
-                }
+            }
+            LearningCertificate cert = certificateMapper.selectOne(
+                    new LambdaQueryWrapper<LearningCertificate>()
+                            .eq(LearningCertificate::getUserId, userId)
+                            .eq(LearningCertificate::getCourseId, resource.getId())
+                            .last("LIMIT 1")
+            );
+            if (cert != null) {
+                resource.setCertificateId(cert.getId());
+                resource.setCertNo(cert.getCertNo());
+            }
+        }
+        return resources;
+    }
+
+    public List<LearningResourceVO> listResourcesByOrg(Long userId, Long orgId, String keyword) {
+        List<LearningResourceVO> resources = courseMapper.listResourcesByOrg(orgId, trim(keyword));
+        if (resources.isEmpty()) {
+            return resources;
+        }
+        for (LearningResourceVO resource : resources) {
+            resource.setLearned(false);
+            if (userId == null) {
+                continue;
+            }
+            UserCourse userCourse = userCourseMapper.selectOne(
+                    new LambdaQueryWrapper<UserCourse>()
+                            .eq(UserCourse::getUserId, userId)
+                            .eq(UserCourse::getCourseId, resource.getId())
+            );
+            if (userCourse != null) {
+                resource.setProgress(userCourse.getProgress());
+                resource.setWatchedSeconds(userCourse.getWatchedSeconds());
+                resource.setMaxWatchedPositionSeconds(userCourse.getMaxWatchedPositionSeconds());
+                resource.setLastPositionSeconds(userCourse.getLastPositionSeconds());
+                resource.setLearningStatus(userCourse.getStatus());
+                resource.setLearned((userCourse.getWatchedSeconds() != null && userCourse.getWatchedSeconds() > 0)
+                        || (userCourse.getProgress() != null && userCourse.getProgress() > 0)
+                        || (userCourse.getStatus() != null && userCourse.getStatus() == 1));
             }
             LearningCertificate cert = certificateMapper.selectOne(
                     new LambdaQueryWrapper<LearningCertificate>()
@@ -140,112 +140,11 @@ public class LearningService {
                 .filter(item -> item.getId().equals(courseId))
                 .findFirst()
                 .orElseThrow(() -> new BusinessException(404, "学习资源不存在或已下架"));
-        maskLockedMedia(resource);
         return resource;
     }
 
     public void assertCourseAccess(Long userId, Long courseId) {
-        if (authSupport.isAdmin(userId)) {
-            requireCourse(courseId);
-            return;
-        }
-        LearningResourceVO resource = listResources(userId, null, null).stream()
-                .filter(item -> item.getId().equals(courseId))
-                .findFirst()
-                .orElseThrow(() -> new BusinessException(404, "学习资源不存在或已下架"));
-        if (Boolean.TRUE.equals(resource.getPaid()) && !Boolean.TRUE.equals(resource.getPurchased())) {
-            throw new BusinessException(403, "请先购买该课程后再学习");
-        }
-    }
-
-    @Transactional
-    public CoursePurchaseResult purchaseCourse(Long userId, Long courseId) {
-        LearningResourceVO resource = listResources(userId, null, null).stream()
-                .filter(item -> item.getId().equals(courseId))
-                .findFirst()
-                .orElseThrow(() -> new BusinessException(404, "学习资源不存在或已下架"));
-        if (!Boolean.TRUE.equals(resource.getPaid())) {
-            throw new BusinessException(400, "该课程无需购买");
-        }
-        if (Boolean.TRUE.equals(resource.getPurchased())) {
-            return CoursePurchaseResult.builder()
-                    .courseId(courseId)
-                    .paidCredit(BigDecimal.ZERO)
-                    .purchased(true)
-                    .build();
-        }
-        BigDecimal price = resolveCoursePrice(
-                resource,
-                mallProductMapper.selectOne(
-                        new LambdaQueryWrapper<MallProduct>()
-                                .eq(MallProduct::getProductType, 3)
-                                .eq(MallProduct::getRefCourseId, courseId)
-                                .eq(MallProduct::getStatus, 1)
-                                .eq(MallProduct::getDeleted, 0)
-                                .last("LIMIT 1")
-                )
-        );
-        if (price.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new BusinessException(400, "课程价格未配置");
-        }
-        CreditSpendRequest spendRequest = new CreditSpendRequest();
-        spendRequest.setAmount(price);
-        spendRequest.setBizType("course_purchase");
-        spendRequest.setRefType("course");
-        spendRequest.setRefId(courseId);
-        spendRequest.setSource("购买课程: " + resource.getTitle());
-        CreditChangeResult creditChange = creditService.spend(userId, spendRequest);
-
-        UserCourse record = userCourseMapper.selectOne(
-                new LambdaQueryWrapper<UserCourse>()
-                        .eq(UserCourse::getUserId, userId)
-                        .eq(UserCourse::getCourseId, courseId)
-        );
-        if (record == null) {
-            record = new UserCourse();
-            record.setUserId(userId);
-            record.setCourseId(courseId);
-            record.setProgress(0);
-            record.setWatchedSeconds(0);
-            record.setMaxWatchedPositionSeconds(0);
-            record.setLastPositionSeconds(0);
-            record.setStatus(0);
-            record.setPaidCredit(price);
-            userCourseMapper.insert(record);
-        } else {
-            record.setPaidCredit(price);
-            userCourseMapper.updateById(record);
-        }
-        return CoursePurchaseResult.builder()
-                .courseId(courseId)
-                .paidCredit(price)
-                .balanceAfter(creditChange.getBalanceAfter())
-                .purchased(true)
-                .build();
-    }
-
-    private void maskLockedMedia(LearningResourceVO resource) {
-        if (!Boolean.TRUE.equals(resource.getPaid()) || Boolean.TRUE.equals(resource.getPurchased())) {
-            return;
-        }
-        resource.setVideoUrl(null);
-    }
-
-    private BigDecimal resolveCoursePrice(LearningResourceVO resource, MallProduct mallProduct) {
-        BigDecimal coursePrice = nz(resource.getPriceCredit());
-        BigDecimal productPrice = mallProduct == null ? BigDecimal.ZERO : nz(mallProduct.getPriceCredit());
-        return coursePrice.max(productPrice);
-    }
-
-    public List<String> listSkillTags() {
-        return sysTagMapper.selectList(
-                        new LambdaQueryWrapper<SysTag>()
-                                .eq(SysTag::getCategory, "skill")
-                                .orderByAsc(SysTag::getName)
-                )
-                .stream()
-                .map(SysTag::getName)
-                .toList();
+        requireCourse(courseId);
     }
 
     @Transactional
@@ -268,7 +167,6 @@ public class LearningService {
         record.setMaxWatchedPositionSeconds(0);
         record.setLastPositionSeconds(0);
         record.setStatus(0);
-        record.setPaidCredit(BigDecimal.ZERO);
         userCourseMapper.insert(record);
         return record;
     }
@@ -346,7 +244,7 @@ public class LearningService {
             creditChange = grantCourseReward(userId, course);
             BigDecimal earned = creditChange != null && creditChange.getAmount() != null
                     ? creditChange.getAmount()
-                    : nz(course.getCreditReward());
+                    : nz(course.getCreditValue());
             profileLearningStatsService.recordCourseCompleted(userId, earned);
         }
         LearningArchive archive = ensureArchive(userId, course, cert);
@@ -438,7 +336,6 @@ public class LearningService {
         cert.setTitle(title);
         cert.setQrContent(verifyUrl);
         cert.setQrImageUrl(null);
-        // 前端用 certificateId 打开证书预览；不再存假 PDF 路径以免空白页
         cert.setFileUrl(null);
         cert.setBlockchainHash(hash);
         cert.setVerifyStatus(1);
@@ -466,7 +363,7 @@ public class LearningService {
         archive.setDescription("完成学习资源并通过区块链证书校验: " + cert.getCertNo());
         archive.setStartDate(LocalDate.now());
         archive.setEndDate(LocalDate.now());
-        archive.setCreditEarned(nz(course.getCreditReward()));
+        archive.setCreditEarned(nz(course.getCreditValue()));
         archive.setStatus(1);
         archiveMapper.insert(archive);
         return archive;
@@ -479,7 +376,7 @@ public class LearningService {
         achievement.setType(1);
         achievement.setOrgId(course.getOrgId());
         achievement.setCertificateId(cert.getId());
-        achievement.setCreditValue(nz(course.getCreditReward()));
+        achievement.setCreditValue(nz(course.getCreditValue()));
         achievement.setFileUrl(null);
         achievement.setVerifyStatus(1);
         achievement.setBlockchainHash(cert.getBlockchainHash());
@@ -487,7 +384,7 @@ public class LearningService {
     }
 
     private CreditChangeResult grantCourseReward(Long userId, Course course) {
-        BigDecimal reward = nz(course.getCreditReward());
+        BigDecimal reward = nz(course.getCreditValue());
         if (reward.compareTo(BigDecimal.ZERO) <= 0) {
             return null;
         }

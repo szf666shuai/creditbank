@@ -36,8 +36,6 @@ function showCoverImage(url?: string) {
 /** 普通条目跳转 */
 function itemPath(item: SearchItem) {
   switch (item.type) {
-    case 'credit':
-      return `/credit/products/${item.id}`
     case 'course':
       return item.id > 0 ? `/resources/${item.id}` : '/resources'
     case 'partner':
@@ -107,7 +105,6 @@ const displayJobs = computed(() =>
 )
 
 const courseCards = computed(() => (homeData.value?.courses ?? []).slice(0, 4))
-const productShelf = computed(() => (homeData.value?.hotProducts ?? []).slice(0, 6))
 
 const courseAccent = ['pink', 'blue', 'purple', 'yellow'] as const
 
@@ -205,38 +202,6 @@ onMounted(loadHomeData)
           <div class="course-more-wrap">
             <router-link to="/resources" class="nb-btn nb-btn--secondary course-more-btn">
               查看全部课程 →
-            </router-link>
-          </div>
-        </section>
-
-        <!-- 热卖商品：价签货架 -->
-        <section class="home-block">
-          <HomeSectionHeader title="热卖商品" icon="hot" more-to="/credit" />
-          <el-empty v-if="!homeData.hotProducts.length" description="暂无商品" :image-size="64" />
-          <div v-else class="product-shelf">
-            <router-link
-              v-for="(item, index) in productShelf"
-              :key="`product-${item.id}`"
-              :to="itemPath(item)"
-              class="product-tile"
-            >
-              <span class="product-rank" :class="{ hot: index < 3 }">{{ index + 1 }}</span>
-              <div class="product-tile__cover">
-                <img
-                  v-if="showCoverImage(item.coverUrl)"
-                  :src="item.coverUrl"
-                  :alt="item.title"
-                  loading="lazy"
-                />
-                <div v-else class="cover-placeholder product-placeholder">
-                  <UiIcon name="gift" :size="28" />
-                </div>
-              </div>
-              <h3>{{ item.title }}</h3>
-              <div class="product-tile__price">
-                <strong>{{ item.extra || '秩点兑换' }}</strong>
-                <span>去兑换</span>
-              </div>
             </router-link>
           </div>
         </section>
@@ -551,110 +516,6 @@ onMounted(loadHomeData)
 .course-placeholder {
   background: var(--nb-pink) !important;
   color: var(--nb-ink);
-}
-
-/* —— 热卖商品 —— */
-.product-shelf {
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.product-tile {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  padding: 12px;
-  border-radius: var(--radius-md);
-  text-decoration: none;
-  color: inherit;
-  background: #fff;
-  border: 2.5px solid var(--nb-ink);
-  box-shadow: var(--nb-shadow-sm);
-  transition: transform 0.12s ease, box-shadow 0.12s ease;
-  cursor: pointer;
-}
-
-.product-tile:hover {
-  transform: translate(2px, 2px);
-  box-shadow: 1px 1px 0 0 var(--nb-ink);
-}
-
-.product-rank {
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  z-index: 1;
-  width: 24px;
-  height: 24px;
-  border-radius: 8px;
-  display: grid;
-  place-items: center;
-  font-size: 11px;
-  font-weight: 800;
-  color: var(--nb-ink);
-  background: var(--nb-yellow);
-  border: 2px solid var(--nb-ink);
-}
-
-.product-rank.hot {
-  color: var(--nb-ink);
-  background: var(--nb-pink);
-}
-
-.product-tile__cover {
-  aspect-ratio: 1;
-  border-radius: 10px;
-  overflow: hidden;
-  background: var(--color-muted);
-  margin-bottom: 10px;
-  border: 2px solid var(--nb-ink);
-}
-
-.product-tile__cover img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.product-placeholder {
-  background: var(--nb-blue) !important;
-  color: var(--nb-ink);
-}
-
-.product-tile h3 {
-  margin: 0 0 10px;
-  font-family: var(--font-heading);
-  font-size: 13px;
-  font-weight: 800;
-  line-height: 1.4;
-  color: var(--nb-ink);
-  min-height: 36px;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.product-tile__price {
-  margin-top: auto;
-  display: flex;
-  justify-content: space-between;
-  gap: 6px;
-  align-items: baseline;
-}
-
-.product-tile__price strong {
-  font-size: 13px;
-  color: var(--nb-green-deep);
-  font-weight: 800;
-}
-
-.product-tile__price span {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--color-muted-foreground);
 }
 
 .card-grid {
@@ -1139,10 +1000,6 @@ onMounted(loadHomeData)
     grid-template-columns: repeat(3, 1fr);
   }
 
-  .product-shelf {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
   .partner-grid {
     grid-template-columns: repeat(4, 1fr);
   }
@@ -1156,10 +1013,6 @@ onMounted(loadHomeData)
   .card-grid--4,
   .card-grid--3 {
     grid-template-columns: repeat(2, 1fr);
-  }
-
-  .product-shelf {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .dual-row {
@@ -1184,10 +1037,6 @@ onMounted(loadHomeData)
   .card-grid--4,
   .card-grid--3 {
     grid-template-columns: 1fr;
-  }
-
-  .product-shelf {
-    grid-template-columns: 1fr 1fr;
   }
 
   .partner-grid {

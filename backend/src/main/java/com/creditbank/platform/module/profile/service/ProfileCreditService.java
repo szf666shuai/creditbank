@@ -24,7 +24,6 @@ public class ProfileCreditService {
     private static final int TYPE_EARN = 1;
     private static final int TYPE_CONVERT = 2;
     private static final int TYPE_GROWTH = 3;
-    private static final int TYPE_SPEND = 4;
 
     private final AuthSupport authSupport;
     private final CreditAccountMapper creditAccountMapper;
@@ -36,15 +35,11 @@ public class ProfileCreditService {
                 .eq(CreditAccount::getUserId, userId));
         if (account == null) {
             return CreditAccountSummaryVO.builder()
-                    .balance(java.math.BigDecimal.ZERO)
                     .totalEarned(java.math.BigDecimal.ZERO)
-                    .totalSpent(java.math.BigDecimal.ZERO)
                     .build();
         }
         return CreditAccountSummaryVO.builder()
-                .balance(account.getBalance())
                 .totalEarned(account.getTotalEarned())
-                .totalSpent(account.getTotalSpent())
                 .build();
     }
 
@@ -83,7 +78,6 @@ public class ProfileCreditService {
                 .type(tx.getType())
                 .typeName(typeName(tx.getType()))
                 .amount(tx.getAmount())
-                .balanceAfter(tx.getBalanceAfter())
                 .bizType(tx.getBizType())
                 .source(tx.getSource())
                 .refType(tx.getRefType())
@@ -100,7 +94,6 @@ public class ProfileCreditService {
             case TYPE_EARN -> "获取";
             case TYPE_CONVERT -> "转换";
             case TYPE_GROWTH -> "增长";
-            case TYPE_SPEND -> "消耗";
             default -> "未知";
         };
     }

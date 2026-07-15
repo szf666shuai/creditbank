@@ -36,6 +36,7 @@ const quickEntries = [
   { label: '面试邀请', desc: '管理面试安排', icon: 'interview', path: '/profile/enterprise/interviews', color: '#722ed1' },
   { label: '活动邀请', desc: '邀请学员参加活动', icon: 'invite', path: '/profile/enterprise/activity-invitations', color: '#13c2c2' },
   { label: '企业资料', desc: '发布学习资料', icon: 'material', path: '/profile/enterprise/materials', color: '#eb2f96' },
+  { label: '课程管理', desc: '发布学习课程', icon: 'course', path: '/profile/enterprise/courses', color: '#1890ff' },
   { label: '机构信息', desc: '维护企业简介', icon: 'enterprise', path: '/profile/enterprise/org', color: '#2f54eb' },
 ]
 

@@ -13,11 +13,8 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class CreditAccountVO {
     private Long userId;
-    private BigDecimal balance;
     private BigDecimal totalEarned;
-    private BigDecimal totalSpent;
     private Integer integrityScore;
     private String integrityLevel;
     private Double earnMultiplier;
-    private Boolean canSpend;
 }

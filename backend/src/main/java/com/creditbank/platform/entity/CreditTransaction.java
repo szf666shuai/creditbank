@@ -18,7 +18,6 @@ public class CreditTransaction {
     /** 1获取 2转换 3增长 4消耗 */
     private Integer type;
     private BigDecimal amount;
-    private BigDecimal balanceAfter;
     private String bizType;
     private String source;
     private String refType;

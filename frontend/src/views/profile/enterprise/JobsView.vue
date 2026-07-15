@@ -170,13 +170,15 @@ onMounted(async () => {
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="操作" width="200">
+      <el-table-column label="操作" width="200" align="center">
         <template #default="{ row }">
-          <el-button link type="primary" @click="openEdit(row)">编辑</el-button>
-          <el-button v-if="row.status === 1" link type="warning" @click="handleOffline(row)">
-            下架
-          </el-button>
-          <el-button v-else link type="success" @click="handleOnline(row)">上架</el-button>
+          <div class="page-table-actions">
+            <el-button link type="primary" @click="openEdit(row)">编辑</el-button>
+            <el-button v-if="row.status === 1" link type="warning" @click="handleOffline(row)">
+              下架
+            </el-button>
+            <el-button v-else link type="success" @click="handleOnline(row)">上架</el-button>
+          </div>
         </template>
       </el-table-column>
     </el-table>

@@ -8,8 +8,7 @@ import com.creditbank.platform.dto.CourseCommentVO;
 import com.creditbank.platform.dto.CourseDanmakuCreateRequest;
 import com.creditbank.platform.dto.CourseDanmakuVO;
 import com.creditbank.platform.dto.CourseMaterialVO;
-import com.creditbank.platform.dto.CreditChangeResult;
-import com.creditbank.platform.dto.CreditEarnRequest;
+import com.creditbank.platform.dto.IntegrityScoreVO;
 import com.creditbank.platform.entity.Course;
 import com.creditbank.platform.entity.CourseComment;
 import com.creditbank.platform.entity.CourseCommentLike;
@@ -47,7 +46,7 @@ public class CourseInteractionService {
     private final CourseDanmakuMapper danmakuMapper;
     private final CourseMaterialMapper materialMapper;
     private final SysUserMapper sysUserMapper;
-    private final CreditService creditService;
+    private final IntegrityService integrityService;
 
     public List<CourseCommentVO> listComments(Long courseId, Long userId, int limit) {
         ensureCourseExists(courseId);
@@ -82,7 +81,7 @@ public class CourseInteractionService {
         commentMapper.insert(comment);
         CourseCommentVO vo = toCommentVO(comment, user);
         vo.setLiked(false);
-        vo.setCreditReward(awardCommentCredit(userId, comment));
+        vo.setIntegrityReward(awardCommentIntegrity(userId, comment));
         if (parent != null) {
             SysUser parentUser = sysUserMapper.selectById(parent.getUserId());
             if (parentUser != null) {
@@ -134,7 +133,7 @@ public class CourseInteractionService {
         int likeCount = nz(comment.getLikeCount()) + 1;
         comment.setLikeCount(likeCount);
         commentMapper.updateById(comment);
-        awardCommentLikeCredit(comment.getUserId(), like.getId());
+        awardCommentLikeIntegrity(comment.getUserId(), like.getId());
         return CourseCommentLikeResult.builder()
                 .commentId(commentId)
                 .likeCount(likeCount)
@@ -253,29 +252,22 @@ public class CourseInteractionService {
         return StringUtils.hasText(user.getRealName()) ? user.getRealName() : user.getUsername();
     }
 
-    private BigDecimal awardCommentCredit(Long userId, CourseComment comment) {
+    private Integer awardCommentIntegrity(Long userId, CourseComment comment) {
         try {
             boolean isReply = comment.getParentId() != null;
-            CreditEarnRequest earnRequest = new CreditEarnRequest();
-            earnRequest.setRuleCode(isReply ? "REPLY_CREATE" : "POST_CREATE");
-            earnRequest.setRefType("course_comment");
-            earnRequest.setRefId(comment.getId());
-            earnRequest.setSource(isReply ? "回复课程评论" : "发表课程评论");
-            CreditChangeResult change = creditService.earnByRule(userId, earnRequest);
-            return change.getAmount();
+            IntegrityScoreVO result = integrityService.applyEvent(userId, isReply ? 1 : 2,
+                    isReply ? "回复课程评论" : "发表课程评论",
+                    "course_comment", comment.getId(), null);
+            return isReply ? 1 : 2;
         } catch (BusinessException ignored) {
             return null;
         }
     }
 
-    private void awardCommentLikeCredit(Long authorUserId, Long likeId) {
+    private void awardCommentLikeIntegrity(Long authorUserId, Long likeId) {
         try {
-            CreditEarnRequest earnRequest = new CreditEarnRequest();
-            earnRequest.setRuleCode("POST_LIKE");
-            earnRequest.setRefType("course_comment_like");
-            earnRequest.setRefId(likeId);
-            earnRequest.setSource("课程评论被点赞");
-            creditService.earnByRule(authorUserId, earnRequest);
+            integrityService.applyEvent(authorUserId, 1, "课程评论被点赞",
+                    "course_comment_like", likeId, null);
         } catch (BusinessException ignored) {
             // 被点赞奖励未命中时不阻断点赞
         }

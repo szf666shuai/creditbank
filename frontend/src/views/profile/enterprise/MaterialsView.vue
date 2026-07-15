@@ -148,12 +148,14 @@ onMounted(fetchMaterials)
       <el-table-column label="发布时间" width="160">
         <template #default="{ row }">{{ formatTime(row.createTime) }}</template>
       </el-table-column>
-      <el-table-column label="操作" width="160">
+      <el-table-column label="操作" width="160" align="center">
         <template #default="{ row }">
-          <el-button link type="primary" @click="openEdit(row)">编辑</el-button>
-          <el-button link :type="row.status === 1 ? 'warning' : 'success'" @click="toggleStatus(row)">
-            {{ row.status === 1 ? '下架' : '发布' }}
-          </el-button>
+          <div class="page-table-actions">
+            <el-button link type="primary" @click="openEdit(row)">编辑</el-button>
+            <el-button link :type="row.status === 1 ? 'warning' : 'success'" @click="toggleStatus(row)">
+              {{ row.status === 1 ? '下架' : '发布' }}
+            </el-button>
+          </div>
         </template>
       </el-table-column>
     </el-table>

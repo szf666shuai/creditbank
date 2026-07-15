@@ -3,8 +3,7 @@ package com.creditbank.platform.service;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.creditbank.platform.common.BusinessException;
 import com.creditbank.platform.dto.CourseEpisodeVO;
-import com.creditbank.platform.dto.CreditChangeResult;
-import com.creditbank.platform.dto.CreditEarnRequest;
+import com.creditbank.platform.dto.IntegrityScoreVO;
 import com.creditbank.platform.dto.LearningCheckinVO;
 import com.creditbank.platform.dto.LearningProgressRequest;
 import com.creditbank.platform.dto.LearningReminderRequest;
@@ -43,7 +42,7 @@ public class LearningEngagementService {
     private final UserLearningCheckinMapper userLearningCheckinMapper;
     private final UserLearningReminderMapper userLearningReminderMapper;
     private final ProfileLearningStatsService profileLearningStatsService;
-    private final CreditService creditService;
+    private final IntegrityService integrityService;
 
     public List<CourseEpisodeVO> listEpisodes(Long userId, Long courseId) {
         requireCourse(courseId);
@@ -201,23 +200,20 @@ public class LearningEngagementService {
         checkin.setCreateTime(LocalDateTime.now());
         userLearningCheckinMapper.insert(checkin);
 
-        CreditChangeResult creditChange = null;
+        Integer integrityReward = null;
         try {
-            CreditEarnRequest earnRequest = new CreditEarnRequest();
-            earnRequest.setRuleCode("LEARNING_CHECKIN");
-            earnRequest.setSource("课程学习打卡");
-            earnRequest.setRefType("learning_checkin");
-            earnRequest.setRefId(checkin.getId());
-            creditChange = creditService.earnByRule(userId, earnRequest);
+            IntegrityScoreVO result = integrityService.applyEvent(userId, 1, "课程学习打卡",
+                    "learning_checkin", checkin.getId(), null);
+            integrityReward = 1;
         } catch (BusinessException ignored) {
-            // 学分规则未命中时不阻断打卡
+            // 诚信分规则未命中时不阻断打卡
         }
 
         return LearningCheckinVO.builder()
                 .courseId(courseId)
                 .checkedInToday(true)
                 .streakDays(countStreakDays(userId, courseId))
-                .creditReward(creditChange == null ? null : creditChange.getAmount())
+                .integrityReward(integrityReward)
                 .message("打卡成功，坚持学习很棒！")
                 .build();
     }
@@ -239,7 +235,6 @@ public class LearningEngagementService {
             userCourse.setUserId(userId);
             userCourse.setCourseId(course.getId());
             userCourse.setStatus(0);
-            userCourse.setPaidCredit(BigDecimal.ZERO);
             userCourse.setStartTime(LocalDateTime.now());
             userCourseMapper.insert(userCourse);
         } else if (userCourse.getStartTime() == null) {

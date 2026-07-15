@@ -15,9 +15,7 @@ public class LearningSituationVO {
     private String username;
     private String realName;
     private Integer role;
-    private BigDecimal creditBalance;
     private BigDecimal creditEarned;
-    private BigDecimal creditSpent;
     private Integer integrityScore;
     private List<Map<String, Object>> courses;
     private List<Map<String, Object>> archives;

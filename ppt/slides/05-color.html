@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>色彩心理学</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
+    
+    :root {
+      --nb-ink: #1a202c;
+      --nb-cream: #fff9f0;
+      --nb-green: #22c55e;
+      --nb-green-deep: #16a34a;
+      --nb-blue: #bee3f8;
+      --nb-pink: #fecdd3;
+      --nb-yellow: #fef08a;
+      --nb-shadow: 4px 4px 0 0 var(--nb-ink);
+      --font-heading: 'Nunito', 'PingFang SC', sans-serif;
+    }
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    html, body {
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      background: var(--nb-cream);
+      font-family: var(--font-heading);
+    }
+    
+    .slide {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      padding: 60px 120px;
+      position: relative;
+    }
+    
+    .page-header {
+      margin-bottom: 40px;
+    }
+    
+    .page-header .page-number {
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--nb-green);
+      letter-spacing: 0.1em;
+      margin-bottom: 8px;
+    }
+    
+    .page-header h2 {
+      font-size: 3rem;
+      font-weight: 900;
+      color: var(--nb-ink);
+    }
+    
+    .color-content {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+    }
+    
+    .color-left {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    
+    .color-main-card {
+      background: #fff;
+      border: 3px solid var(--nb-ink);
+      border-radius: 24px;
+      box-shadow: var(--nb-shadow);
+      padding: 40px;
+      flex: 1;
+    }
+    
+    .color-main-card__title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--nb-ink);
+      margin-bottom: 32px;
+      text-align: center;
+    }
+    
+    .color-palette {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+    
+    .color-swatch {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .color-swatch__box {
+      width: 100%;
+      aspect-ratio: 1;
+      border: 3px solid var(--nb-ink);
+      border-radius: 16px;
+      box-shadow: 3px 3px 0 0 var(--nb-ink);
+      transition: transform 0.15s ease;
+    }
+    
+    .color-swatch__box:hover {
+      transform: translate(2px, 2px);
+    }
+    
+    .color-swatch__name {
+      font-size: 0.875rem;
+      font-weight: 700;
+      color: var(--nb-ink);
+    }
+    
+    .color-swatch__code {
+      font-size: 0.75rem;
+      color: #64748b;
+      font-family: monospace;
+    }
+    
+    .color-swatch:nth-child(1) .color-swatch__box { background: var(--nb-green); }
+    .color-swatch:nth-child(2) .color-swatch__box { background: var(--nb-cream); }
+    .color-swatch:nth-child(3) .color-swatch__box { background: var(--nb-blue); }
+    .color-swatch:nth-child(4) .color-swatch__box { background: var(--nb-pink); }
+    
+    .design-philosophy {
+      background: var(--nb-green);
+      border: 3px solid var(--nb-ink);
+      border-radius: 20px;
+      box-shadow: var(--nb-shadow);
+      padding: 28px;
+      color: #fff;
+    }
+    
+    .design-philosophy__title {
+      font-size: 1.3rem;
+      font-weight: 800;
+      margin-bottom: 16px;
+    }
+    
+    .design-philosophy__desc {
+      font-size: 0.95rem;
+      line-height: 1.7;
+      opacity: 0.95;
+    }
+    
+    .color-right {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    
+    .psychology-card {
+      background: #fff;
+      border: 3px solid var(--nb-ink);
+      border-radius: 18px;
+      box-shadow: var(--nb-shadow);
+      padding: 28px;
+    }
+    
+    .psychology-card--green {
+      background: var(--nb-green);
+      color: #fff;
+    }
+    
+    .psychology-card--green .psychology-card__title,
+    .psychology-card--green .psychology-card__desc {
+      color: #fff;
+    }
+    
+    .psychology-card--green .psychology-card__desc strong {
+      color: rgba(255,255,255,0.9);
+    }
+    
+    .psychology-card--cream {
+      background: var(--nb-cream);
+    }
+    
+    .psychology-card__header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    
+    .psychology-card__icon {
+      font-size: 2rem;
+    }
+    
+    .psychology-card__title {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--nb-ink);
+    }
+    
+    .psychology-card__desc {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: #475569;
+    }
+    
+    .psychology-card__desc strong {
+      color: var(--nb-ink);
+    }
+    
+    .neo-brutal-card {
+      background: #fff;
+      border: 3px solid var(--nb-ink);
+      border-radius: 18px;
+      box-shadow: var(--nb-shadow);
+      padding: 28px;
+      flex: 1;
+    }
+    
+    .neo-brutal-card__title {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--nb-ink);
+      margin-bottom: 16px;
+    }
+    
+    .neo-brutal-features {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+    
+    .neo-brutal-feature {
+      background: var(--nb-yellow);
+      border: 2px solid var(--nb-ink);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+    }
+    
+    .neo-brutal-feature__icon {
+      font-size: 1.5rem;
+      margin-bottom: 8px;
+    }
+    
+    .neo-brutal-feature__name {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--nb-ink);
+    }
+    
+    .footer-note {
+      margin-top: 32px;
+      text-align: center;
+    }
+    
+    .footer-note p {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--nb-ink);
+    }
+    
+    .footer-note p span {
+      color: var(--nb-green);
+    }
+  </style>
+</head>
+<body>
+  <div class="slide">
+    <div class="page-header">
+      <div class="page-number">05 / 12</div>
+      <h2>色彩心理学</h2>
+    </div>
+    
+    <div class="color-content">
+      <div class="color-left">
+        <div class="color-main-card">
+          <div class="color-main-card__title">品牌配色方案</div>
+          <div class="color-palette">
+            <div class="color-swatch">
+              <div class="color-swatch__box"></div>
+              <div class="color-swatch__name">主色 · 绿色</div>
+              <div class="color-swatch__code">#22c55e</div>
+            </div>
+            <div class="color-swatch">
+              <div class="color-swatch__box"></div>
+              <div class="color-swatch__name">背景 · 奶油</div>
+              <div class="color-swatch__code">#fff9f0</div>
+            </div>
+            <div class="color-swatch">
+              <div class="color-swatch__box"></div>
+              <div class="color-swatch__name">辅助 · 蓝色</div>
+              <div class="color-swatch__code">#bee3f8</div>
+            </div>
+            <div class="color-swatch">
+              <div class="color-swatch__box"></div>
+              <div class="color-swatch__name">点缀 · 粉色</div>
+              <div class="color-swatch__code">#fecdd3</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="design-philosophy">
+          <div class="design-philosophy__title">设计理念</div>
+          <div class="design-philosophy__desc">
+            Neo-brutal风格强调直接、诚实的设计表达。粗边框、硬阴影、大胆的色彩搭配，传递出年轻、活力、可信的品牌形象，与教育产品的属性完美契合。
+          </div>
+        </div>
+      </div>
+      
+      <div class="color-right">
+        <div class="psychology-card psychology-card--green">
+          <div class="psychology-card__header">
+            <div class="psychology-card__icon">🌿</div>
+            <div class="psychology-card__title">绿色的心理学意义</div>
+          </div>
+          <div class="psychology-card__desc">
+            <strong>信任与安全感</strong>：绿色是大自然的颜色，代表生命、成长、希望。在教育场景中，绿色传递出可信、专业的形象。
+          </div>
+        </div>
+        
+        <div class="psychology-card psychology-card--cream">
+          <div class="psychology-card__header">
+            <div class="psychology-card__icon">🍦</div>
+            <div class="psychology-card__title">奶油色的心理学意义</div>
+          </div>
+          <div class="psychology-card__desc">
+            <strong>温暖与包容</strong>：奶油色比纯白更温暖，减少视觉疲劳，营造舒适的学习环境。适合各年龄段用户，体现"终身学习"的包容性。
+          </div>
+        </div>
+        
+        <div class="psychology-card">
+          <div class="psychology-card__header">
+            <div class="psychology-card__icon">🎯</div>
+            <div class="psychology-card__title">色彩策略</div>
+          </div>
+          <div class="psychology-card__desc">
+            <strong>吸引各年龄段人群</strong>：绿色传递专业与信任，奶油色带来温暖与舒适，搭配亮色点缀增添活力。这种配色策略使平台既专业又亲民。
+          </div>
+        </div>
+        
+        <div class="neo-brutal-card">
+          <div class="neo-brutal-card__title">Neo-brutal 风格特征</div>
+          <div class="neo-brutal-features">
+            <div class="neo-brutal-feature">
+              <div class="neo-brutal-feature__icon">⬜</div>
+              <div class="neo-brutal-feature__name">粗边框</div>
+            </div>
+            <div class="neo-brutal-feature">
+              <div class="neo-brutal-feature__icon">⬛</div>
+              <div class="neo-brutal-feature__name">硬阴影</div>
+            </div>
+            <div class="neo-brutal-feature">
+              <div class="neo-brutal-feature__icon">🌈</div>
+              <div class="neo-brutal-feature__name">大胆配色</div>
+            </div>
+            <div class="neo-brutal-feature">
+              <div class="neo-brutal-feature__icon">🔶</div>
+              <div class="neo-brutal-feature__name">大圆角</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="footer-note">
+      <p>色彩不是随意选择，而是<span>品牌语言</span>的表达</p>
+    </div>
+  </div>
+</body>
+</html>

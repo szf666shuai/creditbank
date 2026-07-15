@@ -1,4 +1,4 @@
-﻿import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
 import MainLayout from '@/layouts/MainLayout.vue'
 import ProfileLayout from '@/layouts/ProfileLayout.vue'
 import HomeView from '@/views/HomeView.vue'
@@ -8,12 +8,14 @@ import RegisterView from '@/views/auth/RegisterView.vue'
 import SearchView from '@/views/SearchView.vue'
 import ForumView from '@/views/ForumView.vue'
 import InformationView from '@/views/InformationView.vue'
-import CreditMallView from '@/views/CreditMallView.vue'
-import MallOrdersView from '@/views/MallOrdersView.vue'
+
 import LearningResourcesView from '@/views/LearningResourcesView.vue'
 import CoursePlayerView from '@/views/CoursePlayerView.vue'
 import LearningArchiveView from '@/views/LearningArchiveView.vue'
-import MallProductDetailView from '@/views/MallProductDetailView.vue'
+import MyCreditView from '@/views/MyCreditView.vue'
+import CourseOverviewView from '@/views/CourseOverviewView.vue'
+import OrganizationCoursesView from '@/views/OrganizationCoursesView.vue'
+
 import EnterpriseIndexView from '@/views/enterprise/IndexView.vue'
 import EnterpriseDetailView from '@/views/enterprise/DetailView.vue'
 
@@ -25,12 +27,14 @@ import ProfileEnterpriseInterviewsView from '@/views/profile/enterprise/Intervie
 import ProfileEnterpriseActivityInvitationsView from '@/views/profile/enterprise/ActivityInvitationsView.vue'
 import ProfileEnterpriseOrgView from '@/views/profile/enterprise/OrgView.vue'
 import ProfileEnterpriseMaterialsView from '@/views/profile/enterprise/MaterialsView.vue'
-import ProfileEnterpriseProductsView from '@/views/profile/enterprise/ProductsView.vue'
+import ProfileEnterpriseCoursesView from '@/views/profile/enterprise/CoursesView.vue'
+import ProfileEnterpriseTransferRulesView from '@/views/profile/enterprise/TransferRulesView.vue'
+import ProfileEnterpriseTransferApplicationsView from '@/views/profile/enterprise/TransferApplicationsView.vue'
+import ProfileStudentCreditTransferView from '@/views/profile/student/CreditTransferView.vue'
 import ProfileIndexView from '@/views/profile/IndexView.vue'
 import ProfileResumeView from '@/views/profile/ResumeView.vue'
 import ProfileLearningView from '@/views/profile/LearningView.vue'
 import ProfileLearningProfileView from '@/views/profile/LearningProfileView.vue'
-import ProfileCreditView from '@/views/profile/CreditView.vue'
 import ProfileIntegrityView from '@/views/profile/IntegrityView.vue'
 import ProfilePostsView from '@/views/profile/PostsView.vue'
 import ProfileApplicationsView from '@/views/profile/ApplicationsView.vue'
@@ -49,7 +53,7 @@ import ProfileAdminIntegrityView from '@/views/profile/admin/IntegrityView.vue'
 import ProfileAdminCreditView from '@/views/profile/admin/CreditView.vue'
 import ProfileAdminJobsView from '@/views/profile/admin/JobsView.vue'
 import ProfileAdminActivitiesView from '@/views/profile/admin/ActivitiesView.vue'
-import ProfileAdminProductsView from '@/views/profile/admin/ProductsView.vue'
+import ProfileAdminCoursesView from '@/views/profile/admin/CoursesView.vue'
 
 import {
   canAccessPath,
@@ -76,10 +80,10 @@ const router = createRouter({
       children: [
         { path: '', name: 'home', component: HomeView },
         { path: 'courses', ...placeholder('课程') },
-        { path: 'credit', name: 'credit', component: CreditMallView },
-        { path: 'credit/orders', name: 'mall-orders', component: MallOrdersView, meta: { ...authRoute } },
-        { path: 'credit/products/:productId', name: 'mall-product-detail', component: MallProductDetailView },
+        { path: 'credit', name: 'my-credit', component: MyCreditView, meta: studentRoute },
+        { path: 'courses-overview', name: 'courses-overview', component: CourseOverviewView, meta: { title: '课程概览' } },
         { path: 'resources', name: 'resources', component: LearningResourcesView },
+        { path: 'resources/org/:orgId', name: 'org-courses', component: OrganizationCoursesView },
         { path: 'resources/:courseId', name: 'course-player', component: CoursePlayerView, meta: studentRoute },
         { path: 'archive', name: 'archive', component: LearningArchiveView, meta: studentRoute },
         { path: 'achievement', ...placeholder('学习成果') },
@@ -171,16 +175,16 @@ const router = createRouter({
               meta: { title: '学习档案', ...studentRoute },
             },
             {
+              path: 'credit-transfer',
+              name: 'profile-credit-transfer',
+              component: ProfileStudentCreditTransferView,
+              meta: { title: '学分转换', ...studentRoute },
+            },
+            {
               path: 'learning-profile',
               name: 'profile-learning-profile',
               component: ProfileLearningProfileView,
               meta: { title: '学习画像', ...studentRoute },
-            },
-            {
-              path: 'credit',
-              name: 'profile-credit',
-              component: ProfileCreditView,
-              meta: { title: '秩点流水', ...studentRoute },
             },
             {
               path: 'integrity',
@@ -293,10 +297,10 @@ const router = createRouter({
               meta: { title: '活动监管', ...adminRoute },
             },
             {
-              path: 'admin/products',
-              name: 'profile-admin-products',
-              component: ProfileAdminProductsView,
-              meta: { title: '商品审核', ...adminRoute },
+              path: 'admin/courses',
+              name: 'profile-admin-courses',
+              component: ProfileAdminCoursesView,
+              meta: { title: '课程审核', ...adminRoute },
             },
             {
               path: 'enterprise',
@@ -353,10 +357,22 @@ const router = createRouter({
               meta: { title: '企业资料', ...enterpriseRoute },
             },
             {
-              path: 'enterprise/products',
-              name: 'profile-enterprise-products',
-              component: ProfileEnterpriseProductsView,
-              meta: { title: '商城管理', ...enterpriseRoute },
+              path: 'enterprise/courses',
+              name: 'profile-enterprise-courses',
+              component: ProfileEnterpriseCoursesView,
+              meta: { title: '课程管理', ...enterpriseRoute },
+            },
+            {
+              path: 'enterprise/transfer-rules',
+              name: 'profile-enterprise-transfer-rules',
+              component: ProfileEnterpriseTransferRulesView,
+              meta: { title: '转换规则', ...enterpriseRoute },
+            },
+            {
+              path: 'enterprise/transfer-applications',
+              name: 'profile-enterprise-transfer-applications',
+              component: ProfileEnterpriseTransferApplicationsView,
+              meta: { title: '转换申请', ...enterpriseRoute },
             },
           ],
         },

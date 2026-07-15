@@ -1,7 +1,6 @@
 package com.creditbank.platform.controller;
 
 import com.creditbank.platform.common.Result;
-import com.creditbank.platform.dto.CoursePurchaseResult;
 import com.creditbank.platform.dto.CertificateVerifyResult;
 import com.creditbank.platform.dto.LearningArchiveVO;
 import com.creditbank.platform.dto.LearningCertificateVO;
@@ -53,6 +52,13 @@ public class LearningController {
         return Result.ok(learningService.listResources(user.getId(), keyword, tag));
     }
 
+    @GetMapping("/resources/org/{orgId}")
+    public Result<List<LearningResourceVO>> resourcesByOrg(@PathVariable Long orgId,
+                                                           @RequestParam(required = false) String keyword) {
+        SysUser user = authSupport.requireStudentOrAdmin();
+        return Result.ok(learningService.listResourcesByOrg(user.getId(), orgId, keyword));
+    }
+
     @GetMapping("/resources/{courseId}")
     public Result<LearningResourceVO> resource(@PathVariable Long courseId) {
         SysUser user = authSupport.requireStudentOrAdmin();
@@ -88,7 +94,7 @@ public class LearningController {
 
     @GetMapping("/resources/{courseId}/danmaku")
     public Result<List<CourseDanmakuVO>> danmaku(@PathVariable Long courseId) {
-        authSupport.requireStudentOrAdmin();
+        authSupport.requireStudentOrAdminOrEnterprise();
         return Result.ok(courseInteractionService.listDanmaku(courseId));
     }
 
@@ -110,12 +116,6 @@ public class LearningController {
         SysUser user = authSupport.requireStudentOrAdmin();
         learningService.assertCourseAccess(user.getId(), courseId);
         return Result.ok(learningEngagementService.listEpisodes(user.getId(), courseId));
-    }
-
-    @PostMapping("/resources/{courseId}/purchase")
-    public Result<CoursePurchaseResult> purchase(@PathVariable Long courseId) {
-        SysUser student = authSupport.requireStudent();
-        return Result.ok(learningService.purchaseCourse(student.getId(), courseId));
     }
 
     @GetMapping("/resources/{courseId}/reminder")

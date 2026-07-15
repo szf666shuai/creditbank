@@ -11,7 +11,6 @@ import java.math.BigDecimal;
 public class ProfileDashboardVO {
 
     private UserInfoVO userInfo;
-    private BigDecimal creditBalance;
     private BigDecimal totalEarned;
     private Integer integrityScore;
     private long unreadMessageCount;

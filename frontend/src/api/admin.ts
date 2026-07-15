@@ -297,18 +297,18 @@ export function updateAdminActivityStatusApi(id: number, status: number) {
   return request.patch<AdminActivity>(`/admin/oversight/activities/${id}/status`, { status })
 }
 
-export interface AdminMallProduct {
+export interface AdminCourse {
   id: number
   orgId: number
   orgName?: string
-  name: string
+  title: string
   description?: string
   coverUrl?: string
-  productType: number
-  productTypeName: string
-  priceCredit: number
-  priceMoney: number
-  stock: number
+  tags?: string[]
+  creditValue: number
+  duration: number
+  difficulty: number
+  difficultyName?: string
   status: number
   approvalStatus: number
   approvalStatusName: string
@@ -316,14 +316,14 @@ export interface AdminMallProduct {
   createTime?: string
 }
 
-export const PRODUCT_APPROVAL_OPTIONS = [
+export const COURSE_APPROVAL_OPTIONS = [
   { label: '全部审核状态', value: undefined },
   { label: '待审核', value: 0 },
   { label: '已通过', value: 1 },
   { label: '已驳回', value: 2 },
 ] as const
 
-export function listAdminProductsApi(params: {
+export function listAdminCoursesApi(params: {
   page?: number
   pageSize?: number
   approvalStatus?: number
@@ -334,12 +334,12 @@ export function listAdminProductsApi(params: {
   query.set('pageSize', String(params.pageSize ?? 10))
   if (params.approvalStatus !== undefined) query.set('approvalStatus', String(params.approvalStatus))
   if (params.keyword) query.set('keyword', params.keyword)
-  return request.get<PageResult<AdminMallProduct>>(`/admin/oversight/products?${query.toString()}`)
+  return request.get<PageResult<AdminCourse>>(`/admin/oversight/courses?${query.toString()}`)
 }
 
-export function reviewAdminProductApi(
+export function reviewAdminCourseApi(
   id: number,
   data: { approvalStatus: number; reviewRemark?: string },
 ) {
-  return request.patch<AdminMallProduct>(`/admin/oversight/products/${id}/approval`, data)
+  return request.patch<AdminCourse>(`/admin/oversight/courses/${id}/approval`, data)
 }

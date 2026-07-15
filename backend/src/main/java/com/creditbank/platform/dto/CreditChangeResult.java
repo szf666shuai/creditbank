@@ -14,7 +14,6 @@ import java.math.BigDecimal;
 public class CreditChangeResult {
     private Long userId;
     private BigDecimal amount;
-    private BigDecimal balanceAfter;
     private Long transactionId;
     private String message;
 }

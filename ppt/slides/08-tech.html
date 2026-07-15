@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>技术架构</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
+    
+    :root {
+      --nb-ink: #1a202c;
+      --nb-cream: #fff9f0;
+      --nb-green: #22c55e;
+      --nb-green-deep: #16a34a;
+      --nb-blue: #bee3f8;
+      --nb-pink: #fecdd3;
+      --nb-yellow: #fef08a;
+      --nb-purple: #ddd6fe;
+      --nb-shadow: 4px 4px 0 0 var(--nb-ink);
+      --font-heading: 'Nunito', 'PingFang SC', sans-serif;
+    }
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    html, body {
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      background: var(--nb-cream);
+      font-family: var(--font-heading);
+    }
+    
+    .slide {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      padding: 60px 120px;
+      position: relative;
+    }
+    
+    .page-header {
+      margin-bottom: 40px;
+    }
+    
+    .page-header .page-number {
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--nb-green);
+      letter-spacing: 0.1em;
+      margin-bottom: 8px;
+    }
+    
+    .page-header h2 {
+      font-size: 3rem;
+      font-weight: 900;
+      color: var(--nb-ink);
+    }
+    
+    .tech-content {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+    }
+    
+    .tech-architecture {
+      background: #fff;
+      border: 3px solid var(--nb-ink);
+      border-radius: 24px;
+      box-shadow: var(--nb-shadow);
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .tech-architecture__title {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--nb-ink);
+      margin-bottom: 24px;
+      text-align: center;
+    }
+    
+    .architecture-diagram {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      justify-content: center;
+    }
+    
+    .architecture-layer {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    .layer-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 4px;
+    }
+    
+    .layer-components {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    
+    .component-box {
+      background: var(--nb-blue);
+      border: 2px solid var(--nb-ink);
+      border-radius: 12px;
+      padding: 12px 20px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--nb-ink);
+      box-shadow: 2px 2px 0 0 var(--nb-ink);
+    }
+    
+    .component-box--frontend { background: var(--nb-pink); }
+    .component-box--backend { background: var(--nb-green); color: #fff; }
+    .component-box--database { background: var(--nb-yellow); }
+    .component-box--thirdparty { background: var(--nb-purple); }
+    
+    .connection-line {
+      height: 16px;
+      background: linear-gradient(90deg, var(--nb-green), var(--nb-blue));
+      border: 2px solid var(--nb-ink);
+      border-radius: 8px;
+      margin: 0 40px;
+    }
+    
+    .tech-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    
+    .stack-card {
+      background: #fff;
+      border: 3px solid var(--nb-ink);
+      border-radius: 20px;
+      box-shadow: var(--nb-shadow);
+      padding: 28px;
+    }
+    
+    .stack-card__header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    
+    .stack-card__icon {
+      width: 52px;
+      height: 52px;
+      background: var(--nb-green);
+      border: 3px solid var(--nb-ink);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      box-shadow: 3px 3px 0 0 var(--nb-ink);
+    }
+    
+    .stack-card__title {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--nb-ink);
+    }
+    
+    .stack-card:nth-child(2) .stack-card__icon { background: var(--nb-blue); }
+    .stack-card:nth-child(3) .stack-card__icon { background: var(--nb-yellow); }
+    
+    .stack-list {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+    
+    .stack-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--nb-cream);
+      border: 2px solid var(--nb-ink);
+      border-radius: 10px;
+      padding: 10px 16px;
+    }
+    
+    .stack-item__dot {
+      width: 12px;
+      height: 12px;
+      background: var(--nb-green);
+      border: 2px solid var(--nb-ink);
+      border-radius: 50%;
+    }
+    
+    .stack-item__name {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--nb-ink);
+    }
+    
+    .stack-item__version {
+      font-size: 0.75rem;
+      color: #64748b;
+      margin-left: auto;
+    }
+    
+    .footer-note {
+      margin-top: 32px;
+      text-align: center;
+    }
+    
+    .footer-note p {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--nb-ink);
+    }
+    
+    .footer-note p span {
+      color: var(--nb-green);
+    }
+  </style>
+</head>
+<body>
+  <div class="slide">
+    <div class="page-header">
+      <div class="page-number">08 / 12</div>
+      <h2>技术架构</h2>
+    </div>
+    
+    <div class="tech-content">
+      <div class="tech-architecture">
+        <div class="tech-architecture__title">系统架构图</div>
+        <div class="architecture-diagram">
+          <div class="architecture-layer">
+            <div class="layer-label">前端层</div>
+            <div class="layer-components">
+              <div class="component-box component-box--frontend">Vue 3</div>
+              <div class="component-box component-box--frontend">Element Plus</div>
+              <div class="component-box component-box--frontend">Vite</div>
+              <div class="component-box component-box--frontend">Pinia</div>
+            </div>
+          </div>
+          
+          <div class="connection-line"></div>
+          
+          <div class="architecture-layer">
+            <div class="layer-label">后端层</div>
+            <div class="layer-components">
+              <div class="component-box component-box--backend">Spring Boot</div>
+              <div class="component-box component-box--backend">MyBatis Plus</div>
+              <div class="component-box component-box--backend">JWT Auth</div>
+              <div class="component-box component-box--backend">WebSocket</div>
+            </div>
+          </div>
+          
+          <div class="connection-line"></div>
+          
+          <div class="architecture-layer">
+            <div class="layer-label">数据层</div>
+            <div class="layer-components">
+              <div class="component-box component-box--database">MySQL 8.0</div>
+              <div class="component-box component-box--database">Redis 7</div>
+            </div>
+          </div>
+          
+          <div class="connection-line"></div>
+          
+          <div class="architecture-layer">
+            <div class="layer-label">第三方服务</div>
+            <div class="layer-components">
+              <div class="component-box component-box--thirdparty">LLM API</div>
+              <div class="component-box component-box--thirdparty">TRTC</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="tech-stack">
+        <div class="stack-card">
+          <div class="stack-card__header">
+            <div class="stack-card__icon">🎨</div>
+            <div class="stack-card__title">前端技术栈</div>
+          </div>
+          <div class="stack-list">
+            <div class="stack-item">
+              <div class="stack-item__dot"></div>
+              <div class="stack-item__name">Vue</div>
+              <div class="stack-item__version">3.5.x</div>
+            </div>
+            <div class="stack-item">
+              <div class="stack-item__dot"></div>
+              <div class="stack-item__name">Vite</div>
+              <div class="stack-item__version">8.1.x</div>
+            </div>
+            <div class="stack-item">
+              <div class="stack-item__dot"></div>
+              <div class="stack-item__name">Element Plus</div>
+              <div class="stack-item__version">2.14.x</div>
+            </div>
+            <div class="stack-item">
+              <div class="stack-item__dot"></div>
+              <div class="stack-item__name">Pinia</div>
+              <div class="stack-item__version">3.0.x</div>
+            </div>
+            <div class="stack-item">
+              <div class="stack-item__dot"></div>
+              <div class="stack-item__name">TypeScript</div>
+              <div class="stack-item__version">6.0.x</div>
+            </div>
+            <div class="stack-item">
+              <div class="stack-item__dot"></div>
+              <div class="stack-item__name">ECharts</div>
+              <div class="stack-item__version">6.1.x</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="stack-card">
+          <div class="stack-card__header">
+            <div class="stack-card__icon">⚙️</div>
+            <div class="stack-card__title">后端技术栈</div>
+          </div>
+          <div class="stack-list">
+            <div class="stack-item">
+              <div class="stack-item__dot"></div>
+              <div class="stack-item__name">Spring Boot</div>
+              <div class="stack-item__version">3.4.x</div>
+            </div>
+            <div class="stack-item">
+              <div class="stack-item__dot"></div>
+              <div class="stack-item__name">MyBatis Plus</div>
+              <div class="stack-item__version">3.5.x</div>
+            </div>
+            <div class="stack-item">
+              <div class="stack-item__dot"></div>
+              <div class="stack-item__name">Spring Security</div>
+              <div class="stack-item__version">6.4.x</div>
+            </div>
+            <div class="stack-item">
+              <div class="stack-item__dot"></div>
+              <div class="stack-item__name">JJWT</div>
+              <div class="stack-item__version">0.12.x</div>
+            </div>
+            <div class="stack-item">
+              <div class="stack-item__dot"></div>
+              <div class="stack-item__name">MySQL</div>
+              <div class="stack-item__version">8.0</div>
+            </div>
+            <div class="stack-item">
+              <div class="stack-item__dot"></div>
+              <div class="stack-item__name">Redis</div>
+              <div class="stack-item__version">7.0</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="stack-card">
+          <div class="stack-card__header">
+            <div class="stack-card__icon">🚀</div>
+            <div class="stack-card__title">部署架构</div>
+          </div>
+          <div class="stack-list">
+            <div class="stack-item">
+              <div class="stack-item__dot"></div>
+              <div class="stack-item__name">Docker</div>
+              <div class="stack-item__version">24.x</div>
+            </div>
+            <div class="stack-item">
+              <div class="stack-item__dot"></div>
+              <div class="stack-item__name">Docker Compose</div>
+              <div class="stack-item__version">2.x</div>
+            </div>
+            <div class="stack-item">
+              <div class="stack-item__dot"></div>
+              <div class="stack-item__name">Nginx</div>
+              <div class="stack-item__version">1.25.x</div>
+            </div>
+            <div class="stack-item">
+              <div class="stack-item__dot"></div>
+              <div class="stack-item__name">TRTC</div>
+              <div class="stack-item__version">5.18.x</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="footer-note">
+      <p>前后端分离架构，<span>现代化技术栈</span>支撑</p>
+    </div>
+  </div>
+</body>
+</html>

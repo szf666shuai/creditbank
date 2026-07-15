@@ -1,4 +1,4 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -8,15 +8,14 @@ import {
   getJoinedOrgApi,
   listOrgJobsApi,
   listOrgActivitiesApi,
-  listOrgMaterialsByOrgApi,
   getOrgParticipationStatusApi,
   applyJobApi,
   registerActivityApi,
   type OrgListItem,
   type JobPostingItem,
   type ActivityItem,
-  type OrgMaterialItem,
 } from '@/api/enterprise'
+import { fetchOrgCourses, type LearningResource } from '@/api/learning'
 import { getErrorMessage, unwrapApi } from '@/utils/api'
 import { listResumesApi, type UserResumeSummary } from '@/api/profile-resume'
 import UiIcon from '@/components/ui/UiIcon.vue'
@@ -40,10 +39,9 @@ const activeTab = ref('jobs')
 
 const jobs = ref<JobPostingItem[]>([])
 const activities = ref<ActivityItem[]>([])
-const materials = ref<OrgMaterialItem[]>([])
+const courses = ref<LearningResource[]>([])
 const jobsTotal = ref(0)
 const activitiesTotal = ref(0)
-const materialsTotal = ref(0)
 const appliedJobIds = ref<number[]>([])
 const registeredActivityIds = ref<number[]>([])
 
@@ -137,10 +135,8 @@ async function fetchTabData() {
       const data = unwrapApi(await listOrgActivitiesApi(orgId.value))
       activities.value = data.records
       activitiesTotal.value = data.total
-    } else if (activeTab.value === 'materials') {
-      const data = unwrapApi(await listOrgMaterialsByOrgApi(orgId.value))
-      materials.value = data.records
-      materialsTotal.value = data.total
+    } else if (activeTab.value === 'courses') {
+      courses.value = unwrapApi(await fetchOrgCourses(orgId.value))
     }
     await fetchParticipationStatus()
   } catch (e) {
@@ -255,7 +251,7 @@ watch(
     activeTab.value = 'jobs'
     jobs.value = []
     activities.value = []
-    materials.value = []
+    courses.value = []
     await fetchOrgDetail()
     await fetchTabData()
   },
@@ -430,7 +426,7 @@ onMounted(async () => {
           </div>
         </el-tab-pane>
 
-        <el-tab-pane label="企业资料" name="materials">
+        <el-tab-pane label="课程概览" name="courses">
           <div v-loading="tabLoading">
             <el-alert
               v-if="tabError"
@@ -443,33 +439,37 @@ onMounted(async () => {
               <el-button link type="primary" @click="fetchTabData">点击重试</el-button>
             </el-alert>
             <el-empty
-              v-if="!tabLoading && !tabError && materials.length === 0"
+              v-if="!tabLoading && !tabError && courses.length === 0"
               class="page-empty"
               :image-size="80"
-              description="暂无企业资料"
+              description="暂无课程"
             />
-            <div v-else-if="materials.length > 0" class="tab-list">
-              <article v-for="material in materials" :key="material.id" class="tab-card">
+            <div v-else-if="courses.length > 0" class="tab-list">
+              <article v-for="course in courses" :key="course.id" class="tab-card">
                 <div class="tab-card-header">
-                  <h3>{{ material.title }}</h3>
-                  <el-tag size="small" type="info">{{ material.materialTypeName }}</el-tag>
+                  <h3>{{ course.title }}</h3>
+                  <div class="tab-card-actions">
+                    <el-tag v-if="course.creditValue" size="small" type="warning">
+                      {{ course.creditValue }} 学分
+                    </el-tag>
+                    <el-button
+                      type="primary"
+                      size="small"
+                      round
+                      @click="router.push(`/learning/${course.id}`)"
+                    >
+                      开始学习
+                    </el-button>
+                  </div>
                 </div>
-                <p class="tab-desc">{{ material.description || '暂无描述' }}</p>
+                <p class="tab-desc">{{ course.description || '暂无描述' }}</p>
                 <div class="tab-meta">
-                  <span>{{ formatTime(material.createTime) }}</span>
-                  <a
-                    v-if="material.fileUrl"
-                    :href="material.fileUrl"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="page-link"
-                  >
-                    查看资料 →
-                  </a>
+                  <span v-if="course.difficulty">难度：{{ course.difficulty }}</span>
+                  <span v-if="course.duration">时长：{{ course.duration }}分钟</span>
+                  <span v-if="course.tags">标签：{{ course.tags }}</span>
                 </div>
               </article>
             </div>
-            <p v-if="materialsTotal > materials.length" class="tab-total">共 {{ materialsTotal }} 份资料</p>
           </div>
         </el-tab-pane>
       </el-tabs>

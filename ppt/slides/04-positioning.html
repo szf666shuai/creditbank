@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>产品定位</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
+    
+    :root {
+      --nb-ink: #1a202c;
+      --nb-cream: #fff9f0;
+      --nb-green: #22c55e;
+      --nb-green-deep: #16a34a;
+      --nb-blue: #bee3f8;
+      --nb-pink: #fecdd3;
+      --nb-yellow: #fef08a;
+      --nb-purple: #ddd6fe;
+      --nb-shadow: 4px 4px 0 0 var(--nb-ink);
+      --font-heading: 'Nunito', 'PingFang SC', sans-serif;
+    }
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    html, body {
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      background: var(--nb-cream);
+      font-family: var(--font-heading);
+    }
+    
+    .slide {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      padding: 60px 120px;
+      position: relative;
+    }
+    
+    .page-header {
+      margin-bottom: 40px;
+    }
+    
+    .page-header .page-number {
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--nb-green);
+      letter-spacing: 0.1em;
+      margin-bottom: 8px;
+    }
+    
+    .page-header h2 {
+      font-size: 3rem;
+      font-weight: 900;
+      color: var(--nb-ink);
+    }
+    
+    .positioning-content {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 40px;
+    }
+    
+    .main-positioning {
+      background: #fff;
+      border: 3px solid var(--nb-ink);
+      border-radius: 24px;
+      box-shadow: var(--nb-shadow);
+      padding: 48px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+    }
+    
+    .main-positioning__icon {
+      font-size: 5rem;
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    
+    .main-positioning__title {
+      font-size: 3rem;
+      font-weight: 900;
+      color: var(--nb-ink);
+      text-align: center;
+      margin-bottom: 16px;
+      line-height: 1.2;
+    }
+    
+    .main-positioning__title span {
+      color: var(--nb-green);
+    }
+    
+    .main-positioning__subtitle {
+      font-size: 1.4rem;
+      color: #64748b;
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    
+    .positioning-analogy {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    
+    .analogy-card {
+      background: var(--nb-blue);
+      border: 3px solid var(--nb-ink);
+      border-radius: 16px;
+      box-shadow: 3px 3px 0 0 var(--nb-ink);
+      padding: 24px;
+      text-align: center;
+    }
+    
+    .analogy-card:nth-child(2) {
+      background: var(--nb-green);
+      color: #fff;
+      transform: translateY(-8px);
+    }
+    
+    .analogy-card:nth-child(2) .analogy-card__title,
+    .analogy-card:nth-child(2) .analogy-card__desc {
+      color: #fff;
+    }
+    
+    .analogy-card__icon {
+      font-size: 2.5rem;
+      margin-bottom: 12px;
+    }
+    
+    .analogy-card__title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--nb-ink);
+      margin-bottom: 8px;
+    }
+    
+    .analogy-card__desc {
+      font-size: 0.875rem;
+      color: #475569;
+      line-height: 1.5;
+    }
+    
+    .side-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    
+    .value-card {
+      background: #fff;
+      border: 3px solid var(--nb-ink);
+      border-radius: 18px;
+      box-shadow: var(--nb-shadow);
+      padding: 24px;
+    }
+    
+    .value-card__header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    
+    .value-card__icon {
+      width: 44px;
+      height: 44px;
+      background: var(--nb-green);
+      border: 2.5px solid var(--nb-ink);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+    
+    .value-card__title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--nb-ink);
+    }
+    
+    .value-card__desc {
+      font-size: 0.9rem;
+      color: #64748b;
+      line-height: 1.5;
+    }
+    
+    .value-card:nth-child(2) .value-card__icon { background: var(--nb-yellow); }
+    .value-card:nth-child(3) .value-card__icon { background: var(--nb-pink); }
+    .value-card:nth-child(4) .value-card__icon { background: var(--nb-purple); }
+    
+    .target-users {
+      background: var(--nb-green);
+      border: 3px solid var(--nb-ink);
+      border-radius: 18px;
+      box-shadow: var(--nb-shadow);
+      padding: 24px;
+      color: #fff;
+    }
+    
+    .target-users__title {
+      font-size: 1.2rem;
+      font-weight: 800;
+      margin-bottom: 16px;
+    }
+    
+    .target-users__list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    .target-user {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(255,255,255,0.2);
+      border: 2px solid rgba(255,255,255,0.4);
+      border-radius: 12px;
+      padding: 12px 16px;
+    }
+    
+    .target-user__icon {
+      font-size: 1.5rem;
+    }
+    
+    .target-user__name {
+      font-size: 1rem;
+      font-weight: 700;
+    }
+    
+    .footer-note {
+      margin-top: 32px;
+      text-align: center;
+    }
+    
+    .footer-note p {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--nb-ink);
+    }
+    
+    .footer-note p span {
+      color: var(--nb-green);
+    }
+  </style>
+</head>
+<body>
+  <div class="slide">
+    <div class="page-header">
+      <div class="page-number">04 / 12</div>
+      <h2>产品定位</h2>
+    </div>
+    
+    <div class="positioning-content">
+      <div class="main-positioning">
+        <div class="main-positioning__icon">🎓</div>
+        <div class="main-positioning__title">
+          <span>学习</span>的<span>健身房</span><br>
+          知识的<span>银行</span>
+        </div>
+        <div class="main-positioning__subtitle">
+          提供沉浸式学习氛围，让学习成为一种生活方式
+        </div>
+        
+        <div class="positioning-analogy">
+          <div class="analogy-card">
+            <div class="analogy-card__icon">🏠</div>
+            <div class="analogy-card__title">在家学习</div>
+            <div class="analogy-card__desc">容易懈怠、缺乏氛围、孤独感强</div>
+          </div>
+          
+          <div class="analogy-card">
+            <div class="analogy-card__icon">📚</div>
+            <div class="analogy-card__title">我们的平台</div>
+            <div class="analogy-card__desc">沉浸式学习社区、同伴激励、AI助手陪伴</div>
+          </div>
+          
+          <div class="analogy-card">
+            <div class="analogy-card__icon">🏋️</div>
+            <div class="analogy-card__title">健身房</div>
+            <div class="analogy-card__desc">专业设备、教练指导、团体氛围</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="side-panel">
+        <div class="value-card">
+          <div class="value-card__header">
+            <div class="value-card__icon">🎯</div>
+            <div class="value-card__title">精准匹配</div>
+          </div>
+          <div class="value-card__desc">连接企业与学员，解决招聘与求职的信息不对称</div>
+        </div>
+        
+        <div class="value-card">
+          <div class="value-card__header">
+            <div class="value-card__icon">⚡</div>
+            <div class="value-card__title">即时反馈</div>
+          </div>
+          <div class="value-card__desc">学习成果即时记录，学分可积累可兑换</div>
+        </div>
+        
+        <div class="value-card">
+          <div class="value-card__header">
+            <div class="value-card__icon">🤝</div>
+            <div class="value-card__title">社交互动</div>
+          </div>
+          <div class="value-card__desc">论坛、活动、同伴激励，学习不再孤单</div>
+        </div>
+        
+        <div class="value-card">
+          <div class="value-card__header">
+            <div class="value-card__icon">💡</div>
+            <div class="value-card__title">AI驱动</div>
+          </div>
+          <div class="value-card__desc">智能学习助手、个性化推荐、简历生成</div>
+        </div>
+        
+        <div class="target-users">
+          <div class="target-users__title">目标用户</div>
+          <div class="target-users__list">
+            <div class="target-user">
+              <div class="target-user__icon">👨‍🎓</div>
+              <div class="target-user__name">在校学生</div>
+            </div>
+            <div class="target-user">
+              <div class="target-user__icon">💼</div>
+              <div class="target-user__name">职场人士</div>
+            </div>
+            <div class="target-user">
+              <div class="target-user__icon">🏢</div>
+              <div class="target-user__name">企业机构</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="footer-note">
+      <p>打造<span>终身学习</span>的学习型社区生态</p>
+    </div>
+  </div>
+</body>
+</html>

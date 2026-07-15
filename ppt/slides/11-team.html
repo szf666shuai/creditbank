@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>组织管理</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
+    
+    :root {
+      --nb-ink: #1a202c;
+      --nb-cream: #fff9f0;
+      --nb-green: #22c55e;
+      --nb-green-deep: #16a34a;
+      --nb-blue: #bee3f8;
+      --nb-pink: #fecdd3;
+      --nb-yellow: #fef08a;
+      --nb-purple: #ddd6fe;
+      --nb-shadow: 4px 4px 0 0 var(--nb-ink);
+      --font-heading: 'Nunito', 'PingFang SC', sans-serif;
+    }
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    html, body {
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      background: var(--nb-cream);
+      font-family: var(--font-heading);
+    }
+    
+    .slide {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      padding: 60px 120px;
+      position: relative;
+    }
+    
+    .page-header {
+      margin-bottom: 40px;
+    }
+    
+    .page-header .page-number {
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--nb-green);
+      letter-spacing: 0.1em;
+      margin-bottom: 8px;
+    }
+    
+    .page-header h2 {
+      font-size: 3rem;
+      font-weight: 900;
+      color: var(--nb-ink);
+    }
+    
+    .team-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+    
+    .team-section {
+      background: #fff;
+      border: 3px solid var(--nb-ink);
+      border-radius: 24px;
+      box-shadow: var(--nb-shadow);
+      padding: 32px;
+    }
+    
+    .team-section__title {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--nb-ink);
+      margin-bottom: 24px;
+    }
+    
+    .team-members {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+    }
+    
+    .member-card {
+      background: var(--nb-cream);
+      border: 2.5px solid var(--nb-ink);
+      border-radius: 20px;
+      box-shadow: 3px 3px 0 0 var(--nb-ink);
+      padding: 24px;
+      text-align: center;
+    }
+    
+    .member-card:nth-child(1) { background: var(--nb-blue); }
+    .member-card:nth-child(2) { background: var(--nb-pink); }
+    .member-card:nth-child(3) { background: var(--nb-yellow); }
+    .member-card:nth-child(4) { background: var(--nb-purple); }
+    
+    .member-card__avatar {
+      width: 100px;
+      height: 100px;
+      background: #fff;
+      border: 3px solid var(--nb-ink);
+      border-radius: 50%;
+      margin: 0 auto 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      box-shadow: 3px 3px 0 0 var(--nb-ink);
+    }
+    
+    .member-card__name {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--nb-ink);
+      margin-bottom: 8px;
+    }
+    
+    .member-card__role {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #64748b;
+      background: rgba(255,255,255,0.8);
+      border: 2px solid var(--nb-ink);
+      border-radius: 999px;
+      padding: 4px 12px;
+      display: inline-block;
+      margin-bottom: 12px;
+    }
+    
+    .member-card__description {
+      font-size: 0.8rem;
+      color: #64748b;
+      line-height: 1.5;
+      min-height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .team-workflow {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+    
+    .workflow-step {
+      background: var(--nb-cream);
+      border: 2.5px solid var(--nb-ink);
+      border-radius: 16px;
+      box-shadow: 3px 3px 0 0 var(--nb-ink);
+      padding: 24px;
+      text-align: center;
+    }
+    
+    .workflow-step__number {
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: var(--nb-green);
+      margin-bottom: 12px;
+    }
+    
+    .workflow-step__title {
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--nb-ink);
+      margin-bottom: 8px;
+    }
+    
+    .workflow-step__desc {
+      font-size: 0.8rem;
+      color: #64748b;
+    }
+    
+    .footer-note {
+      margin-top: 32px;
+      text-align: center;
+    }
+    
+    .footer-note p {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--nb-ink);
+    }
+    
+    .footer-note p span {
+      color: var(--nb-green);
+    }
+  </style>
+</head>
+<body>
+  <div class="slide">
+    <div class="page-header">
+      <div class="page-number">11 / 12</div>
+      <h2>组织管理</h2>
+    </div>
+    
+    <div class="team-content">
+      <div class="team-section">
+        <div class="team-section__title">成员介绍</div>
+        <div class="team-members">
+          <div class="member-card">
+            <div class="member-card__avatar">👨‍💻</div>
+            <div class="member-card__name">【姓名】</div>
+            <div class="member-card__role">【角色】</div>
+            <div class="member-card__description">【职责描述】</div>
+          </div>
+          
+          <div class="member-card">
+            <div class="member-card__avatar">👩‍💻</div>
+            <div class="member-card__name">【姓名】</div>
+            <div class="member-card__role">【角色】</div>
+            <div class="member-card__description">【职责描述】</div>
+          </div>
+          
+          <div class="member-card">
+            <div class="member-card__avatar">👨‍🎨</div>
+            <div class="member-card__name">【姓名】</div>
+            <div class="member-card__role">【角色】</div>
+            <div class="member-card__description">【职责描述】</div>
+          </div>
+          
+          <div class="member-card">
+            <div class="member-card__avatar">👩‍🎨</div>
+            <div class="member-card__name">【姓名】</div>
+            <div class="member-card__role">【角色】</div>
+            <div class="member-card__description">【职责描述】</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="team-section">
+        <div class="team-section__title">团队协作流程</div>
+        <div class="team-workflow">
+          <div class="workflow-step">
+            <div class="workflow-step__number">01</div>
+            <div class="workflow-step__title">需求分析</div>
+            <div class="workflow-step__desc">收集用户需求，分析业务场景，确定功能范围</div>
+          </div>
+          
+          <div class="workflow-step">
+            <div class="workflow-step__number">02</div>
+            <div class="workflow-step__title">系统设计</div>
+            <div class="workflow-step__desc">架构设计、数据库设计、界面设计</div>
+          </div>
+          
+          <div class="workflow-step">
+            <div class="workflow-step__number">03</div>
+            <div class="workflow-step__title">开发实现</div>
+            <div class="workflow-step__desc">前后端并行开发，代码审查与测试</div>
+          </div>
+          
+          <div class="workflow-step">
+            <div class="workflow-step__number">04</div>
+            <div class="workflow-step__title">部署上线</div>
+            <div class="workflow-step__desc">Docker容器化部署，持续集成与运维</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="footer-note">
+      <p><span>团队协作</span>，共创价值</p>
+    </div>
+  </div>
+</body>
+</html>

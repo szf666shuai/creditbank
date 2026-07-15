@@ -22,6 +22,7 @@ public class LearningAchievement {
     private Long certificateId;
     private BigDecimal creditValue;
     private String fileUrl;
+    private String tags;
     private Integer verifyStatus;
     private String blockchainHash;
     private LocalDateTime createTime;

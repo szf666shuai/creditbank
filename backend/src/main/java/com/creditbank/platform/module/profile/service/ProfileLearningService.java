@@ -97,6 +97,7 @@ public class ProfileLearningService {
                 .certificateId(achievement.getCertificateId())
                 .creditValue(achievement.getCreditValue())
                 .fileUrl(achievement.getFileUrl())
+                .tags(achievement.getTags())
                 .verifyStatus(achievement.getVerifyStatus())
                 .verifyStatusName(verifyStatusName(achievement.getVerifyStatus()))
                 .blockchainHash(achievement.getBlockchainHash())

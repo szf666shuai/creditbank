@@ -16,7 +16,7 @@ public class ActivityCheckinResultVO {
     private String statusName;
     private LocalDateTime checkInTime;
     private String message;
-    private Boolean creditGranted;
-    private BigDecimal creditReward;
-    private String creditMessage;
+    private Boolean integrityGranted;
+    private Integer integrityReward;
+    private String integrityMessage;
 }

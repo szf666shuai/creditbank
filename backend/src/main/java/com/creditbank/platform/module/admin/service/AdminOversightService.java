@@ -4,21 +4,21 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.creditbank.platform.common.BusinessException;
 import com.creditbank.platform.common.PageResult;
+import com.creditbank.platform.entity.Course;
 import com.creditbank.platform.entity.CreditTransaction;
 import com.creditbank.platform.entity.IntegrityRecord;
-import com.creditbank.platform.entity.MallProduct;
 import com.creditbank.platform.entity.SysOrganization;
 import com.creditbank.platform.entity.SysUser;
+import com.creditbank.platform.mapper.CourseMapper;
 import com.creditbank.platform.mapper.CreditTransactionMapper;
 import com.creditbank.platform.mapper.IntegrityRecordMapper;
-import com.creditbank.platform.mapper.MallProductMapper;
 import com.creditbank.platform.mapper.SysOrganizationMapper;
 import com.creditbank.platform.mapper.SysUserMapper;
 import com.creditbank.platform.module.admin.dto.AdminActivityVO;
+import com.creditbank.platform.module.admin.dto.AdminCourseVO;
 import com.creditbank.platform.module.admin.dto.AdminCreditTransactionVO;
 import com.creditbank.platform.module.admin.dto.AdminIntegrityRecordVO;
 import com.creditbank.platform.module.admin.dto.AdminJobVO;
-import com.creditbank.platform.module.admin.dto.AdminMallProductVO;
 import com.creditbank.platform.module.admin.dto.AdminProductApprovalRequest;
 import com.creditbank.platform.module.admin.dto.UpdateContentStatusRequest;
 import com.creditbank.platform.module.enterprise.service.ActivityLifecycleService;
@@ -53,7 +53,7 @@ public class AdminOversightService {
     private final CreditTransactionMapper creditTransactionMapper;
     private final SysOrganizationMapper sysOrganizationMapper;
     private final SysUserMapper sysUserMapper;
-    private final MallProductMapper mallProductMapper;
+    private final CourseMapper courseMapper;
     private final ActivityLifecycleService activityLifecycleService;
 
     public PageResult<AdminJobVO> pageJobs(long page, long pageSize, Integer status, String keyword) {
@@ -76,42 +76,42 @@ public class AdminOversightService {
                 result.getSize());
     }
 
-    public PageResult<AdminMallProductVO> pageProducts(long page, long pageSize, Integer approvalStatus, String keyword) {
+    public PageResult<AdminCourseVO> pageCourses(long page, long pageSize, Integer approvalStatus, String keyword) {
         authSupport.requireAdmin();
         AdminSupport.validatePage(page, pageSize);
-        LambdaQueryWrapper<MallProduct> wrapper = new LambdaQueryWrapper<MallProduct>()
-                .eq(MallProduct::getDeleted, 0)
-                .eq(approvalStatus != null, MallProduct::getApprovalStatus, approvalStatus)
-                .orderByDesc(MallProduct::getCreateTime);
+        LambdaQueryWrapper<Course> wrapper = new LambdaQueryWrapper<Course>()
+                .eq(Course::getDeleted, 0)
+                .eq(approvalStatus != null, Course::getApprovalStatus, approvalStatus)
+                .orderByDesc(Course::getCreateTime);
         if (StringUtils.hasText(keyword)) {
-            wrapper.like(MallProduct::getName, keyword.trim());
+            wrapper.like(Course::getTitle, keyword.trim());
         }
-        Page<MallProduct> result = mallProductMapper.selectPage(new Page<>(page, pageSize), wrapper);
-        Map<Long, String> orgNameMap = loadOrgNameMap(result.getRecords().stream().map(MallProduct::getOrgId).toList());
+        Page<Course> result = courseMapper.selectPage(new Page<>(page, pageSize), wrapper);
+        Map<Long, String> orgNameMap = loadOrgNameMap(result.getRecords().stream().map(Course::getOrgId).toList());
         return PageResult.of(
-                result.getRecords().stream().map(product -> toProductVO(product, orgNameMap.get(product.getOrgId()))).toList(),
+                result.getRecords().stream().map(course -> toCourseVO(course, orgNameMap.get(course.getOrgId()))).toList(),
                 result.getTotal(),
                 result.getCurrent(),
                 result.getSize());
     }
 
     @Transactional
-    public AdminMallProductVO reviewProduct(Long productId, AdminProductApprovalRequest request) {
+    public AdminCourseVO reviewCourse(Long courseId, AdminProductApprovalRequest request) {
         SysUser admin = authSupport.requireAdmin();
-        MallProduct product = mallProductMapper.selectById(productId);
-        if (product == null || product.getDeleted() != null && product.getDeleted() == 1) {
-            throw new BusinessException(404, "商品不存在");
+        Course course = courseMapper.selectById(courseId);
+        if (course == null || course.getDeleted() != null && course.getDeleted() == 1) {
+            throw new BusinessException(404, "课程不存在");
         }
         if (request.getApprovalStatus() != 1 && request.getApprovalStatus() != 2) {
             throw new BusinessException(400, "审核状态无效");
         }
-        product.setApprovalStatus(request.getApprovalStatus());
-        product.setReviewRemark(request.getReviewRemark());
-        product.setReviewedBy(admin.getId());
-        product.setReviewedAt(LocalDateTime.now());
-        product.setStatus(request.getApprovalStatus() == 1 ? 1 : 0);
-        mallProductMapper.updateById(product);
-        return toProductVO(product, loadOrgName(product.getOrgId()));
+        course.setApprovalStatus(request.getApprovalStatus());
+        course.setReviewRemark(request.getReviewRemark());
+        course.setReviewedBy(admin.getId());
+        course.setReviewedAt(LocalDateTime.now());
+        course.setStatus(request.getApprovalStatus() == 1 ? 1 : 0);
+        courseMapper.updateById(course);
+        return toCourseVO(course, loadOrgName(course.getOrgId()));
     }
 
     @Transactional
@@ -300,42 +300,41 @@ public class AdminOversightService {
                 .type(tx.getType())
                 .typeName(creditTypeName(tx.getType()))
                 .amount(tx.getAmount())
-                .balanceAfter(tx.getBalanceAfter())
                 .bizType(tx.getBizType())
                 .source(tx.getSource())
                 .createTime(tx.getCreateTime())
                 .build();
     }
 
-    private AdminMallProductVO toProductVO(MallProduct product, String orgName) {
-        AdminMallProductVO vo = new AdminMallProductVO();
-        vo.setId(product.getId());
-        vo.setOrgId(product.getOrgId());
-        vo.setOrgName(orgName);
-        vo.setName(product.getName());
-        vo.setDescription(product.getDescription());
-        vo.setCoverUrl(product.getCoverUrl());
-        vo.setProductType(product.getProductType());
-        vo.setProductTypeName(productTypeName(product.getProductType()));
-        vo.setPriceCredit(product.getPriceCredit());
-        vo.setPriceMoney(product.getPriceMoney());
-        vo.setStock(product.getStock());
-        vo.setStatus(product.getStatus());
-        vo.setApprovalStatus(product.getApprovalStatus());
-        vo.setApprovalStatusName(approvalStatusName(product.getApprovalStatus()));
-        vo.setReviewRemark(product.getReviewRemark());
-        vo.setCreateTime(product.getCreateTime());
-        return vo;
+    private AdminCourseVO toCourseVO(Course course, String orgName) {
+        return AdminCourseVO.builder()
+                .id(course.getId())
+                .orgId(course.getOrgId())
+                .orgName(orgName)
+                .title(course.getTitle())
+                .description(course.getDescription())
+                .coverUrl(course.getCoverUrl())
+                .tags(course.getTags() != null ? List.of(course.getTags().split(",")) : null)
+                .creditValue(course.getCreditValue())
+                .duration(course.getDurationMinutes())
+                .difficulty(course.getDifficulty())
+                .difficultyName(difficultyName(course.getDifficulty()))
+                .status(course.getStatus())
+                .approvalStatus(course.getApprovalStatus())
+                .approvalStatusName(approvalStatusName(course.getApprovalStatus()))
+                .reviewRemark(course.getReviewRemark())
+                .createTime(course.getCreateTime())
+                .build();
     }
 
-    private static String productTypeName(Integer type) {
-        if (type == null) return "未知";
-        return switch (type) {
-            case 1 -> "实物商品";
-            case 2 -> "虚拟商品";
-            case 3 -> "课程兑换";
-            case 4 -> "服务权益";
-            default -> "其他";
+    private static String difficultyName(Integer difficulty) {
+        if (difficulty == null) return "入门";
+        return switch (difficulty) {
+            case 1 -> "入门";
+            case 2 -> "初级";
+            case 3 -> "中级";
+            case 4 -> "高级";
+            default -> "入门";
         };
     }
 

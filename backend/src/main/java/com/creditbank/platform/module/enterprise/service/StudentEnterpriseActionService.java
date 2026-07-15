@@ -2,8 +2,7 @@ package com.creditbank.platform.module.enterprise.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.creditbank.platform.common.BusinessException;
-import com.creditbank.platform.dto.CreditChangeResult;
-import com.creditbank.platform.dto.CreditEarnRequest;
+import com.creditbank.platform.dto.IntegrityScoreVO;
 import com.creditbank.platform.entity.SysOrganization;
 import com.creditbank.platform.entity.SysUser;
 import com.creditbank.platform.entity.UserResume;
@@ -25,7 +24,7 @@ import com.creditbank.platform.module.enterprise.mapper.JobApplicationMapper;
 import com.creditbank.platform.module.enterprise.mapper.JobPostingMapper;
 import com.creditbank.platform.module.profile.service.ProfileResumeService;
 import com.creditbank.platform.security.AuthSupport;
-import com.creditbank.platform.service.CreditService;
+import com.creditbank.platform.service.IntegrityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -56,7 +55,7 @@ public class StudentEnterpriseActionService {
     private final JobApplicationMapper jobApplicationMapper;
     private final ActivityMapper activityMapper;
     private final ActivityRegistrationMapper activityRegistrationMapper;
-    private final CreditService creditService;
+    private final IntegrityService integrityService;
     private final ActivityLifecycleService activityLifecycleService;
 
     public OrgParticipationStatusVO getOrgParticipationStatus(Long orgId) {
@@ -220,23 +219,20 @@ public class StudentEnterpriseActionService {
         registration.setCheckInTime(now);
         activityRegistrationMapper.updateById(registration);
 
-        Boolean creditGranted = false;
-        BigDecimal creditReward = null;
-        String creditMessage = null;
+        Boolean integrityGranted = false;
+        Integer integrityReward = null;
+        String integrityMessage = null;
         try {
-            CreditEarnRequest earnRequest = new CreditEarnRequest();
-            earnRequest.setRuleCode("ACTIVITY_CHECKIN");
-            earnRequest.setSource("活动签到: " + activity.getTitle());
-            earnRequest.setRefType("activity_registration");
-            earnRequest.setRefId(registration.getId());
-            CreditChangeResult creditChange = creditService.earnByRule(user.getId(), earnRequest);
-            creditGranted = true;
-            creditReward = creditChange != null ? creditChange.getAmount() : null;
+            IntegrityScoreVO result = integrityService.applyEvent(user.getId(), 3,
+                    "活动签到: " + activity.getTitle(),
+                    "activity_registration", registration.getId(), null);
+            integrityGranted = true;
+            integrityReward = 3;
         } catch (BusinessException ex) {
-            creditMessage = ex.getMessage();
+            integrityMessage = ex.getMessage();
         }
 
-        String message = buildCheckinMessage(creditGranted, creditReward, creditMessage);
+        String message = buildCheckinMessage(integrityGranted, integrityReward, integrityMessage);
 
         return ActivityCheckinResultVO.builder()
                 .registrationId(registration.getId())
@@ -244,19 +240,19 @@ public class StudentEnterpriseActionService {
                 .status(REG_CHECKED_IN)
                 .statusName("已签到")
                 .checkInTime(now)
-                .creditGranted(creditGranted)
-                .creditReward(creditReward)
-                .creditMessage(creditMessage)
+                .integrityGranted(integrityGranted)
+                .integrityReward(integrityReward)
+                .integrityMessage(integrityMessage)
                 .message(message)
                 .build();
     }
 
-    private static String buildCheckinMessage(Boolean creditGranted, BigDecimal creditReward, String creditMessage) {
-        if (Boolean.TRUE.equals(creditGranted) && creditReward != null) {
-            return "签到成功，已获得 " + creditReward.stripTrailingZeros().toPlainString() + " 秩点";
+    private static String buildCheckinMessage(Boolean integrityGranted, Integer integrityReward, String integrityMessage) {
+        if (Boolean.TRUE.equals(integrityGranted) && integrityReward != null) {
+            return "签到成功，已获得 " + integrityReward + " 诚信分";
         }
-        if (StringUtils.hasText(creditMessage)) {
-            return "签到成功，但秩点未发放：" + creditMessage;
+        if (StringUtils.hasText(integrityMessage)) {
+            return "签到成功，但诚信分未发放：" + integrityMessage;
         }
         return "签到成功，感谢参与！";
     }

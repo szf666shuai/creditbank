@@ -22,11 +22,17 @@ public class Course {
     private String coverUrl;
     private String videoUrl;
     private Integer videoDurationSeconds;
-    private BigDecimal priceCredit;
-    private BigDecimal priceMoney;
     private BigDecimal durationHours;
     private BigDecimal creditReward;
+    private BigDecimal creditValue;
+    private String tags;
+    private Integer difficulty;
+    private Integer durationMinutes;
     private Integer status;
+    private Integer approvalStatus;
+    private String reviewRemark;
+    private Long reviewedBy;
+    private LocalDateTime reviewedAt;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
 
