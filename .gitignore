@@ -32,7 +32,7 @@ logs/
 .env
 .env.local
 .env.*.local
-backend/src/main/resources/application-local.yml
+# application-local.yml 已纳入仓库，便于云服务器从 Gitee 拉取后直接使用 LLM/TRTC 配置
 
 # Docker volumes (local data)
 docker/mysql/data/

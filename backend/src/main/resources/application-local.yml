@@ -1,0 +1,18 @@
+# 本地/部署私密配置（LLM、腾讯云 TRTC 等）
+# 通过 spring.config.import=optional:classpath:application-local.yml 自动加载
+
+llm:
+  enabled: true
+  api-key: sk-2e03b747ddf14934b1dcd23ec1b64abe
+  base-url: https://api.deepseek.com
+  model: deepseek-chat
+  timeout-ms: 60000
+
+# 面试视频（腾讯云 TRTC）
+trtc:
+  enabled: true
+  sdk-app-id: 1600151564
+  secret-key: 9dad8fe2db289560eb169376d4ba74e6e8bceb687a3ce8f7fd89d3e291571150
+  expire-seconds: 86400
+  join-window-minutes-before: 30
+  join-window-minutes-after: 120
