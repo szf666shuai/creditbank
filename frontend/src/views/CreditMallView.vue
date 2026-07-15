@@ -1,5 +1,6 @@
 ﻿<script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Delete, Goods, Search } from '@element-plus/icons-vue'
@@ -13,21 +14,18 @@ import {
   type MallProduct,
 } from '@/api/mall'
 import { useAuthStore } from '@/stores/auth'
+import { useMallCartStore } from '@/stores/mallCart'
 import UiIcon from '@/components/ui/UiIcon.vue'
-
-interface CartLine {
-  product: MallProduct
-  quantity: number
-}
 
 const router = useRouter()
 const authStore = useAuthStore()
+const mallCart = useMallCartStore()
+const { cart, cartCount, totalCredit, totalMoney } = storeToRefs(mallCart)
 
 const loading = ref(false)
 const orderLoading = ref(false)
 const categories = ref<MallCategory[]>([])
 const products = ref<MallProduct[]>([])
-const cart = ref<CartLine[]>([])
 const activeCategoryId = ref<number | undefined>()
 const keyword = ref('')
 const remark = ref('')
@@ -39,14 +37,6 @@ const bannerIndex = ref(0)
 let bannerTimer: number | undefined
 
 const categoryIcons = ['course', 'gift', 'collection', 'medal', 'goods', 'reading', 'activity', 'star', 'document', 'cart']
-
-const totalCredit = computed(() =>
-  cart.value.reduce((sum, line) => sum + Number(line.product.priceCredit || 0) * line.quantity, 0),
-)
-const totalMoney = computed(() =>
-  cart.value.reduce((sum, line) => sum + Number(line.product.priceMoney || 0) * line.quantity, 0),
-)
-const cartCount = computed(() => cart.value.reduce((sum, line) => sum + line.quantity, 0))
 
 const bannerSlides = computed(() => {
   const featured = products.value.filter((p) => p.coverUrl).slice(0, 4)
@@ -142,25 +132,16 @@ function selectCategory(categoryId?: number) {
 }
 
 function addToCart(product: MallProduct) {
-  if (product.stock <= 0) {
-    ElMessage.warning('商品库存不足')
+  const result = mallCart.addToCart(product)
+  if (!result.ok) {
+    ElMessage.warning(result.message || '加入兑换篮失败')
     return
-  }
-  const line = cart.value.find((item) => item.product.id === product.id)
-  if (line) {
-    if (line.quantity >= product.stock) {
-      ElMessage.warning('已达到可兑换库存')
-      return
-    }
-    line.quantity += 1
-  } else {
-    cart.value.push({ product, quantity: 1 })
   }
   ElMessage.success('已加入兑换篮')
 }
 
 function removeCartLine(productId: number) {
-  cart.value = cart.value.filter((line) => line.product.id !== productId)
+  mallCart.removeCartLine(productId)
 }
 
 function viewPurchasedCourse(courseId?: number) {
@@ -198,7 +179,7 @@ async function submitOrder() {
     paymentResultNo.value = ''
     paymentVisible.value = true
     cartDrawerVisible.value = false
-    cart.value = []
+    mallCart.clearCart()
     remark.value = ''
   } catch (e) {
     ElMessage.error(e instanceof Error ? e.message : '提交订单失败')

@@ -12,6 +12,7 @@ import {
   gridSearchTypes,
   searchCategories,
 } from '@/config/search-categories'
+import { searchItemPath } from '@/utils/search-item-path'
 
 const route = useRoute()
 const router = useRouter()
@@ -147,6 +148,10 @@ function changeType(type: string) {
   router.push({ path: '/search', query: { q: keyword.value, type } })
 }
 
+function openItem(item: SearchItem) {
+  router.push(searchItemPath(item))
+}
+
 onMounted(fetchResults)
 watch(() => [route.query.q, route.query.type], fetchResults)
 </script>
@@ -194,6 +199,10 @@ watch(() => [route.query.q, route.query.type], fetchResults)
                 v-for="item in resultsMap[col.value]"
                 :key="`${item.type}-${item.id}`"
                 class="grid-card"
+                role="link"
+                tabindex="0"
+                @click="openItem(item)"
+                @keyup.enter="openItem(item)"
               >
                 <div class="grid-cover">
                   <img
@@ -238,6 +247,10 @@ watch(() => [route.query.q, route.query.type], fetchResults)
                     v-for="item in resultsMap[panel.value]"
                     :key="`${item.type}-${item.id}`"
                     class="panel-item"
+                    role="link"
+                    tabindex="0"
+                    @click="openItem(item)"
+                    @keyup.enter="openItem(item)"
                   >
                     <p class="panel-item-title" v-html="highlightKeyword(item.title)" />
                     <p v-if="item.summary" class="panel-item-summary">{{ item.summary }}</p>
@@ -272,6 +285,10 @@ watch(() => [route.query.q, route.query.type], fetchResults)
                 v-for="item in resultsMap[block.value]"
                 :key="`${item.type}-${item.id}`"
                 class="stack-card"
+                role="link"
+                tabindex="0"
+                @click="openItem(item)"
+                @keyup.enter="openItem(item)"
               >
                 <h4 class="stack-title" v-html="highlightKeyword(item.title)" />
                 <p v-if="item.summary" class="stack-summary">{{ item.summary }}</p>
@@ -308,6 +325,10 @@ watch(() => [route.query.q, route.query.type], fetchResults)
                 v-for="item in resultsMap.enterprise"
                 :key="`${item.type}-${item.id}`"
                 class="enterprise-card"
+                role="link"
+                tabindex="0"
+                @click="openItem(item)"
+                @keyup.enter="openItem(item)"
               >
                 <h4 class="enterprise-title" v-html="highlightKeyword(item.title)" />
                 <p v-if="item.summary" class="enterprise-summary">{{ item.summary }}</p>
@@ -336,6 +357,10 @@ watch(() => [route.query.q, route.query.type], fetchResults)
                 v-for="item in resultsMap[col.value]"
                 :key="`${item.type}-${item.id}`"
                 class="grid-card"
+                role="link"
+                tabindex="0"
+                @click="openItem(item)"
+                @keyup.enter="openItem(item)"
               >
                 <div class="grid-cover">
                   <img
@@ -364,6 +389,10 @@ watch(() => [route.query.q, route.query.type], fetchResults)
             :key="`${item.type}-${item.id}`"
             class="result-card"
             shadow="hover"
+            role="link"
+            tabindex="0"
+            @click="openItem(item)"
+            @keyup.enter="openItem(item)"
           >
             <div class="result-meta">
               <el-tag size="small" type="info">{{ item.typeName }}</el-tag>
@@ -561,6 +590,7 @@ watch(() => [route.query.q, route.query.type], fetchResults)
 .panel-item {
   padding-bottom: 10px;
   border-bottom: 1px solid var(--color-border-neutral);
+  cursor: pointer;
 }
 
 .panel-item:last-child {
@@ -615,6 +645,7 @@ watch(() => [route.query.q, route.query.type], fetchResults)
 }
 
 .stack-card {
+  cursor: pointer;
   background: var(--color-card);
   border-radius: 12px;
   padding: 14px 16px;
@@ -659,6 +690,7 @@ watch(() => [route.query.q, route.query.type], fetchResults)
 }
 
 .enterprise-card {
+  cursor: pointer;
   background: var(--color-card);
   border-radius: 12px;
   padding: 16px 18px;
@@ -707,6 +739,7 @@ watch(() => [route.query.q, route.query.type], fetchResults)
 }
 
 .result-card {
+  cursor: pointer;
   border-radius: 12px;
   border: 1px solid var(--color-border-neutral) !important;
   background: var(--color-card) !important;

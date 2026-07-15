@@ -14,6 +14,8 @@ import com.creditbank.platform.dto.CourseDanmakuVO;
 import com.creditbank.platform.dto.CourseMaterialVO;
 import com.creditbank.platform.dto.LearningProgressRequest;
 import com.creditbank.platform.dto.LearningResourceVO;
+import com.creditbank.platform.context.UserContext;
+import com.creditbank.platform.constant.UserRole;
 import com.creditbank.platform.entity.SysUser;
 import com.creditbank.platform.entity.UserCourse;
 import com.creditbank.platform.security.AuthSupport;
@@ -49,8 +51,8 @@ public class LearningController {
     @GetMapping("/resources")
     public Result<List<LearningResourceVO>> resources(@RequestParam(required = false) String keyword,
                                                       @RequestParam(required = false) String tag) {
-        SysUser user = authSupport.requireStudentOrAdmin();
-        return Result.ok(learningService.listResources(user.getId(), keyword, tag));
+        // 游客可浏览列表；登录学员/管理员带个性化进度
+        return Result.ok(learningService.listResources(optionalLearningUserId(), keyword, tag));
     }
 
     @GetMapping("/resources/{courseId}")
@@ -61,8 +63,25 @@ public class LearningController {
 
     @GetMapping("/tags")
     public Result<List<String>> tags() {
-        authSupport.requireStudentOrAdmin();
         return Result.ok(learningService.listSkillTags());
+    }
+
+    /** 未登录或非学员/管理员时按游客浏览，不抛错 */
+    private Long optionalLearningUserId() {
+        Long userId = UserContext.getUserId();
+        if (userId == null) {
+            return null;
+        }
+        try {
+            SysUser user = authSupport.requireLoginUser();
+            if (user.getRole() != null
+                    && (user.getRole() == UserRole.STUDENT || user.getRole() == UserRole.ADMIN)) {
+                return user.getId();
+            }
+        } catch (Exception ignored) {
+            // token 失效或用户不存在：按游客
+        }
+        return null;
     }
 
     @GetMapping("/resources/{courseId}/comments")
