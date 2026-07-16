@@ -79,7 +79,9 @@ function openEdit(row: EnterpriseCourse) {
   form.title = row.title
   form.description = row.description || ''
   form.coverUrl = row.coverUrl || ''
-  form.tags = row.tags?.join(',') || ''
+  form.tags = Array.isArray(row.tags)
+    ? row.tags.join(',')
+    : (row.tags || '')
   form.creditValue = Number(row.creditValue || 1)
   form.duration = Number(row.duration || 60)
   form.difficulty = row.difficulty || 1
@@ -113,7 +115,7 @@ async function handleSubmit() {
       title: form.title.trim(),
       description: form.description,
       coverUrl: form.coverUrl,
-      tags: form.tags.trim() ? form.tags.split(',').map(t => t.trim()).filter(Boolean) : undefined,
+      tags: form.tags.trim() || undefined,
       creditValue: form.creditValue,
       duration: form.duration,
       difficulty: form.difficulty,
@@ -161,12 +163,20 @@ onMounted(fetchCourses)
       <el-table-column prop="title" label="课程名称" min-width="160" />
       <el-table-column label="标签" min-width="120">
         <template #default="{ row }">
-          <el-tag v-for="tag in row.tags" :key="tag" size="small" class="tag-margin">{{ tag }}</el-tag>
-          <span v-if="!row.tags || row.tags.length === 0" class="text-muted">-</span>
+          <el-tag
+            v-for="tag in (Array.isArray(row.tags) ? row.tags : String(row.tags || '').split(/[,，]/).map((t: string) => t.trim()).filter(Boolean))"
+            :key="tag"
+            size="small"
+            class="tag-margin"
+          >{{ tag }}</el-tag>
+          <span v-if="!(row.tags && String(row.tags).trim())" class="text-muted">-</span>
         </template>
       </el-table-column>
-      <el-table-column label="秩点" width="80">
-        <template #default="{ row }">{{ Number(row.creditValue || 0).toFixed(0) }}</template>
+      <el-table-column label="学分" width="80">
+        <template #default="{ row }">{{ Number(row.creditValue || 0).toFixed(1) }}</template>
+      </el-table-column>
+      <el-table-column label="完成秩点" width="100">
+        <template #default="{ row }">{{ Number(row.creditReward ?? row.creditValue ?? 0).toFixed(0) }}</template>
       </el-table-column>
       <el-table-column label="时长(分钟)" width="100">
         <template #default="{ row }">{{ row.duration }}</template>

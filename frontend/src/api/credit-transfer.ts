@@ -15,7 +15,9 @@ export interface CreditTransferRule {
   targetCourseName?: string
   targetCertificateId?: number
   targetAchievementId?: number
+  targetAchievementTitle?: string
   targetOrgId?: number
+  targetOrgName?: string
   creditRatio?: number
   description?: string
   status: number
@@ -61,6 +63,10 @@ export interface CreditTransferApplication {
   targetOrgId?: number
   targetOrgName?: string
   applyReason?: string
+  aiSuggestion?: string
+  aiReason?: string
+  aiLlmUsed?: boolean
+  aiScreenTime?: string
   status: number
   statusName?: string
   reviewerId?: number
@@ -85,6 +91,10 @@ export interface CreditTransferApplyPayload {
 
 export function listRulesApi() {
   return request.get<CreditTransferRule[]>('/credit-transfer/rules')
+}
+
+export function listOrgTransferRulesApi(orgId: number) {
+  return request.get<CreditTransferRule[]>(`/credit-transfer/org/${orgId}/rules`)
 }
 
 export function getRuleApi(ruleId: number) {
@@ -128,4 +138,16 @@ export function matchRulesApi(sourceType: number, sourceCourseId?: number, sourc
   if (sourceCourseId) params.sourceCourseId = String(sourceCourseId)
   if (sourceAchievementId) params.sourceAchievementId = String(sourceAchievementId)
   return request.get<CreditTransferRule[]>(`/credit-transfer/match-rules?${new URLSearchParams(params).toString()}`)
+}
+
+export interface CreditTransferAiScreenResult {
+  suggestion: 'approve' | 'reject' | 'uncertain' | string
+  reason: string
+  llmUsed?: boolean
+}
+
+export function aiScreenApplicationApi(applicationId: number) {
+  return request.post<CreditTransferAiScreenResult>(
+    `/credit-transfer/applications/${applicationId}/ai-screen`,
+  )
 }

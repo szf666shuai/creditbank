@@ -10,12 +10,13 @@ import java.util.List;
 @Mapper
 public interface HomeMapper {
 
-    /** 与学习资源列表同源：course 表上架课程，展示学时与完成奖励 */
+    /** 与学习资源列表同源：course 表上架课程，展示完成奖励秩点 */
     @Select("""
             SELECT 'course' AS type, '课程' AS typeName, id, title, description AS summary, cover_url AS coverUrl,
-                   CONCAT(IFNULL(price_credit, 0), ' 秩点') AS extra, create_time AS createTime
+                   CONCAT(IFNULL(credit_reward, 0), ' 秩点') AS extra, create_time AS createTime
             FROM course
             WHERE deleted = 0 AND status = 1
+              AND (approval_status IS NULL OR approval_status = 1)
             ORDER BY create_time DESC, id DESC
             LIMIT #{limit}
             """)

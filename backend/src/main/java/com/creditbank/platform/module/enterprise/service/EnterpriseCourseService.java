@@ -41,10 +41,12 @@ public class EnterpriseCourseService {
         SysUser user = authSupport.requireEnterpriseWritable();
         Course course = new Course();
         course.setOrgId(user.getOrgId());
+        course.setPublisherId(user.getId());
         course.setTitle(request.getTitle().trim());
         course.setDescription(trim(request.getDescription()));
         course.setCoverUrl(trim(request.getCoverUrl()));
         course.setCreditValue(request.getCreditValue() == null ? BigDecimal.valueOf(3.00) : request.getCreditValue());
+        course.setCreditReward(request.getCreditValue() == null ? BigDecimal.valueOf(8.00) : request.getCreditValue());
         course.setDifficulty(request.getDifficulty() == null ? 1 : request.getDifficulty());
         course.setDurationMinutes(request.getDuration() == null ? 60 : request.getDuration());
         course.setTags(trim(request.getTags()));
@@ -105,6 +107,7 @@ public class EnterpriseCourseService {
         vo.setDescription(course.getDescription());
         vo.setCoverUrl(course.getCoverUrl());
         vo.setCreditValue(course.getCreditValue());
+        vo.setCreditReward(course.getCreditReward());
         vo.setDuration(course.getDurationMinutes());
         vo.setDifficulty(course.getDifficulty());
         vo.setDifficultyName(difficultyName(course.getDifficulty()));

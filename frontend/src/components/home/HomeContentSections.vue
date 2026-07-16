@@ -20,7 +20,7 @@ interface DisplayRow extends SearchItem {
 
 const modulePaths: Record<string, string> = {
   course: '/resources',
-  credit: '/credit',
+  credit: '/profile/credit',
   activity: '/news?type=activity',
   news: '/news?type=policy',
   job: '/news?type=job',
@@ -53,16 +53,17 @@ function itemPath(item: SearchItem) {
   }
 }
 
-/** 微专业：按学习资源技能标签筛选 */
+/** 微专业：进入该技能标签下的课程轨道列表 */
 function microMajorPath(item: SearchItem) {
   const tag = item.typeName && item.typeName !== '课程' ? item.typeName : undefined
-  return {
-    path: '/resources',
-    query: {
-      ...(tag ? { tag } : {}),
-      ...(item.id ? { courseId: String(item.id) } : {}),
-    },
+  if (tag) {
+    return { path: `/resources/track/${encodeURIComponent(tag)}` }
   }
+  // 兜底：若为具体课程，进入播放页
+  if (item.id && item.id > 0) {
+    return `/resources/${item.id}`
+  }
+  return '/resources'
 }
 
 function formatDate(value?: string) {
@@ -193,7 +194,6 @@ onMounted(loadHomeData)
               </div>
               <p v-if="item.summary" class="course-card__summary">{{ truncate(item.summary, 72) }}</p>
               <div class="course-card__meta">
-                <span>课程</span>
                 <span>{{ item.typeName || '开放学习' }}</span>
                 <span>进入学习 →</span>
               </div>
@@ -229,7 +229,7 @@ onMounted(loadHomeData)
 
         <!-- 微专业（按学习资源技能标签聚合） -->
         <section class="home-block">
-          <HomeSectionHeader title="微专业" icon="school" more-to="/resources" />
+          <HomeSectionHeader title="微专业" icon="school" more-to="/resources" more-label="浏览全部机构" />
           <el-empty v-if="!homeData.microMajors.length" description="暂无微专业" :image-size="64" />
           <div v-else class="card-grid card-grid--3">
             <router-link

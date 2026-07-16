@@ -125,7 +125,7 @@ onMounted(loadSummary)
         </el-button>
         <el-button @click="$router.push('/archive')">学习档案</el-button>
         <el-button @click="$router.push('/resources')">学习资源</el-button>
-        <el-button @click="$router.push('/credit')">我的秩点</el-button>
+        <el-button @click="$router.push('/profile/credit')">秩点总览</el-button>
       </div>
     </div>
   </div>

@@ -25,6 +25,19 @@ function statusTagType(status: number) {
   return 'warning'
 }
 
+function suggestionLabel(suggestion?: string) {
+  if (suggestion === 'approve') return '建议通过'
+  if (suggestion === 'reject') return '建议驳回'
+  if (suggestion === 'uncertain') return '存疑'
+  return ''
+}
+
+function suggestionTagType(suggestion?: string) {
+  if (suggestion === 'approve') return 'success'
+  if (suggestion === 'reject') return 'danger'
+  return 'warning'
+}
+
 function sourceDisplay(row: CreditTransferApplication) {
   if (row.sourceType === 2 && row.sourceAchievementTitle) {
     return row.sourceAchievementTitle
@@ -94,11 +107,19 @@ onMounted(fetchApplications)
 <template>
   <PageShell
     title="学分转换申请"
-    description="审核学员提交的学分转换申请，确认后将颁发等效证书并发放学分"
+    description="审核学员提交的外部学分转入申请。学员提交时系统已自动完成 AI 初筛，可直接对照建议进行人工复核。"
     :loading="loading"
     :error="loadError"
     @retry="fetchApplications"
   >
+    <el-alert
+      type="info"
+      :closable="false"
+      show-icon
+      class="tip"
+      title="AI 初筛在学员提交申请时自动生成，仅供参考；最终以人工审核为准。"
+    />
+
     <el-form :inline="true" class="filter-form" @submit.prevent="handleFilter">
       <el-form-item label="审核状态">
         <el-select v-model="filters.status" clearable placeholder="全部" style="width: 140px">
@@ -132,8 +153,19 @@ onMounted(fetchApplications)
           </div>
         </template>
       </el-table-column>
-      <el-table-column prop="applyReason" label="申请理由" min-width="160" show-overflow-tooltip>
+      <el-table-column prop="applyReason" label="申请理由" min-width="140" show-overflow-tooltip>
         <template #default="{ row }">{{ row.applyReason || '-' }}</template>
+      </el-table-column>
+      <el-table-column label="AI 初筛" min-width="220">
+        <template #default="{ row }">
+          <div v-if="row.aiSuggestion" class="ai-hint">
+            <el-tag :type="suggestionTagType(row.aiSuggestion)" size="small" effect="plain">
+              {{ suggestionLabel(row.aiSuggestion) }}
+            </el-tag>
+            <p>{{ row.aiReason || '-' }}</p>
+          </div>
+          <span v-else class="page-text-muted">未生成</span>
+        </template>
       </el-table-column>
       <el-table-column label="审核状态" width="100" align="center">
         <template #default="{ row }">
@@ -142,15 +174,11 @@ onMounted(fetchApplications)
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="reviewComment" label="审核备注" min-width="140" show-overflow-tooltip>
+      <el-table-column prop="reviewComment" label="审核备注" min-width="120" show-overflow-tooltip>
         <template #default="{ row }">{{ row.reviewComment || '-' }}</template>
       </el-table-column>
-      <el-table-column prop="reviewerName" label="审核人" width="100" />
-      <el-table-column label="申请时间" width="170">
+      <el-table-column label="申请时间" width="160">
         <template #default="{ row }">{{ formatTime(row.applyTime) }}</template>
-      </el-table-column>
-      <el-table-column label="审核时间" width="170">
-        <template #default="{ row }">{{ row.reviewTime ? formatTime(row.reviewTime) : '-' }}</template>
       </el-table-column>
       <el-table-column label="操作" width="140" align="center">
         <template #default="{ row }">
@@ -187,7 +215,25 @@ onMounted(fetchApplications)
 </template>
 
 <style scoped>
+.tip {
+  margin-bottom: 16px;
+}
+
 .filter-form {
   margin-bottom: 16px;
+}
+
+.ai-hint {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ai-hint p {
+  margin: 0;
+  font-size: 12px;
+  color: var(--el-text-color-regular);
+  line-height: 1.5;
+  white-space: normal;
 }
 </style>

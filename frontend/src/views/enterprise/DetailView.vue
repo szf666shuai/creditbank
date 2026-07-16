@@ -16,6 +16,7 @@ import {
   type ActivityItem,
 } from '@/api/enterprise'
 import { fetchOrgCourses, type LearningResource } from '@/api/learning'
+import { listOrgTransferRulesApi, type CreditTransferRule } from '@/api/credit-transfer'
 import { getErrorMessage, unwrapApi } from '@/utils/api'
 import { listResumesApi, type UserResumeSummary } from '@/api/profile-resume'
 import UiIcon from '@/components/ui/UiIcon.vue'
@@ -40,6 +41,7 @@ const activeTab = ref('jobs')
 const jobs = ref<JobPostingItem[]>([])
 const activities = ref<ActivityItem[]>([])
 const courses = ref<LearningResource[]>([])
+const transferRules = ref<CreditTransferRule[]>([])
 const jobsTotal = ref(0)
 const activitiesTotal = ref(0)
 const appliedJobIds = ref<number[]>([])
@@ -137,6 +139,8 @@ async function fetchTabData() {
       activitiesTotal.value = data.total
     } else if (activeTab.value === 'courses') {
       courses.value = unwrapApi(await fetchOrgCourses(orgId.value))
+    } else if (activeTab.value === 'transfer-rules') {
+      transferRules.value = unwrapApi(await listOrgTransferRulesApi(orgId.value))
     }
     await fetchParticipationStatus()
   } catch (e) {
@@ -252,6 +256,7 @@ watch(
     jobs.value = []
     activities.value = []
     courses.value = []
+    transferRules.value = []
     await fetchOrgDetail()
     await fetchTabData()
   },
@@ -456,7 +461,7 @@ onMounted(async () => {
                       type="primary"
                       size="small"
                       round
-                      @click="router.push(`/learning/${course.id}`)"
+                      @click="router.push(`/resources/${course.id}`)"
                     >
                       开始学习
                     </el-button>
@@ -465,9 +470,59 @@ onMounted(async () => {
                 <p class="tab-desc">{{ course.description || '暂无描述' }}</p>
                 <div class="tab-meta">
                   <span v-if="course.difficulty">难度：{{ course.difficulty }}</span>
-                  <span v-if="course.duration">时长：{{ course.duration }}分钟</span>
+                  <span v-if="course.durationMinutes">时长：{{ course.durationMinutes }}分钟</span>
                   <span v-if="course.tags">标签：{{ course.tags }}</span>
                 </div>
+              </article>
+            </div>
+          </div>
+        </el-tab-pane>
+
+        <el-tab-pane label="学分转换规则" name="transfer-rules">
+          <div v-loading="tabLoading">
+            <el-alert
+              v-if="tabError"
+              :title="tabError"
+              type="error"
+              show-icon
+              :closable="false"
+              class="tab-error"
+            >
+              <el-button link type="primary" @click="fetchTabData">点击重试</el-button>
+            </el-alert>
+            <el-alert
+              v-else
+              type="info"
+              :closable="false"
+              show-icon
+              class="tab-error"
+              title="以下为该机构已启用的学分互认 / 转换规则。学员可在个人中心「学分转换」中选择规则并申请；是否承认由该机构审核。"
+            />
+            <el-empty
+              v-if="!tabLoading && !tabError && transferRules.length === 0"
+              class="page-empty"
+              :image-size="80"
+              description="该机构暂未公布转换规则"
+            />
+            <div v-else-if="transferRules.length > 0" class="rule-grid">
+              <article v-for="rule in transferRules" :key="rule.id" class="rule-card">
+                <div class="rule-card__head">
+                  <el-tag size="small" type="success">启用</el-tag>
+                  <strong>{{ Math.round(Number(rule.creditRatio || 1) * 100) }}%</strong>
+                </div>
+                <h3>{{ rule.description || '转换规则' }}</h3>
+                <p>
+                  <span>接收目标</span>{{ rule.targetTypeName || '课程' }} ·
+                  {{ rule.targetCourseName || (rule.targetAchievementId ? `成果#${rule.targetAchievementId}` : '本机构学分') }}
+                </p>
+                <el-button
+                  v-if="canOperateAsStudent"
+                  type="primary"
+                  link
+                  @click="router.push('/profile/credit-transfer')"
+                >
+                  去申请转换 →
+                </el-button>
               </article>
             </div>
           </div>
@@ -861,6 +916,47 @@ onMounted(async () => {
 
 .apply-resume-link:hover {
   text-decoration: underline;
+}
+
+.rule-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.rule-card {
+  border: 1.5px solid var(--color-border-neutral);
+  border-radius: 12px;
+  padding: 14px 16px;
+  background: #fff;
+}
+
+.rule-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.rule-card h3 {
+  margin: 0 0 10px;
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.rule-card p {
+  margin: 0 0 6px;
+  font-size: 13px;
+  color: var(--color-muted-foreground);
+}
+
+.rule-card p span {
+  display: inline-block;
+  min-width: 2.5em;
+  margin-right: 6px;
+  color: var(--color-foreground);
+  font-weight: 700;
 }
 
 @media (max-width: 768px) {

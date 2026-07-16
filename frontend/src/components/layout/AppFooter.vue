@@ -63,7 +63,7 @@ const courseLinks = [
 
 const companyLinks = [
   { label: '企业机构', path: '/enterprise' },
-  { label: '秩点商城', path: '/credit' },
+  { label: '秩点商城', path: '/profile/credit' },
   { label: '机构入驻', path: '/register' },
 ]
 

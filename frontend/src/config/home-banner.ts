@@ -37,7 +37,7 @@ export const homeBannerSlides: BannerSlide[] = [
     type: 'image',
     image: '/images/banner/slide-credit-mall.png',
     alt: '我的秩点，学习记录与学分转换',
-    link: '/credit',
+    link: '/profile/credit',
   },
   {
     id: 'forum',

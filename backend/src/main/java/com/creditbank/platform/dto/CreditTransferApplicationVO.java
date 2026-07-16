@@ -31,6 +31,10 @@ public class CreditTransferApplicationVO {
     private Long targetOrgId;
     private String targetOrgName;
     private String applyReason;
+    private String aiSuggestion;
+    private String aiReason;
+    private Boolean aiLlmUsed;
+    private LocalDateTime aiScreenTime;
     private Integer status;
     private String statusName;
     private Long reviewerId;

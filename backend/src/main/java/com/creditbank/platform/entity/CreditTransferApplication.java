@@ -27,6 +27,11 @@ public class CreditTransferApplication {
     private Long targetAchievementId;
     private Long targetOrgId;
     private String applyReason;
+    /** AI 初筛建议：approve / reject / uncertain */
+    private String aiSuggestion;
+    private String aiReason;
+    private Integer aiLlmUsed;
+    private LocalDateTime aiScreenTime;
     private Integer status;
     private Long reviewerId;
     private String reviewComment;

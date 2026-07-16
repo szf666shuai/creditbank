@@ -16,6 +16,7 @@ import type { SearchItem } from '@/api/search'
 const {
   siteNav,
   profileNav,
+  profileHomePath,
   searchKeyword,
   searchCategory,
   isLoggedIn,
@@ -367,11 +368,15 @@ onUnmounted(() => {
             placement="bottom-end"
             popper-class="app-header-dropdown"
           >
-            <span class="nav-item profile-trigger">
+            <router-link
+              :to="profileHomePath"
+              class="nav-item profile-trigger"
+              @click.stop
+            >
               <span class="profile-name">{{ displayName }}</span>
               <span class="role-badge">{{ userRoleName }}</span>
               <el-icon class="nav-arrow"><ArrowDown /></el-icon>
-            </span>
+            </router-link>
             <template #dropdown>
               <el-dropdown-menu>
                 <el-dropdown-item
@@ -641,18 +646,19 @@ onUnmounted(() => {
 .header-main {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-left: auto;
+  gap: 16px;
+  margin-left: 8px;
   min-width: 0;
   flex: 1;
-  justify-content: flex-end;
 }
 
 .main-nav {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 4px;
   min-width: 0;
+  flex: 0 1 auto;
+  justify-content: flex-start;
   overflow-x: auto;
   overflow-y: hidden;
   scrollbar-width: none;
@@ -681,16 +687,16 @@ onUnmounted(() => {
 }
 
 .app-header.is-logged-in .main-nav {
-  gap: 2px;
+  gap: 4px;
 }
 
 .app-header.is-logged-in .nav-item {
-  padding: 6px 11px;
+  padding: 6px 12px;
   font-size: 14px;
 }
 
 .app-header.is-logged-in .nav-home {
-  padding: 6px 9px;
+  padding: 6px 10px;
 }
 
 .nav-item:hover,
@@ -719,16 +725,17 @@ onUnmounted(() => {
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   flex-shrink: 0;
+  margin-left: auto;
 }
 
 .app-header.is-logged-in .search-box {
-  width: 240px;
+  width: 176px;
 }
 
 .app-header.is-logged-in .search-category {
-  width: 88px;
+  width: 72px;
 }
 
 .search-box {
@@ -993,7 +1000,7 @@ onUnmounted(() => {
   }
 
   .app-header.is-logged-in .search-box {
-    width: 210px;
+    width: 160px;
   }
 }
 

@@ -11,6 +11,7 @@ export interface EnterpriseDashboard {
   registeringActivityCount: number
   pendingApplicationCount: number
   pendingInterviewCount: number
+  pendingTransferCount: number
   materialCount: number
 }
 

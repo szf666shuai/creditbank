@@ -13,6 +13,7 @@ public class EnterpriseCourseVO {
     private String description;
     private String coverUrl;
     private BigDecimal creditValue;
+    private BigDecimal creditReward;
     private String tags;
     private String videoUrl;
     private Integer videoDurationSeconds;

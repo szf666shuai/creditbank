@@ -126,9 +126,38 @@
   box-shadow: none !important;
 }
 
+/* 点击后勿保持 :focus 高亮，仅 hover / keyboard focus-visible 时提示 */
+.page-shell .el-button.is-link:focus:not(:hover):not(:focus-visible),
+.profile-main .el-button.is-link:focus:not(:hover):not(:focus-visible),
+.page-shell .el-button.is-text:focus:not(:hover):not(:focus-visible),
+.profile-main .el-button.is-text:focus:not(:hover):not(:focus-visible) {
+  background: transparent !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.page-shell .el-button.is-link:focus-visible,
+.profile-main .el-button.is-link:focus-visible,
+.page-shell .el-button.is-text:focus-visible,
+.profile-main .el-button.is-text:focus-visible {
+  outline: 2px solid var(--nb-green-deep, #16a34a) !important;
+  outline-offset: 2px;
+}
+
 .page-shell .el-button.is-link.el-button--primary,
 .profile-main .el-button.is-link.el-button--primary {
   color: var(--nb-green-deep, #16a34a) !important;
+}
+
+.page-shell .el-button.is-link.el-button--primary:focus:not(:hover),
+.profile-main .el-button.is-link.el-button--primary:focus:not(:hover),
+.page-shell .el-button.is-link.el-button--danger:focus:not(:hover),
+.profile-main .el-button.is-link.el-button--danger:focus:not(:hover),
+.page-shell .el-button.is-link.el-button--warning:focus:not(:hover),
+.profile-main .el-button.is-link.el-button--warning:focus:not(:hover),
+.page-shell .el-button.is-link.el-button--success:focus:not(:hover),
+.profile-main .el-button.is-link.el-button--success:focus:not(:hover) {
+  background: transparent !important;
 }
 
 .page-shell .el-button.is-link.el-button--danger,
@@ -357,8 +386,14 @@
 }
 
 .el-button--primary:hover,
-.el-button--primary:focus {
+.el-button--primary:focus-visible {
   background-color: var(--nb-green-deep, #16a34a) !important;
+  border-color: var(--nb-ink, #1a202c) !important;
+  color: #fff !important;
+}
+
+.el-button--primary:focus:not(:hover):not(:focus-visible) {
+  background-color: var(--nb-green, #22c55e) !important;
   border-color: var(--nb-ink, #1a202c) !important;
   color: #fff !important;
 }

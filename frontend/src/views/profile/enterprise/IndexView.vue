@@ -24,6 +24,7 @@ const statCards = computed(() => {
     { key: 'ongoing', label: '进行中活动', value: data.ongoingActivityCount, icon: 'activity', color: '#52c41a', path: '/profile/enterprise/activities' },
     { key: 'registering', label: '报名中活动', value: data.registeringActivityCount, icon: 'calendar', color: '#13c2c2', path: '/profile/enterprise/activities' },
     { key: 'applications', label: '待处理投递', value: data.pendingApplicationCount, icon: 'applications', color: '#fa8c16', path: '/profile/enterprise/applications' },
+    { key: 'transfers', label: '待审核转换', value: data.pendingTransferCount ?? 0, icon: 'applications', color: '#0891b2', path: '/profile/enterprise/transfer-applications' },
     { key: 'interviews', label: '待回复面试', value: data.pendingInterviewCount, icon: 'interview', color: '#722ed1', path: '/profile/enterprise/interviews' },
     { key: 'materials', label: '企业资料', value: data.materialCount, icon: 'folder', color: '#eb2f96', path: '/profile/enterprise/materials' },
   ]
@@ -33,6 +34,7 @@ const quickEntries = [
   { label: '发布职位', desc: '新增招聘岗位', icon: 'plus', path: '/profile/enterprise/jobs', color: '#2094f3' },
   { label: '发布活动', desc: '创建企业活动', icon: 'activity', path: '/profile/enterprise/activities', color: '#52c41a' },
   { label: '投递管理', desc: '查看简历投递', icon: 'applications', path: '/profile/enterprise/applications', color: '#fa8c16' },
+  { label: '转换申请', desc: '处理学分转入', icon: 'applications', path: '/profile/enterprise/transfer-applications', color: '#0891b2' },
   { label: '面试邀请', desc: '管理面试安排', icon: 'interview', path: '/profile/enterprise/interviews', color: '#722ed1' },
   { label: '活动邀请', desc: '邀请学员参加活动', icon: 'invite', path: '/profile/enterprise/activity-invitations', color: '#13c2c2' },
   { label: '企业资料', desc: '发布学习资料', icon: 'material', path: '/profile/enterprise/materials', color: '#eb2f96' },

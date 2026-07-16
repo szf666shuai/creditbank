@@ -8,6 +8,8 @@ import com.creditbank.platform.entity.SysOrganization;
 import com.creditbank.platform.entity.SysUser;
 import com.creditbank.platform.mapper.SysOrganizationMapper;
 import com.creditbank.platform.mapper.SysUserMapper;
+import com.creditbank.platform.entity.CreditTransferApplication;
+import com.creditbank.platform.mapper.CreditTransferApplicationMapper;
 import com.creditbank.platform.module.admin.service.AdminSupport;
 import com.creditbank.platform.module.enterprise.dto.EnterpriseDashboardVO;
 import com.creditbank.platform.module.enterprise.entity.Activity;
@@ -45,6 +47,7 @@ public class EnterpriseDashboardService {
     private final InterviewInvitationMapper interviewInvitationMapper;
     private final OrgMaterialMapper orgMaterialMapper;
     private final ActivityLifecycleService activityLifecycleService;
+    private final CreditTransferApplicationMapper creditTransferApplicationMapper;
 
     public EnterpriseDashboardVO getDashboard() {
         SysUser user = authSupport.requireEnterprise();
@@ -70,6 +73,7 @@ public class EnterpriseDashboardService {
                 .registeringActivityCount(countActivities(orgId, ACTIVITY_REGISTERING))
                 .pendingApplicationCount(pendingApplications != null ? pendingApplications : 0)
                 .pendingInterviewCount(countPendingInterviews(orgId))
+                .pendingTransferCount(countPendingTransfers(orgId))
                 .materialCount(countMaterials(orgId))
                 .build();
     }
@@ -101,6 +105,13 @@ public class EnterpriseDashboardService {
         Long count = orgMaterialMapper.selectCount(new LambdaQueryWrapper<OrgMaterial>()
                 .eq(OrgMaterial::getOrgId, orgId)
                 .eq(OrgMaterial::getStatus, MATERIAL_ACTIVE));
+        return count != null ? count : 0;
+    }
+
+    private long countPendingTransfers(Long orgId) {
+        Long count = creditTransferApplicationMapper.selectCount(new LambdaQueryWrapper<CreditTransferApplication>()
+                .eq(CreditTransferApplication::getTargetOrgId, orgId)
+                .eq(CreditTransferApplication::getStatus, 0));
         return count != null ? count : 0;
     }
 }

@@ -127,7 +127,7 @@ onMounted(fetchData)
 
 <template>
   <PageShell
-    title="我的秩点"
+    title="秩点总览"
     description="学习档案与学分转换"
     :loading="loading"
     :error="loadError"

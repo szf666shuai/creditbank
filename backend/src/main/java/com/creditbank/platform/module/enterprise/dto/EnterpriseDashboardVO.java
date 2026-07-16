@@ -14,6 +14,7 @@ public class EnterpriseDashboardVO {
     private long registeringActivityCount;
     private long pendingApplicationCount;
     private long pendingInterviewCount;
+    private long pendingTransferCount;
     private long materialCount;
     private Integer joinStatus;
     private String joinStatusName;

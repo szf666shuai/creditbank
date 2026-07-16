@@ -34,6 +34,7 @@ const overviewCards = computed(() => {
     { label: '在招职位', value: data.openJobCount, hint: '当前对外招聘中', path: '/profile/enterprise/jobs' },
     { label: '进行中活动', value: data.ongoingActivityCount, hint: '学员可参与', path: '/profile/enterprise/activities' },
     { label: '待处理投递', value: data.pendingApplicationCount, hint: '等待企业回复', path: '/profile/enterprise/applications' },
+    { label: '待审核转换', value: data.pendingTransferCount ?? 0, hint: '学分转入待处理', path: '/profile/enterprise/transfer-applications' },
     { label: '待回复面试', value: data.pendingInterviewCount, hint: '面试安排待确认', path: '/profile/enterprise/interviews' },
   ]
 })
@@ -170,6 +171,9 @@ onMounted(loadDashboard)
           </div>
 
           <div class="footer-cta">
+            <button type="button" class="cta-btn secondary" @click="go('/profile/enterprise/transfer-applications')">
+              处理转换申请
+            </button>
             <button type="button" class="cta-btn" @click="go('/profile/enterprise')">
               进入企业工作台
             </button>
@@ -283,7 +287,7 @@ onMounted(loadDashboard)
 
 .overview-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 12px;
   margin-bottom: 18px;
 }
@@ -413,6 +417,8 @@ onMounted(loadDashboard)
 .footer-cta {
   display: flex;
   justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
   margin-top: 24px;
 }
 
@@ -430,12 +436,31 @@ onMounted(loadDashboard)
   transition: background 0.15s ease;
 }
 
+.cta-btn.secondary {
+  background: #fff;
+  color: var(--nb-ink, #1a202c);
+}
+
+.cta-btn.secondary:hover {
+  background: #bbf7d0;
+}
+
 .cta-btn:hover {
   background: var(--nb-green-deep, #16a34a);
 }
 
+.cta-btn.secondary:hover {
+  background: #bbf7d0;
+}
+
 .cta-btn:active {
   box-shadow: 2px 2px 0 0 var(--nb-ink, #1a202c);
+}
+
+@media (max-width: 1100px) {
+  .overview-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 900px) {

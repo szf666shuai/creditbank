@@ -13,7 +13,7 @@ export function getFooterLinksForRole(options: {
   if (!options.isLoggedIn) {
     return [
       { label: '课程资源', path: '/resources' },
-      { label: '我的秩点', path: '/credit' },
+      { label: '我的秩点', path: '/profile/credit' },
       { label: '企业机构', path: '/enterprise' },
       { label: '机构入驻', path: '/register' },
     ]
@@ -34,7 +34,7 @@ export function getFooterLinksForRole(options: {
     return [
       { label: '管理概览', path: '/profile/admin' },
       { label: '课程资源', path: '/resources' },
-      { label: '我的秩点', path: '/credit' },
+      { label: '我的秩点', path: '/profile/credit' },
       { label: '机构审核', path: '/profile/admin/organizations' },
       { label: '课程审核', path: '/profile/admin/courses' },
       { label: '用户管理', path: '/profile/admin/users' },
@@ -44,7 +44,7 @@ export function getFooterLinksForRole(options: {
   return [
     { label: '课程资源', path: '/resources' },
     { label: '学习档案', path: '/archive' },
-    { label: '我的秩点', path: '/credit' },
+    { label: '我的秩点', path: '/profile/credit' },
     { label: '个人中心', path: '/profile' },
   ]
 }

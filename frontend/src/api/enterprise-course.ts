@@ -5,9 +5,12 @@ export interface EnterpriseCourse {
   title: string
   description?: string
   coverUrl?: string
-  tags?: string[]
+  /** 后端存逗号分隔字符串；兼容偶发数组 */
+  tags?: string | string[]
   creditValue: number
+  creditReward?: number
   duration: number
+  durationMinutes?: number
   difficulty: number
   difficultyName?: string
   status: number
@@ -23,7 +26,7 @@ export interface EnterpriseCourseSavePayload {
   title: string
   description?: string
   coverUrl?: string
-  tags?: string[]
+  tags?: string
   creditValue: number
   duration: number
   difficulty: number

@@ -1,6 +1,7 @@
 package com.creditbank.platform.controller;
 
 import com.creditbank.platform.common.Result;
+import com.creditbank.platform.dto.CreditTransferAiScreenResult;
 import com.creditbank.platform.dto.CreditTransferApplyRequest;
 import com.creditbank.platform.dto.CreditTransferApplicationVO;
 import com.creditbank.platform.dto.CreditTransferRuleVO;
@@ -34,6 +35,12 @@ public class CreditTransferController {
     public Result<List<CreditTransferRuleVO>> listRules() {
         SysUser user = authSupport.requireEnterprise();
         return Result.ok(creditTransferService.listRules(user.getOrgId()));
+    }
+
+    /** 公开：学员/访客查看某机构已启用的学分转换规则 */
+    @GetMapping("/org/{orgId}/rules")
+    public Result<List<CreditTransferRuleVO>> listOrgPublicRules(@PathVariable Long orgId) {
+        return Result.ok(creditTransferService.listEnabledRules(orgId));
     }
 
     @GetMapping("/rules/{ruleId}")
@@ -83,6 +90,12 @@ public class CreditTransferController {
             @RequestParam Integer status,
             @RequestParam(required = false) String comment) {
         return Result.ok(creditTransferService.review(applicationId, status, comment));
+    }
+
+    @PostMapping("/applications/{applicationId}/ai-screen")
+    public Result<CreditTransferAiScreenResult> aiScreen(
+            @PathVariable Long applicationId) {
+        return Result.ok(creditTransferService.aiScreen(applicationId));
     }
 
     @GetMapping("/match-rules")

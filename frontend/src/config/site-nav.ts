@@ -15,19 +15,13 @@ export interface NavItem {
   children: NavChild[]
 }
 
-/** 顶部主导航配置（学员 / 访客默认） */
+/** 顶部主导航配置（学员 / 访客默认）——不含「我的秩点」 */
 export const siteNav: NavItem[] = [
   {
     key: 'home',
     label: '首页',
     path: '/',
     icon: true,
-    children: [],
-  },
-  {
-    key: 'credit',
-    label: '我的秩点',
-    path: '/credit',
     children: [],
   },
   {
@@ -68,73 +62,85 @@ export const siteNav: NavItem[] = [
 /** 按角色返回顶部导航 */
 export function getSiteNavForRole(role?: number): NavItem[] {
   if (role === 1) {
-    return siteNav
-      .filter((item) => item.key !== 'resources')
-      .map((item) => {
-        if (item.key === 'credit') {
-          return {
-            ...item,
-            label: '课程概览',
-            path: '/courses-overview',
-            children: [],
-          }
-        }
-        if (item.key !== 'enterprise') return item
-        return {
-          ...item,
-          label: '企业运营',
-          children: [
-            { label: '企业工作台', path: '/profile/enterprise' },
-            { label: '加盟企业', path: '/enterprise' },
-          ],
-        }
-      })
+    return [
+      { key: 'home', label: '首页', path: '/', icon: true, children: [] },
+      {
+        key: 'courses',
+        label: '课程概览',
+        path: '/courses-overview',
+        children: [],
+      },
+      {
+        key: 'enterprise',
+        label: '企业运营',
+        children: [
+          { label: '企业工作台', path: '/profile/enterprise' },
+          { label: '学分转换规则', path: '/profile/enterprise/transfer-rules' },
+          { label: '加盟企业', path: '/enterprise' },
+        ],
+      },
+      {
+        key: 'news',
+        label: '资讯中心',
+        path: '/news',
+        children: [
+          { label: '招聘信息', path: '/news?type=job' },
+          { label: '活动信息', path: '/news?type=activity' },
+        ],
+      },
+    ]
   }
 
   if (role === 2) {
-    return siteNav
-      .filter((item) => item.key !== 'credit' && item.key !== 'resources')
-      .map((item) => {
-        if (item.key !== 'enterprise') return item
-        return {
-          ...item,
-          label: '平台监管',
-          path: '/profile/admin',
-          children: [
-            { label: '管理概览', path: '/profile/admin' },
-            { label: '机构加盟', path: '/profile/admin/organizations' },
-            { label: '用户管理', path: '/profile/admin/users' },
-            { label: '课程审核', path: '/profile/admin/courses' },
-          ],
-        }
-      })
+    return [
+      { key: 'home', label: '首页', path: '/', icon: true, children: [] },
+      {
+        key: 'admin',
+        label: '平台监管',
+        path: '/profile/admin',
+        children: [
+          { label: '管理概览', path: '/profile/admin' },
+          { label: '课程审核', path: '/profile/admin/courses' },
+          { label: '机构加盟', path: '/profile/admin/organizations' },
+        ],
+      },
+      {
+        key: 'enterprise',
+        label: '企业中心',
+        path: '/enterprise',
+        children: [],
+      },
+      {
+        key: 'news',
+        label: '资讯中心',
+        path: '/news',
+        children: [
+          { label: '招聘信息', path: '/news?type=job' },
+          { label: '活动信息', path: '/news?type=activity' },
+          { label: '政策资讯', path: '/news?type=policy' },
+        ],
+      },
+    ]
   }
 
   return siteNav
 }
 
-/** 登录后「个人中心」下拉 — 按角色扩展 */
+/** 登录后「个人中心」下拉 — 仅常用入口 */
 export const profileNavByRole: Record<number, NavChild[]> = {
   /** 学员 */
   0: [
     { label: '个人概览', path: '/profile' },
-    { label: '我的简历', path: '/profile/resume' },
     { label: '学习档案', path: '/profile/learning' },
-    { label: '学分转换', path: '/profile/credit-transfer' },
-    { label: '学习画像', path: '/profile/learning-profile' },
-    { label: '诚信评定', path: '/profile/integrity' },
-    { label: '我的发言', path: '/profile/posts' },
-    { label: '投递记录', path: '/profile/applications' },
-    { label: '面试邀请', path: '/profile/interviews' },
-    { label: '我的活动', path: '/profile/activities' },
+    { label: '我的秩点', path: '/profile/credit' },
     { label: '消息中心', path: '/profile/messages' },
   ],
   /** 企业用户 */
   1: [
     { label: '账号概览', path: '/profile' },
     { label: '企业工作台', path: '/profile/enterprise' },
-    { label: '课程管理', path: '/profile/enterprise/courses' },
-    { label: '加盟企业', path: '/enterprise' },
+    { label: '课程概览', path: '/courses-overview' },
+    { label: '转换规则', path: '/profile/enterprise/transfer-rules' },
     { label: '消息中心', path: '/profile/messages' },
   ],
   /** 管理员 */
@@ -142,9 +148,15 @@ export const profileNavByRole: Record<number, NavChild[]> = {
     { label: '管理概览', path: '/profile/admin' },
     { label: '课程审核', path: '/profile/admin/courses' },
     { label: '机构加盟', path: '/profile/admin/organizations' },
-    { label: '用户管理', path: '/profile/admin/users' },
     { label: '消息中心', path: '/profile/messages' },
   ],
+}
+
+/** 个人中心首页路径（点击头像名称直接进入） */
+export function getProfileHomePath(role?: number): string {
+  if (role === 1) return '/profile/enterprise'
+  if (role === 2) return '/profile/admin'
+  return '/profile'
 }
 
 /** @deprecated 使用 profileNavByRole */

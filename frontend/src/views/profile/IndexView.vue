@@ -32,7 +32,7 @@ const studentStatCards = computed(() => {
       suffix: '分',
       icon: 'credit',
       color: '#22c55e',
-      path: '/credit',
+      path: '/profile/credit',
     },
     {
       key: 'messages',
@@ -80,10 +80,9 @@ const enterpriseStatCards = computed(() => {
 })
 
 const studentQuickEntries = [
-  { label: '我的简历', desc: '编辑个人简历', icon: 'resume', path: '/profile/resume', color: '#22c55e' },
-  { label: '学习档案', desc: '学习记录与学分', icon: 'folder', path: '/profile/learning', color: '#059669' },
+  { label: '学习档案', desc: '档案、简历与画像', icon: 'learning', path: '/profile/learning', color: '#059669' },
+  { label: '秩点总览', desc: '秩点余额与流水', icon: 'credit', path: '/profile/credit', color: '#d97706' },
   { label: '学分转换', desc: '申请学分转换', icon: 'exchange', path: '/profile/credit-transfer', color: '#0f766e' },
-  { label: '我的秩点', desc: '秩点与学习档案', icon: 'credit', path: '/credit', color: '#d97706' },
   { label: '资源商城', desc: '浏览机构课程', icon: 'course', path: '/resources', color: '#ea580c' },
   { label: '投递记录', desc: '求职投递历史', icon: 'applications', path: '/profile/applications', color: '#0284c7' },
   { label: '消息中心', desc: '查看私信通知', icon: 'message', path: '/profile/messages', color: '#0284c7' },
@@ -91,10 +90,10 @@ const studentQuickEntries = [
 
 const enterpriseQuickEntries = [
   { label: '企业工作台', desc: '运营数据概览', icon: 'enterprise', path: '/profile/enterprise', color: '#22c55e' },
-  { label: '课程管理', desc: '发布与管理课程', icon: 'course', path: '/profile/enterprise/courses', color: '#059669' },
+  { label: '课程概览', desc: '查看机构课程', icon: 'course', path: '/courses-overview', color: '#059669' },
+  { label: '转换规则', desc: '学分互认规则', icon: 'exchange', path: '/profile/enterprise/transfer-rules', color: '#0284c7' },
   { label: '招聘管理', desc: '发布与管理职位', icon: 'job', path: '/profile/enterprise/jobs', color: '#0f766e' },
   { label: '活动管理', desc: '发布与管理活动', icon: 'activity', path: '/profile/enterprise/activities', color: '#d97706' },
-  { label: '转换规则', desc: '设置学分转换规则', icon: 'exchange', path: '/profile/enterprise/transfer-rules', color: '#0284c7' },
   { label: '消息中心', desc: '查看私信通知', icon: 'message', path: '/profile/messages', color: '#0284c7' },
 ]
 

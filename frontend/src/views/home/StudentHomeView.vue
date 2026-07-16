@@ -209,9 +209,9 @@ onMounted(async () => {
             <button
               type="button"
               class="nb-btn nb-btn--secondary"
-              @click="go(authStore.isLoggedIn ? '/credit' : '/register')"
+              @click="go(authStore.isLoggedIn ? '/profile/credit' : '/register')"
             >
-              {{ authStore.isLoggedIn ? '我的秩点' : '了解注册' }}
+              {{ authStore.isLoggedIn ? '秩点总览' : '了解注册' }}
             </button>
           </div>
           <ul class="cta-band__perks">

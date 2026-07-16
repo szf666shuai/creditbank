@@ -1,0 +1,16 @@
+llm:
+  enabled: true
+  provider: deepseek
+  api-key: sk-afe5a982a8ed496d8739e69a51f1fc48
+  base-url: https://api.deepseek.com
+  model: deepseek-chat
+  timeout-ms: 60000
+  system-prompt: "你是星秩存册学习助手。"
+
+trtc:
+  enabled: true
+  sdk-app-id: 1600151564
+  secret-key: 9dad8fe2db289560eb169376d4ba74e6e8bceb687a3ce8f7fd89d3e291571150
+  expire-seconds: 86400
+  join-window-minutes-before: 30
+  join-window-minutes-after: 120

@@ -13,7 +13,7 @@ const loadError = ref('')
 
 const discoveryPaths: Record<string, string> = {
   course: '/resources',
-  credit: '/credit',
+  credit: '/profile/credit',
   activity: '/enterprise',
 }
 

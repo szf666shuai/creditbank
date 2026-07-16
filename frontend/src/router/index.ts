@@ -15,6 +15,7 @@ import LearningArchiveView from '@/views/LearningArchiveView.vue'
 import MyCreditView from '@/views/MyCreditView.vue'
 import CourseOverviewView from '@/views/CourseOverviewView.vue'
 import OrganizationCoursesView from '@/views/OrganizationCoursesView.vue'
+import TagTrackCoursesView from '@/views/TagTrackCoursesView.vue'
 
 import EnterpriseIndexView from '@/views/enterprise/IndexView.vue'
 import EnterpriseDetailView from '@/views/enterprise/DetailView.vue'
@@ -80,10 +81,11 @@ const router = createRouter({
       children: [
         { path: '', name: 'home', component: HomeView },
         { path: 'courses', ...placeholder('课程') },
-        { path: 'credit', name: 'my-credit', component: MyCreditView, meta: studentRoute },
+        { path: 'credit', redirect: '/profile/credit' },
         { path: 'courses-overview', name: 'courses-overview', component: CourseOverviewView, meta: { title: '课程概览' } },
         { path: 'resources', name: 'resources', component: LearningResourcesView },
         { path: 'resources/org/:orgId', name: 'org-courses', component: OrganizationCoursesView },
+        { path: 'resources/track/:tag', name: 'tag-track-courses', component: TagTrackCoursesView, meta: { title: '微专业轨道' } },
         { path: 'resources/:courseId', name: 'course-player', component: CoursePlayerView, meta: studentRoute },
         { path: 'archive', name: 'archive', component: LearningArchiveView, meta: studentRoute },
         { path: 'achievement', ...placeholder('学习成果') },
@@ -172,7 +174,13 @@ const router = createRouter({
               path: 'learning',
               name: 'profile-learning',
               component: ProfileLearningView,
-              meta: { title: '学习档案', ...studentRoute },
+              meta: { title: '档案与成果', ...studentRoute },
+            },
+            {
+              path: 'credit',
+              name: 'profile-credit',
+              component: MyCreditView,
+              meta: { title: '秩点总览', ...studentRoute },
             },
             {
               path: 'credit-transfer',

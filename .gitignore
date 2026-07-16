@@ -32,7 +32,8 @@ logs/
 .env
 .env.local
 .env.*.local
-backend/src/main/resources/application-local.yml
+# 演示联调：允许提交 application-local.yml（含 LLM/TRTC 测试配置）
+# backend/src/main/resources/application-local.yml
 
 # Docker volumes (local data)
 docker/mysql/data/

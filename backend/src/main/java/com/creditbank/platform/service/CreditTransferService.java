@@ -2,6 +2,7 @@ package com.creditbank.platform.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.creditbank.platform.common.BusinessException;
+import com.creditbank.platform.dto.CreditTransferAiScreenResult;
 import com.creditbank.platform.dto.CreditTransferApplyRequest;
 import com.creditbank.platform.dto.CreditTransferApplicationVO;
 import com.creditbank.platform.dto.CreditTransferRuleVO;
@@ -25,12 +26,11 @@ import com.creditbank.platform.security.AuthSupport;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 @Service
 @RequiredArgsConstructor
@@ -46,6 +46,7 @@ public class CreditTransferService {
     private final LearningArchiveMapper archiveMapper;
     private final LearningCertificateMapper certificateMapper;
     private final CreditService creditService;
+    private final LlmService llmService;
 
     public List<CreditTransferRuleVO> listRules(Long orgId) {
         LambdaQueryWrapper<CreditTransferRule> wrapper = new LambdaQueryWrapper<>();
@@ -57,6 +58,10 @@ public class CreditTransferService {
         return ruleMapper.selectList(wrapper).stream()
                 .map(this::toRuleVO)
                 .toList();
+    }
+
+    public List<CreditTransferRuleVO> listEnabledRules(Long orgId) {
+        return listRules(orgId);
     }
 
     public CreditTransferRuleVO getRule(Long ruleId) {
@@ -71,8 +76,14 @@ public class CreditTransferService {
     public CreditTransferRuleVO createRule(CreditTransferRule rule) {
         SysUser user = authSupport.requireEnterpriseWritable();
         rule.setOrgId(user.getOrgId());
-        if (rule.getSourceType() == null) rule.setSourceType(1);
+        // 机构只配置「本机构接收目标」；源课程适配由人工/AI 审核判断
+        rule.setSourceType(1);
+        rule.setSourceTags(null);
+        rule.setSourceCourseId(null);
         if (rule.getTargetType() == null) rule.setTargetType(1);
+        if (rule.getTargetOrgId() == null) rule.setTargetOrgId(user.getOrgId());
+        if (rule.getCreditRatio() == null) rule.setCreditRatio(BigDecimal.ONE);
+        assertUniqueTargetCourse(user.getOrgId(), rule.getTargetType(), rule.getTargetCourseId(), null);
         rule.setStatus(1);
         rule.setCreateTime(LocalDateTime.now());
         rule.setUpdateTime(LocalDateTime.now());
@@ -84,17 +95,21 @@ public class CreditTransferService {
     public CreditTransferRuleVO updateRule(Long ruleId, CreditTransferRule rule) {
         SysUser user = authSupport.requireEnterpriseWritable();
         CreditTransferRule existing = requireOwnedRule(ruleId, user.getOrgId());
-        existing.setSourceType(rule.getSourceType());
-        existing.setSourceCourseId(rule.getSourceCourseId());
-        existing.setSourceTags(rule.getSourceTags());
-        existing.setTargetType(rule.getTargetType());
+        existing.setSourceType(1);
+        existing.setSourceCourseId(null);
+        existing.setSourceTags(null);
+        existing.setTargetType(rule.getTargetType() != null ? rule.getTargetType() : 1);
         existing.setTargetCourseId(rule.getTargetCourseId());
         existing.setTargetCertificateId(rule.getTargetCertificateId());
         existing.setTargetAchievementId(rule.getTargetAchievementId());
-        existing.setTargetOrgId(rule.getTargetOrgId());
+        existing.setTargetOrgId(rule.getTargetOrgId() != null ? rule.getTargetOrgId() : user.getOrgId());
         existing.setCreditRatio(rule.getCreditRatio());
         existing.setDescription(rule.getDescription());
-        existing.setStatus(rule.getStatus());
+        Integer nextStatus = rule.getStatus() != null ? rule.getStatus() : existing.getStatus();
+        existing.setStatus(nextStatus);
+        if (nextStatus != null && nextStatus == 1) {
+            assertUniqueTargetCourse(user.getOrgId(), existing.getTargetType(), existing.getTargetCourseId(), ruleId);
+        }
         existing.setUpdateTime(LocalDateTime.now());
         ruleMapper.updateById(existing);
         return toRuleVO(existing);
@@ -195,7 +210,14 @@ public class CreditTransferService {
             }
         }
 
-        return toApplicationVO(application);
+        // 提交时同步 AI 初筛（失败不影响申请落库）
+        try {
+            runAiScreenAndPersist(application);
+        } catch (Exception ignored) {
+            // ignore
+        }
+
+        return toApplicationVO(applicationMapper.selectById(application.getId()));
     }
 
     public List<CreditTransferApplicationVO> listApplications(Long orgId, Integer status) {
@@ -351,54 +373,191 @@ public class CreditTransferService {
         }
     }
 
+    /**
+     * 学员可选接收规则：返回其他机构已启用的转入规则（不再按标签自动过滤）。
+     * 是否与源课程等价，由机构人工审核或 AI 初筛判断。
+     */
     public List<CreditTransferRuleVO> matchRules(Integer sourceType, Long sourceCourseId, Long sourceAchievementId) {
+        Long sourceOrgId = null;
         if (sourceType == null) sourceType = 1;
 
-        String sourceTags = "";
-        Long sourceOrgId = null;
-
-        if (sourceType == 1) {
-            if (sourceCourseId == null) return List.of();
+        if (sourceType == 1 && sourceCourseId != null) {
             Course sourceCourse = courseMapper.selectById(sourceCourseId);
-            if (sourceCourse == null) return List.of();
-            sourceTags = sourceCourse.getTags();
-            sourceOrgId = sourceCourse.getOrgId();
-        } else if (sourceType == 2) {
-            if (sourceAchievementId == null) return List.of();
+            if (sourceCourse != null) {
+                sourceOrgId = sourceCourse.getOrgId();
+            }
+        } else if (sourceType == 2 && sourceAchievementId != null) {
             LearningAchievement achievement = achievementMapper.selectById(sourceAchievementId);
-            if (achievement == null) return List.of();
-            sourceTags = achievement.getTags();
-            sourceOrgId = achievement.getOrgId();
-        } else {
-            return List.of();
-        }
-
-        List<CreditTransferRule> rules = ruleMapper.selectList(
-                new LambdaQueryWrapper<CreditTransferRule>()
-                        .eq(CreditTransferRule::getStatus, 1)
-                        .eq(CreditTransferRule::getSourceType, sourceType)
-        );
-
-        List<CreditTransferRuleVO> matched = new ArrayList<>();
-        if (StringUtils.hasText(sourceTags)) {
-            String[] sourceTagArray = sourceTags.split(",");
-            for (CreditTransferRule rule : rules) {
-                if (sourceOrgId != null && sourceOrgId.equals(rule.getOrgId())) {
-                    continue;
-                }
-                String ruleTags = rule.getSourceTags();
-                if (StringUtils.hasText(ruleTags)) {
-                    for (String tag : sourceTagArray) {
-                        if (ruleTags.contains(tag.trim())) {
-                            matched.add(toRuleVO(rule));
-                            break;
-                        }
-                    }
-                }
+            if (achievement != null) {
+                sourceOrgId = achievement.getOrgId();
             }
         }
 
-        return matched;
+        LambdaQueryWrapper<CreditTransferRule> wrapper = new LambdaQueryWrapper<CreditTransferRule>()
+                .eq(CreditTransferRule::getStatus, 1)
+                .orderByDesc(CreditTransferRule::getUpdateTime);
+        if (sourceOrgId != null) {
+            wrapper.ne(CreditTransferRule::getOrgId, sourceOrgId);
+        }
+
+        return ruleMapper.selectList(wrapper).stream()
+                .map(rule -> {
+                    CreditTransferRuleVO vo = toRuleVO(rule);
+                    if (vo.getTargetOrgId() == null) {
+                        vo.setTargetOrgId(rule.getOrgId());
+                    }
+                    return vo;
+                })
+                .toList();
+    }
+
+    /**
+     * AI 初筛（企业可手动复看；正常流程在学员提交申请时已自动写入）。
+     */
+    public CreditTransferAiScreenResult aiScreen(Long applicationId) {
+        SysUser user = authSupport.requireEnterprise();
+        CreditTransferApplication application = applicationMapper.selectById(applicationId);
+        if (application == null) {
+            throw new BusinessException(404, "转换申请不存在");
+        }
+        if (!user.getOrgId().equals(application.getTargetOrgId())) {
+            throw new BusinessException(403, "无权查看该申请");
+        }
+        return runAiScreenAndPersist(application);
+    }
+
+    private CreditTransferAiScreenResult runAiScreenAndPersist(CreditTransferApplication application) {
+        CreditTransferAiScreenResult result = evaluateAiScreen(application);
+        application.setAiSuggestion(result.getSuggestion());
+        application.setAiReason(result.getReason());
+        application.setAiLlmUsed(result.isLlmUsed() ? 1 : 0);
+        application.setAiScreenTime(LocalDateTime.now());
+        applicationMapper.updateById(application);
+        return result;
+    }
+
+    private CreditTransferAiScreenResult evaluateAiScreen(CreditTransferApplication application) {
+        CreditTransferApplicationVO vo = toApplicationVO(application);
+        String sourceName = vo.getSourceCourseName() != null ? vo.getSourceCourseName() : vo.getSourceAchievementTitle();
+        String targetName = vo.getTargetCourseName() != null ? vo.getTargetCourseName() : vo.getTargetAchievementTitle();
+        String sourceOrg = vo.getSourceOrgName() != null ? vo.getSourceOrgName() : "-";
+        String reason = vo.getApplyReason() != null ? vo.getApplyReason() : "-";
+        BigDecimal sourceCredit = vo.getSourceCredit() != null ? vo.getSourceCredit() : BigDecimal.ZERO;
+
+        String ruleDescription = "-";
+        LambdaQueryWrapper<CreditTransferRule> ruleQuery = new LambdaQueryWrapper<CreditTransferRule>()
+                .eq(CreditTransferRule::getOrgId, application.getTargetOrgId())
+                .eq(CreditTransferRule::getStatus, 1)
+                .orderByDesc(CreditTransferRule::getUpdateTime)
+                .last("LIMIT 1");
+        if (application.getTargetType() != null && application.getTargetType() == 1
+                && application.getTargetCourseId() != null) {
+            ruleQuery.eq(CreditTransferRule::getTargetCourseId, application.getTargetCourseId());
+        } else if (application.getTargetType() != null && application.getTargetType() == 2) {
+            ruleQuery.eq(CreditTransferRule::getTargetType, 2);
+            if (application.getTargetAchievementId() != null) {
+                ruleQuery.eq(CreditTransferRule::getTargetAchievementId, application.getTargetAchievementId());
+            }
+        }
+        CreditTransferRule matchedRule = ruleMapper.selectOne(ruleQuery);
+        if (matchedRule != null && matchedRule.getDescription() != null) {
+            ruleDescription = matchedRule.getDescription();
+        }
+
+        String prompt = """
+                你是学分银行平台的学分互认初筛助手。请以「机构规则说明」为主要判断依据，对照学员源课程/成果与申请理由，判断是否建议机构通过该转入申请。
+                只输出一行 JSON，不要 Markdown，格式严格为：
+                {"suggestion":"approve|reject|uncertain","reason":"不超过80字的中文理由"}
+
+                机构规则说明（最重要）：
+                %s
+
+                申请信息：
+                - 源类型：%s
+                - 源名称：%s
+                - 源机构：%s
+                - 源学分：%s
+                - 目标类型：%s
+                - 目标名称：%s
+                - 学员理由：%s
+                """.formatted(
+                ruleDescription,
+                vo.getSourceTypeName(),
+                sourceName != null ? sourceName : "-",
+                sourceOrg,
+                sourceCredit.toPlainString(),
+                vo.getTargetTypeName(),
+                targetName != null ? targetName : "-",
+                reason
+        );
+
+        try {
+            String raw = llmService.chat(prompt, null, "业务：学分转换申请 AI 初筛");
+            return parseAiScreen(raw, true);
+        } catch (Exception e) {
+            return heuristicScreen(sourceName, targetName, false);
+        }
+    }
+
+    private CreditTransferAiScreenResult parseAiScreen(String raw, boolean llmUsed) {
+        if (raw == null) {
+            return heuristicScreen(null, null, llmUsed);
+        }
+        String text = raw.trim();
+        int start = text.indexOf('{');
+        int end = text.lastIndexOf('}');
+        if (start >= 0 && end > start) {
+            text = text.substring(start, end + 1);
+        }
+        String lower = text.toLowerCase(Locale.ROOT);
+        String suggestion = "uncertain";
+        if (lower.contains("\"approve\"") || lower.contains("approve")) {
+            suggestion = "approve";
+        } else if (lower.contains("\"reject\"") || lower.contains("reject")) {
+            suggestion = "reject";
+        }
+        String reason = text;
+        int reasonIdx = text.indexOf("\"reason\"");
+        if (reasonIdx >= 0) {
+            int colon = text.indexOf(':', reasonIdx);
+            int q1 = text.indexOf('"', colon + 1);
+            int q2 = text.indexOf('"', q1 + 1);
+            if (q1 >= 0 && q2 > q1) {
+                reason = text.substring(q1 + 1, q2);
+            }
+        }
+        if (reason.length() > 120) {
+            reason = reason.substring(0, 120) + "…";
+        }
+        return CreditTransferAiScreenResult.builder()
+                .suggestion(suggestion)
+                .reason(reason)
+                .llmUsed(llmUsed)
+                .build();
+    }
+
+    private CreditTransferAiScreenResult heuristicScreen(String sourceName, String targetName, boolean llmUsed) {
+        String s = sourceName != null ? sourceName : "";
+        String t = targetName != null ? targetName : "";
+        boolean overlap = false;
+        for (String token : List.of("Java", "Python", "AI", "数据", "算法", "前端", "后端", "C++")) {
+            if (s.contains(token) && t.contains(token)) {
+                overlap = true;
+                break;
+            }
+        }
+        if (overlap) {
+            return CreditTransferAiScreenResult.builder()
+                    .suggestion("approve")
+                    .reason("源与目标课程名称存在相同技能关键词，建议人工复核后通过（启发式，未调用大模型）。")
+                    .llmUsed(llmUsed)
+                    .build();
+        }
+        return CreditTransferAiScreenResult.builder()
+                .suggestion("uncertain")
+                .reason("未能自动确认课程等价性，建议人工对照培养方案与证明材料审核。")
+                .llmUsed(llmUsed)
+                .build();
     }
 
     private CreditTransferRule requireOwnedRule(Long ruleId, Long orgId) {
@@ -410,6 +569,25 @@ public class CreditTransferService {
             throw new BusinessException(403, "无权操作该规则");
         }
         return rule;
+    }
+
+    /** 同一机构下，同一目标课程仅允许一条启用中的转换规则 */
+    private void assertUniqueTargetCourse(Long orgId, Integer targetType, Long targetCourseId, Long excludeRuleId) {
+        if (targetType == null || targetType != 1 || targetCourseId == null) {
+            return;
+        }
+        LambdaQueryWrapper<CreditTransferRule> wrapper = new LambdaQueryWrapper<CreditTransferRule>()
+                .eq(CreditTransferRule::getOrgId, orgId)
+                .eq(CreditTransferRule::getStatus, 1)
+                .eq(CreditTransferRule::getTargetType, 1)
+                .eq(CreditTransferRule::getTargetCourseId, targetCourseId);
+        if (excludeRuleId != null) {
+            wrapper.ne(CreditTransferRule::getId, excludeRuleId);
+        }
+        Long count = ruleMapper.selectCount(wrapper);
+        if (count != null && count > 0) {
+            throw new BusinessException(400, "该课程已存在启用中的转换规则，每个课程仅允许一条规则");
+        }
     }
 
     private CreditTransferRuleVO toRuleVO(CreditTransferRule rule) {
@@ -428,7 +606,7 @@ public class CreditTransferService {
         vo.setTargetCourseName(getCourseName(rule.getTargetCourseId()));
         vo.setTargetCertificateId(rule.getTargetCertificateId());
         vo.setTargetAchievementId(rule.getTargetAchievementId());
-        vo.setTargetOrgId(rule.getTargetOrgId());
+        vo.setTargetOrgId(rule.getTargetOrgId() != null ? rule.getTargetOrgId() : rule.getOrgId());
         vo.setCreditRatio(rule.getCreditRatio());
         vo.setDescription(rule.getDescription());
         vo.setStatus(rule.getStatus());
@@ -462,6 +640,10 @@ public class CreditTransferService {
         vo.setTargetOrgId(application.getTargetOrgId());
         vo.setTargetOrgName(getOrgName(application.getTargetOrgId()));
         vo.setApplyReason(application.getApplyReason());
+        vo.setAiSuggestion(application.getAiSuggestion());
+        vo.setAiReason(application.getAiReason());
+        vo.setAiLlmUsed(application.getAiLlmUsed() != null && application.getAiLlmUsed() == 1);
+        vo.setAiScreenTime(application.getAiScreenTime());
         vo.setStatus(application.getStatus());
         vo.setStatusName(applicationStatusName(application.getStatus()));
         vo.setReviewerId(application.getReviewerId());
