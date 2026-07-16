@@ -76,7 +76,6 @@ export function getSiteNavForRole(role?: number): NavItem[] {
         children: [
           { label: '企业工作台', path: '/profile/enterprise' },
           { label: '学分转换规则', path: '/profile/enterprise/transfer-rules' },
-          { label: '加盟企业', path: '/enterprise' },
         ],
       },
       {

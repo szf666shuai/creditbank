@@ -120,8 +120,8 @@ onMounted(loadSummary)
       </template>
 
       <div class="quick-links">
-        <el-button v-if="isEnterprise" type="primary" @click="$router.push('/enterprise')">
-          进入企业中心
+        <el-button v-if="isEnterprise" type="primary" @click="$router.push('/profile/enterprise')">
+          进入企业工作台
         </el-button>
         <el-button @click="$router.push('/archive')">学习档案</el-button>
         <el-button @click="$router.push('/resources')">学习资源</el-button>

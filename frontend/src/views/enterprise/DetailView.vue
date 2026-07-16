@@ -58,6 +58,9 @@ const resumesLoading = ref(false)
 
 const canOperateAsStudent = computed(() => authStore.isLoggedIn && authStore.isStudent)
 
+/** 企业登录不可浏览学习资源，不展示课程概览 */
+const showCoursesTab = computed(() => !authStore.isEnterprise)
+
 const typeIcons: Record<number, string> = {
   1: 'school',
   2: 'course',
@@ -240,7 +243,19 @@ async function handleRegister(activity: ActivityItem) {
   }
 }
 
-watch(activeTab, fetchTabData)
+watch(activeTab, (tab) => {
+  if (tab === 'courses' && !showCoursesTab.value) {
+    activeTab.value = 'jobs'
+    return
+  }
+  fetchTabData()
+})
+
+watch(showCoursesTab, (visible) => {
+  if (!visible && activeTab.value === 'courses') {
+    activeTab.value = 'jobs'
+  }
+})
 
 watch(
   () => authStore.isLoggedIn,
@@ -431,7 +446,7 @@ onMounted(async () => {
           </div>
         </el-tab-pane>
 
-        <el-tab-pane label="课程概览" name="courses">
+        <el-tab-pane v-if="showCoursesTab" label="课程概览" name="courses">
           <div v-loading="tabLoading">
             <el-alert
               v-if="tabError"

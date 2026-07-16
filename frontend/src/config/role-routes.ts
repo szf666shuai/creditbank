@@ -46,7 +46,15 @@ export function isAdminOnlyPath(path: string): boolean {
   return path === '/profile/admin' || path.startsWith('/profile/admin/')
 }
 
+/** 企业加盟列表页（企业用户不可进入「企业中心」） */
+export function isEnterprisePortalPath(path: string): boolean {
+  return path === '/enterprise'
+}
+
 export function canAccessPath(role: number, path: string): boolean {
+  if (role === ROLE_ENTERPRISE && isEnterprisePortalPath(path)) {
+    return false
+  }
   if (isStudentLearningPath(path)) {
     return role === ROLE_STUDENT || role === ROLE_ADMIN
   }

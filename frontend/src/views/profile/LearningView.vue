@@ -2,6 +2,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import PageShell from '@/components/common/PageShell.vue'
+import LearningChartsPanel from '@/components/profile/LearningChartsPanel.vue'
 import CertificatePreview from '@/components/learning/CertificatePreview.vue'
 import {
   listLearningArchivesApi,
@@ -13,6 +14,7 @@ import { fetchLearningCertificates, type LearningCertificate } from '@/api/learn
 import { getErrorMessage, unwrapApi } from '@/utils/api'
 import { formatDate, formatTime } from '@/utils/format'
 
+const activePanel = ref('overview')
 const loading = ref(false)
 const loadError = ref<string | null>(null)
 const archives = ref<LearningArchiveItem[]>([])
@@ -126,10 +128,16 @@ onMounted(fetchData)
   <PageShell
     title="学习档案与成果"
     description="查看个人终身学习档案、课程学分及学习成果"
-    :loading="loading"
     :error="loadError"
     @retry="fetchData"
   >
+    <el-tabs v-model="activePanel" class="learning-tabs">
+      <el-tab-pane label="学习总览" name="overview">
+        <LearningChartsPanel embedded :archives="courseArchives" :achievements="achievements" />
+      </el-tab-pane>
+
+      <el-tab-pane label="档案明细" name="detail">
+        <div v-loading="loading" class="detail-panel">
     <!-- 学习档案：课程+学分表格 -->
     <section class="page-section">
       <h2>学习档案</h2>
@@ -217,6 +225,9 @@ onMounted(fetchData)
         description="暂无其他学习成果"
       />
     </section>
+        </div>
+      </el-tab-pane>
+    </el-tabs>
   </PageShell>
 
   <el-dialog
@@ -232,6 +243,14 @@ onMounted(fetchData)
 </template>
 
 <style scoped>
+.learning-tabs :deep(.el-tabs__header) {
+  margin-bottom: 20px;
+}
+
+.detail-panel {
+  min-height: 200px;
+}
+
 .page-section {
   margin-bottom: 28px;
 }

@@ -26,7 +26,7 @@ export function getFooterLinksForRole(options: {
       { label: '企业工作台', path: '/profile/enterprise' },
       { label: '课程管理', path: '/profile/enterprise/courses' },
       { label: '招聘管理', path: '/profile/enterprise/jobs' },
-      { label: '加盟企业', path: '/enterprise' },
+      { label: '转换规则', path: '/profile/enterprise/transfer-rules' },
     ]
   }
 
