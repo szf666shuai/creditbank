@@ -135,6 +135,13 @@ public class LearningService {
         return resources;
     }
 
+    public List<String> listSkillTags() {
+        return sysTagMapper.selectList(null).stream()
+                .map(SysTag::getName)
+                .filter(StringUtils::hasText)
+                .toList();
+    }
+
     public LearningResourceVO getResource(Long userId, Long courseId) {
         LearningResourceVO resource = listResources(userId, null, null).stream()
                 .filter(item -> item.getId().equals(courseId))

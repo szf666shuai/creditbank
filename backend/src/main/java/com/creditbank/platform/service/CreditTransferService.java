@@ -507,7 +507,7 @@ public class CreditTransferService {
     private String getUserName(Long userId) {
         if (userId == null) return null;
         SysUser user = sysUserMapper.selectById(userId);
-        return user == null ? null : user.getNickname();
+        return user == null ? null : user.getRealName();
     }
 
     private String sourceTypeText(Integer type) {
