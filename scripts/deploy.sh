@@ -175,6 +175,20 @@ start_docker() {
   info "Redis 状态: $rstatus"
 }
 
+# 解析后端构建命令：优先 ./mvnw，否则系统 mvn
+resolve_mvn() {
+  cd "$BACKEND_DIR"
+  if [[ -f ./mvnw ]]; then
+    chmod +x ./mvnw 2>/dev/null || true
+    echo "./mvnw"
+  elif command -v mvn >/dev/null 2>&1; then
+    warn "未找到 backend/mvnw，改用系统 mvn"
+    echo "mvn"
+  else
+    fail "未找到 backend/mvnw，且系统未安装 mvn。请安装 Maven 或补齐 backend/mvnw 后重试"
+  fi
+}
+
 build_backend() {
   cd "$BACKEND_DIR"
   local jar
@@ -185,14 +199,9 @@ build_backend() {
     return
   fi
   info "打包后端（首次可能较久）..."
-  if [[ -x ./mvnw ]]; then
-    ./mvnw -q -DskipTests package
-  elif [[ -f ./mvnw ]]; then
-    chmod +x ./mvnw
-    ./mvnw -q -DskipTests package
-  else
-    fail "未找到 backend/mvnw"
-  fi
+  local mvn_cmd
+  mvn_cmd="$(resolve_mvn)"
+  "$mvn_cmd" -q -DskipTests package
   jar="$(ls -1 target/credit-bank-platform-*.jar 2>/dev/null | grep -v '\.original$' | head -n1 || true)"
   [[ -n "$jar" ]] || fail "打包完成但未找到 jar"
   echo "$jar"
@@ -210,7 +219,9 @@ start_backend() {
   cd "$BACKEND_DIR"
   if [[ "$MODE" == "dev" ]]; then
     info "以 dev 模式启动后端（spring-boot:run）..."
-    nohup ./mvnw spring-boot:run >"$BACKEND_LOG" 2>&1 &
+    local mvn_cmd
+    mvn_cmd="$(resolve_mvn)"
+    nohup "$mvn_cmd" spring-boot:run >"$BACKEND_LOG" 2>&1 &
     echo $! >"$BACKEND_PID"
   else
     local jar
