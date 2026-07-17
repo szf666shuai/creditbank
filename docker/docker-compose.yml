@@ -46,6 +46,9 @@ services:
     restart: unless-stopped
     ports:
       - "80:80"
+    extra_hosts:
+      # Linux 云服务器上让容器能访问宿主机的后端 8080 / 前端 5173
+      - "host.docker.internal:host-gateway"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/conf.d:/etc/nginx/conf.d:ro

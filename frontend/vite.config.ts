@@ -14,7 +14,8 @@ export default defineConfig({
   },
   server: {
     port: 5173,
-    host: lanHttps,
+    // 默认监听所有网卡，便于局域网 / 云服务器访问；dev:lan 另开 HTTPS
+    host: true,
     proxy: {
       '/api': {
         target: 'http://localhost:8080',
