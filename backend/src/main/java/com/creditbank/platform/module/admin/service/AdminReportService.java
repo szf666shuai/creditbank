@@ -107,11 +107,8 @@ public class AdminReportService {
                     "forum_report",
                     report.getId(),
                     operatorId);
-        } catch (BusinessException ex) {
-            // 已到 0 分边界时仍视为举报处理成功，不阻断主流程
-            if (ex.getMessage() == null || !ex.getMessage().contains("边界")) {
-                throw ex;
-            }
+        } catch (Exception ex) {
+            // 诚信扣分失败（含达边界）不阻断举报处理主流程；applyEvent 已用 REQUIRES_NEW 隔离
         }
     }
 

@@ -202,11 +202,14 @@ public class LearningEngagementService {
 
         Integer integrityReward = null;
         try {
-            IntegrityScoreVO result = integrityService.applyEvent(userId, 1, "课程学习打卡",
+            int before = integrityService.getMyScore(userId).getScore();
+            IntegrityScoreVO after = integrityService.applyEvent(userId, 1, "课程学习打卡",
                     "learning_checkin", checkin.getId(), null);
-            integrityReward = 1;
-        } catch (BusinessException ignored) {
-            // 诚信分规则未命中时不阻断打卡
+            if (after != null && after.getScore() != null && after.getScore() > before) {
+                integrityReward = after.getScore() - before;
+            }
+        } catch (Exception ignored) {
+            // 诚信分奖励失败不阻断打卡
         }
 
         return LearningCheckinVO.builder()

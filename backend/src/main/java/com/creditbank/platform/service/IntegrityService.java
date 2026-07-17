@@ -12,6 +12,7 @@ import com.creditbank.platform.mapper.IntegrityRecordMapper;
 import com.creditbank.platform.mapper.IntegrityScoreMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -110,10 +111,22 @@ public class IntegrityService {
         return getMyScore(userId);
     }
 
-    /** 按预设事件加减分（供业务模块调用） */
-    @Transactional
+    /**
+     * 按预设事件加减分（供业务模块调用）。
+     * 使用 REQUIRES_NEW：失败/达边界时只回滚本段诚信变更，不污染外层业务事务（打卡、评论等）。
+     * 分数已达上下限时静默返回，不抛错。
+     */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public IntegrityScoreVO applyEvent(Long userId, int changeValue, String reason,
                                        String refType, Long refId, Long operatorId) {
+        IntegrityScore score = ensureScore(userId);
+        int before = score.getScore();
+        int after = clamp(before + changeValue);
+        if (after == before) {
+            // 已达 0/100 边界：自动奖励场景不抛错，避免外层 catch 后出现 rollback-only
+            return getMyScore(userId);
+        }
+
         IntegrityAdjustRequest req = new IntegrityAdjustRequest();
         req.setChangeValue(changeValue);
         req.setReason(reason);

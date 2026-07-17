@@ -10,7 +10,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
@@ -87,7 +86,10 @@ public class LearningProfileService {
                 .build();
     }
 
-    @Transactional
+    /**
+     * 生成画像：LLM 调用不放在事务里，避免外部 HTTP 失败/超时污染事务。
+     * 解析成功后再写库。
+     */
     public LearningProfileVO generate(Long userId) {
         LearningSituationVO situation = loadSituation(userId);
         String context = buildContext(situation);

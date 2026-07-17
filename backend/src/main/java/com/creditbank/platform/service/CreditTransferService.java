@@ -26,6 +26,9 @@ import com.creditbank.platform.security.AuthSupport;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -210,14 +213,30 @@ public class CreditTransferService {
             }
         }
 
-        // 提交时同步 AI 初筛（失败不影响申请落库）
-        try {
-            runAiScreenAndPersist(application);
-        } catch (Exception ignored) {
-            // ignore
+        // AI 初筛放到事务提交之后：避免 LLM/SQL 异常把整笔申请标成 rollback-only
+        final Long applicationId = application.getId();
+        Runnable aiScreenTask = () -> {
+            try {
+                CreditTransferApplication latest = applicationMapper.selectById(applicationId);
+                if (latest != null) {
+                    runAiScreenAndPersist(latest);
+                }
+            } catch (Exception ignored) {
+                // 初筛失败不影响已提交的申请
+            }
+        };
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    aiScreenTask.run();
+                }
+            });
+        } else {
+            aiScreenTask.run();
         }
 
-        return toApplicationVO(applicationMapper.selectById(application.getId()));
+        return toApplicationVO(applicationMapper.selectById(applicationId));
     }
 
     public List<CreditTransferApplicationVO> listApplications(Long orgId, Integer status) {
@@ -428,8 +447,16 @@ public class CreditTransferService {
 
     private CreditTransferAiScreenResult runAiScreenAndPersist(CreditTransferApplication application) {
         CreditTransferAiScreenResult result = evaluateAiScreen(application);
-        application.setAiSuggestion(result.getSuggestion());
-        application.setAiReason(result.getReason());
+        String suggestion = result.getSuggestion();
+        if (StringUtils.hasText(suggestion) && suggestion.length() > 20) {
+            suggestion = suggestion.substring(0, 20);
+        }
+        String reason = result.getReason();
+        if (StringUtils.hasText(reason) && reason.length() > 500) {
+            reason = reason.substring(0, 500);
+        }
+        application.setAiSuggestion(suggestion);
+        application.setAiReason(reason);
         application.setAiLlmUsed(result.isLlmUsed() ? 1 : 0);
         application.setAiScreenTime(LocalDateTime.now());
         applicationMapper.updateById(application);
