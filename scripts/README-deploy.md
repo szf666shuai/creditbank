@@ -31,7 +31,9 @@ HOST_IP=你的公网IP ./scripts/deploy.sh start
 
 安全组 / 防火墙需放行：`80`、`5173`（按需 `8080`）。
 
-配置说明：仓库已含 `application-local.yml`（DeepSeek / TRTC），一般无需在服务器再改密钥。数据库账号与 `docker-compose.yml` 一致（MySQL `3307`，Redis `6379`）。
+前端开发服务器默认 **HTTPS**（Vite 自签证书）。访问 `https://服务器IP:5173`，浏览器提示不安全时点「继续访问」即可使用摄像头/麦克风。
+
+若临时需要 HTTP：`VITE_HTTP=1 npm run dev`
 
 ## 本机 Windows
 

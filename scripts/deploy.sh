@@ -121,7 +121,8 @@ is_port_listen() {
 http_ok() {
   local url="$1"
   if command -v curl >/dev/null 2>&1; then
-    curl -fsS --max-time 5 "$url" >/dev/null 2>&1
+    # -k：开发环境 Vite 自签 HTTPS 证书
+    curl -kfsS --max-time 5 "$url" >/dev/null 2>&1
   else
     return 1
   fi
@@ -237,7 +238,7 @@ start_backend() {
 }
 
 start_frontend() {
-  if is_port_listen 5173 && http_ok "http://127.0.0.1:5173"; then
+  if is_port_listen 5173 && http_ok "https://127.0.0.1:5173"; then
     ok "前端已在 5173 运行，跳过启动"
     return
   fi
@@ -253,15 +254,15 @@ start_frontend() {
     fail "缺少 frontend/node_modules，请先 npm install 或去掉 SKIP_NPM_INSTALL=1"
   fi
 
-  info "启动前端（监听 0.0.0.0:5173，局域网/公网可访问）..."
-  # --host 让云服务器 / 局域网其他设备能访问
+  info "启动前端 HTTPS（监听 0.0.0.0:5173，局域网/公网可访问）..."
+  # Vite 已默认开启 basicSsl；如需强制 HTTP 可设 VITE_HTTP=1
   nohup npm run dev -- --host 0.0.0.0 --port 5173 >"$FRONTEND_LOG" 2>&1 &
   echo $! >"$FRONTEND_PID"
 
   local i=0
   while (( i < 30 )); do
-    if http_ok "http://127.0.0.1:5173"; then
-      ok "前端已就绪"
+    if http_ok "https://127.0.0.1:5173"; then
+      ok "前端已就绪（HTTPS）"
       return
     fi
     if ! pid_running "$FRONTEND_PID"; then
@@ -288,17 +289,17 @@ print_summary() {
 ========================================
   星秩存册 已启动
 ========================================
-  本机前端:  http://127.0.0.1:5173
-  局域网/云: http://${ip}:5173
-  经 Nginx:  http://${ip}/   （需安全组放行 80）
+  本机前端:  https://127.0.0.1:5173
+  局域网/云: https://${ip}:5173
+  经 Nginx:  http://${ip}/   （反代到前端 HTTPS；视频面试请优先直连 https://IP:5173）
   后端健康:  http://${ip}:8080/api/health
   账号密码:  student1 / enterprise1 / admin   密码均为 admin123
 
+  首次用自签证书时，浏览器会提示「不安全」，点「继续访问 / 高级 → 继续」即可
   日志目录:  $LOG_DIR
   停止服务:  ./scripts/deploy.sh stop
 
   云服务器请放行安全组端口: 80 / 5173 / 8080（按需）
-  注意: 公网 HTTP 下浏览器通常不允许摄像头/麦克风，视频面试请用本机 localhost 或 HTTPS
 ========================================
 EOF
 }
