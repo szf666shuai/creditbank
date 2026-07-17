@@ -121,12 +121,11 @@ echo.
 echo ========================================
 echo   Startup commands completed
 echo ========================================
-echo   Frontend: https://localhost:5173
+echo   Frontend: http://localhost:5173
 echo   Health:   http://localhost:8080/api/health
 echo   Account:  admin / admin123
 echo.
 echo Keep the backend and frontend windows open.
-echo First visit may show a self-signed HTTPS warning; click Advanced - Continue.
 echo The first backend startup may take several minutes.
 echo.
 pause

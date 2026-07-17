@@ -162,6 +162,10 @@ stop_pidfile() {
 }
 
 start_docker() {
+  info "应用云服务器 Nginx 配置（反代 HTTPS 前端）..."
+  if [[ -f "$DOCKER_DIR/nginx/conf.d/default.cloud.conf" ]]; then
+    cp "$DOCKER_DIR/nginx/conf.d/default.cloud.conf" "$DOCKER_DIR/nginx/conf.d/default.conf"
+  fi
   info "启动 Docker 服务（MySQL / Redis / Nginx）..."
   compose up -d
   wait_mysql
@@ -254,9 +258,9 @@ start_frontend() {
     fail "缺少 frontend/node_modules，请先 npm install 或去掉 SKIP_NPM_INSTALL=1"
   fi
 
-  info "启动前端 HTTPS（监听 0.0.0.0:5173，局域网/公网可访问）..."
-  # Vite 已默认开启 basicSsl；如需强制 HTTP 可设 VITE_HTTP=1
-  nohup npm run dev -- --host 0.0.0.0 --port 5173 >"$FRONTEND_LOG" 2>&1 &
+  info "启动前端 HTTPS（云服务器模式，VITE_HTTPS=1）..."
+  # 仅云服务器启用自签 HTTPS；本地请直接 npm run dev（HTTP）
+  nohup env VITE_HTTPS=1 npm run dev -- --host 0.0.0.0 --port 5173 >"$FRONTEND_LOG" 2>&1 &
   echo $! >"$FRONTEND_PID"
 
   local i=0
@@ -290,8 +294,8 @@ print_summary() {
   星秩存册 已启动
 ========================================
   本机前端:  https://127.0.0.1:5173
-  局域网/云: https://${ip}:5173
-  经 Nginx:  http://${ip}/   （反代到前端 HTTPS；视频面试请优先直连 https://IP:5173）
+  云访问:    https://${ip}:5173
+  经 Nginx:  http://${ip}/   （反代到前端 HTTPS；音视频请优先直连 :5173）
   后端健康:  http://${ip}:8080/api/health
   账号密码:  student1 / enterprise1 / admin   密码均为 admin123
 
@@ -300,6 +304,7 @@ print_summary() {
   停止服务:  ./scripts/deploy.sh stop
 
   云服务器请放行安全组端口: 80 / 5173 / 8080（按需）
+  说明: 本脚本仅用于云服务器；本地开发请用 HTTP（npm run dev / start-test.bat）
 ========================================
 EOF
 }
